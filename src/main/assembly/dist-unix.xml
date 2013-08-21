@@ -1,7 +1,7 @@
 <assembly>
 	<id>dist-unix</id>
 	<formats>
-		<format>tar</format>
+		<format>tar.gz</format>
 	</formats>
 	<fileSets>
 		<fileSet>
