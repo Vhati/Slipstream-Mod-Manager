@@ -1,0 +1,36 @@
+<assembly>
+	<id>dist-unix</id>
+	<formats>
+		<format>tar</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<directory>skel_common</directory>
+			<outputDirectory>/</outputDirectory>
+		</fileSet>
+		<fileSet>  <!-- Non-executables. -->
+			<directory>skel_unix</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.command</exclude>
+				<exclude>**/*.sh</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>  <!-- Executables. -->
+			<directory>skel_unix</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.command</include>
+				<include>**/*.sh</include>
+			</includes>
+			<fileMode>755</fileMode>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>modman.jar</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

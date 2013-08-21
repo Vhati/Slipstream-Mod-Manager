@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="warn">
+  <appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+      <PatternLayout>
+        <pattern>%-5level %logger{1} - %msg%throwable%n</pattern>
+      </PatternLayout>
+    </Console>
+    <File name="LogFile" fileName="modman-log.txt" append="false">
+      <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+      <PatternLayout>
+        <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%throwable%n</pattern>
+      </PatternLayout>
+    </File>
+  </appenders>
+  <loggers>
+    <logger name="net.vhati" level="trace" additivity="false">
+      <appender-ref ref="Console"/>
+      <appender-ref ref="LogFile"/>
+    </logger>
+    <root level="error">
+      <appender-ref ref="Console"/>
+      <appender-ref ref="LogFile"/>
+    </root>
+  </loggers>
+</configuration>

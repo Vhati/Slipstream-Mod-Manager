@@ -1,0 +1,133 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.vhati.modmanager</groupId>
+	<artifactId>ftl-mod-manager</artifactId>
+	<version>1.0</version>
+	<name>Slipstream Mod Manager</name>
+
+	<!-- Determined by mvn versions:display-plugin-updates -->
+	<prerequisites>
+		<maven>2.2.1</maven>
+	</prerequisites>
+	<properties>
+		<jdk.version>1.6</jdk.version>
+	</properties>
+
+	<!--
+	Don't include meta-packages as dependencies.
+	They cause the "jar-with-dependencies" task
+	to throw an error about "Negative Time",
+	probably for setting timestamps on their
+	non-existent class files.
+	-->
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.0-beta8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.0-beta8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ovh.ws</groupId>
+			<artifactId>jsonizer-json-jackson</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>ar.com.hjg</groupId>
+			<artifactId>pngj</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>2.0.5</version>
+		</dependency>
+	</dependencies>
+  
+	<build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.1</version>
+			<configuration>
+				<target>1.6</target>
+				<compilerArgument>-Xlint:unchecked</compilerArgument>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<version>2.4</version>  <!-- Plexus Archiver had bad tar support before. -->
+			<dependencies>
+				<dependency> <!-- Newer Archiver than required fixing tar bugs. -->
+					<groupId>org.codehaus.plexus</groupId>
+					<artifactId>plexus-archiver</artifactId>
+					<version>2.4.3</version>
+				</dependency>
+				<dependency> <!-- Newer IO than Archiver required fixing another bug. -->
+					<groupId>org.codehaus.plexus</groupId>
+					<artifactId>plexus-io</artifactId>
+					<version>2.0.8</version>
+				</dependency>
+			</dependencies>
+			<executions>
+				<execution>  <!-- Build jar. -->
+					<id>jar-with-dependencies</id>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+						<archive>
+							<manifest>
+								<mainClass>net.vhati.modmanager.FTLModManager</mainClass>
+							</manifest>
+							<manifestEntries>
+								<Built-By>Vhati</Built-By>
+							</manifestEntries>
+						</archive>
+						<finalName>modman</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
+				</execution>
+				<execution>  <!-- Build zip archive. -->
+					<id>dist-win</id>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/dist-win.xml</descriptor>
+						</descriptors>
+						<finalName>${project.name} v${project.version}-Win</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
+				</execution>
+				<execution>  <!-- Build tar.gz archive. -->
+					<id>dist-unix</id>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/dist-unix.xml</descriptor>
+						</descriptors>
+						<finalName>${project.name} v${project.version}-Unix</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
+  </build>
+</project>
