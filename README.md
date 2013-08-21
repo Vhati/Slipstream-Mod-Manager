@@ -3,6 +3,8 @@ Slipstream Mod Manager
 
 Slipstream is the successor to Grognak's Mod Manager (GMM), a program designed to make it easy to install multiple [FTL](http://www.ftlgame.com/) mods at the same time.
 
+To download compiled binaries, [click here](https://sourceforge.net/projects/slipstreammodmanager/).
+
 Comments can be made in a forum thread [here](http://).
 
 

@@ -1,12 +1,14 @@
 Slipstream Mod Manager
-http://
+https://github.com/Vhati/Slipstream-Mod-Manager
 
 
 About
 
-  Slipstream is the successor to Grognak's Mod Manager (GMM), a
-  program designed to make it easy to install multiple mods at the
-  same time.
+  Slipstream is a mod manager for the game FasterThanLight, making it
+  easy to install multiple mods at the same time and, later, revert
+  to vanilla gameplay.
+
+  It is the successor to Grognak's Mod Manager (GMM).
 
 
 Requirements

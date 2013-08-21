@@ -1,7 +1,3 @@
-// http://docs.oracle.com/javase/tutorial/uiswing/dnd/emptytable.html
-// http://stackoverflow.com/questions/638807/how-do-i-drag-and-drop-a-row-in-a-jtable
-// http://www.java2s.com/Tutorial/Java/0240__Swing/UsingdefaultBooleanvaluecelleditorandrenderer.htm
-
 package net.vhati.modmanager.ui;
 
 import java.awt.BorderLayout;
