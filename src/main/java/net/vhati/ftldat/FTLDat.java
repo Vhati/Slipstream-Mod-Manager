@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import net.vhati.ftldat.FileChannelRegionInputStream;
-import net.vhati.ftldat.SizeLimitInputStream;
 
 
 public class FTLDat {
@@ -789,11 +788,6 @@ public class FTLDat {
 			// Create a stream that can only see this region.
 			// Multiple read-only streams can coexist (each has its own position).
 			InputStream stream = new FileChannelRegionInputStream( raf.getChannel(), entry.dataOffset, entry.dataSize );
-
-			// Create a stream that can only see this region.
-			// There must be no other reads/seeks until it is closed.
-			//InputStream tmpStream = Channels.newInputStream( raf.getChannel().position( entry.dataOffset ) );
-			//InputStream stream = new SizeLimitInputStream( tmpStream, entry.dataSize );
 
 			// Mapped regions may not garbage collect promptly.
 			// That would keep the file in use: bad.
