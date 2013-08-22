@@ -169,6 +169,15 @@ public class ModPatchDialog extends JDialog implements ActionListener, ModPatchO
 				patchingSucceeded = success;
 
 				continueBtn.setEnabled( true );
+
+				if ( !ModPatchDialog.this.isShowing() ) {
+					// The window's not visible, no continueBtn to click.
+					ModPatchDialog.this.dispose();
+
+					if ( patchingSucceeded && successTask != null ) {
+						successTask.run();
+					}
+				}
 			}
 		});
 	}
@@ -179,5 +188,14 @@ public class ModPatchDialog extends JDialog implements ActionListener, ModPatchO
 	 */
 	public void setSuccessTask( Runnable r ) {
 		successTask = r;
+	}
+
+	/**
+	 * Shows or hides this component depending on the value of parameter b.
+	 *
+	 * If patching has already completed, this method will do nothing.
+	 */
+	public void setVisible( boolean b ) {
+		if ( !done ) super.setVisible( b );
 	}
 }
