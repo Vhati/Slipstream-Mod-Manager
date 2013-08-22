@@ -136,19 +136,6 @@ public class FTLDat {
 	}
 
 
-
-	public static class FTLDatException extends RuntimeException {
-		public FTLDatException() {
-			super();
-		}
-
-		public FTLDatException( String message ) {
-			super( message );
-		}
-	}
-
-
-
 	/**
 	 * Information about an innerFile within a dat.
 	 *
@@ -363,7 +350,7 @@ public class FTLDat {
 		@Override
 		public void add( String innerPath, InputStream is ) throws IOException {
 			File dstFile = getFile( innerPath );
-			if ( dstFile.exists() ) throw new FTLDatException( "File already exists" );
+			if ( dstFile.exists() ) throw new IOException( "File already exists" );
 
 			dstFile.getParentFile().mkdirs();
 
@@ -686,10 +673,10 @@ public class FTLDat {
 		@Override
 		public void add( String innerPath, InputStream is ) throws IOException {
 			if ( pathToIndexMap.containsKey( innerPath ) ) {
-				throw new FTLDatException( "InnerPath already exists: "+ innerPath );
+				throw new IOException( "InnerPath already exists: "+ innerPath );
 			}
 			if ( !asciiEncoder.canEncode( innerPath ) ) {
-				throw new FTLDatException( "InnerPath contains non-ascii characters: "+ innerPath );
+				throw new IllegalArgumentException( "InnerPath contains non-ascii characters: "+ innerPath );
 			}
 
 			// Find a vacancy in the header, or create one.
