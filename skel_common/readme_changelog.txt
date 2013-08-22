@@ -13,6 +13,7 @@ Changes shared with Grognaks Mod Manager 1.8:
 - Added a log warning during patching if a mod gets clobbered
 - Added a log warning during patching if a modded file's case doesn't match
 - Made the main window resizable
+- Changed listbox selection to use double-click
 
 Grognaks Mod Manager 1.7:
 - Last official release

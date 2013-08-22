@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -192,6 +194,18 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		contentPane.add( statusPanel, BorderLayout.SOUTH );
 
 
+		localModsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked( MouseEvent e ) {
+				if ( e.getClickCount() % 2 != 0 ) return;
+
+				int row = localModsTable.getSelectedRow();
+				if ( row != -1 ) {
+					boolean selected = localModsTableModel.isSelected( row );
+					localModsTableModel.setSelected( row, !selected );
+				}
+			}
+		});
 		localModsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged( ListSelectionEvent e ) {
