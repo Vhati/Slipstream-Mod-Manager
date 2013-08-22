@@ -65,6 +65,7 @@ public class ModPatchDialog extends JDialog implements ActionListener, ModPatchO
 		getContentPane().add( continueHolder, BorderLayout.SOUTH );
 
 		this.setSize( 400, 160 );
+		this.setMinimumSize( this.getPreferredSize() );
 		this.setLocationRelativeTo( owner );
 	}
 

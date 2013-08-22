@@ -225,6 +225,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		this.setContentPane( contentPane );
 		this.pack();
+		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
 		this.setLocationRelativeTo(null);
 
 		showAboutInfo();
@@ -412,7 +413,6 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			body += "where you found it and include this md5 hash:\n";
 			body += modHash +"\n";
 			infoArea.setDescription( modFileInfo.getName(), body );
-			log.info( String.format("No info for selected mod: %s (%s).", modFileInfo.getName(), modHash) );
 		}
 	}
 
