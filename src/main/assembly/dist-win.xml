@@ -7,9 +7,6 @@
 		<fileSet>
 			<directory>skel_common</directory>
 			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>*</include>
-			</includes>
 		</fileSet>
 		<fileSet>
 			<directory>skel_win</directory>

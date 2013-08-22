@@ -27,6 +27,8 @@ public class FTLModManager {
 
 	private static final String APP_NAME = "Slipstream Mod Manager";
 	private static final ComparableVersion APP_VERSION = new ComparableVersion( "1.0" );
+	private static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
+	private static final String APP_AUTHOR = "Vhati";
 
 
 	public static void main( String[] args ) {
@@ -166,7 +168,7 @@ public class FTLModManager {
 
 		// Create the GUI.
 		try {
-			final ManagerFrame frame = new ManagerFrame( config, APP_NAME, APP_VERSION );
+			final ManagerFrame frame = new ManagerFrame( config, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
 			frame.setDefaultCloseOperation( frame.EXIT_ON_CLOSE );
 			frame.setVisible(true);
 

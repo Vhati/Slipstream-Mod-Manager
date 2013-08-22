@@ -85,6 +85,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private Properties config;
 	private String appName;
 	private ComparableVersion appVersion;
+	private String appURL;
+	private String appAuthor;
 
 	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
 	private ModDB modDB = new ModDB();
@@ -102,11 +104,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JLabel statusLbl;
 
 
-	public ManagerFrame( Properties config, String appName, ComparableVersion appVersion ) {
+	public ManagerFrame( Properties config, String appName, ComparableVersion appVersion, String appURL, String appAuthor ) {
 		super();
 		this.config = config;
 		this.appName = appName;
 		this.appVersion = appVersion;
+		this.appURL = appURL;
+		this.appAuthor = appAuthor;
 
 		this.setTitle( String.format( "%s v%s", appName, appVersion ) );
 
@@ -397,7 +401,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		body += "Thanks for using this mod manager.\n";
 		body += "Make sure to visit the forum for updates!";
 
-		infoArea.setDescription( appName, "Vhati", appVersion.toString(), "http://abc.net", body );
+		infoArea.setDescription( appName, appAuthor, appVersion.toString(), appURL, body );
 	}
 
 	/**
