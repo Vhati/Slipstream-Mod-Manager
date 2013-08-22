@@ -241,6 +241,10 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			public boolean accept( File f ) {
 				if ( f.isFile() ) {
 					if ( f.getName().endsWith(".ftl") ) return true;
+
+					if ( config.getProperty( "allow_zip", "false" ).equals( "true" ) ) {
+						if ( f.getName().endsWith(".zip") ) return true;
+					}
 				}
 				return false;
 			}
