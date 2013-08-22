@@ -6,33 +6,38 @@ The build process for this project is automated by Maven.
 To build, run "mvn clean" and "mvn package" in this folder.
 
 
+"img/"
+  Screenshots.
 
-"skel_common/" contains files to include in distribution archives.
+"skel_common/"
+  Files to include in distribution archives.
 
-"skel_win/" and "skel_unix/" are for system specific dist files.
+"skel_win/" and "skel_unix/"
+  System-specific files to include in distribution archives.
 
-
-
-"skel_exe/" contains materials to create modman.exe (not part of Maven).
-
-- Get Launch4j: http://launch4j.sourceforge.net/index.html
-- Drag "launch4j.xml" onto "launch4jc.exe".
-- "modman.exe" will appear alongside the xml.
-- Drag modman.exe into "skel_win/".
-- "mvn clear" and "mvn package".
+"skel_exe/"
+  Materials to create modman.exe (not part of Maven).
+    - Get Launch4j: http://launch4j.sourceforge.net/index.html
+    - Drag "launch4j.xml" onto "launch4jc.exe".
+    - "modman.exe" will appear alongside the xml.
+    - Drag modman.exe into "skel_win/".
+    - Run "mvn clear" and "mvn package".
 
 
 
 This project depends on the following libraries.
 - Jackson JSON Processor 2.x
     http://jackson.codehaus.org/Home
-    (JavaDoc links are on the right.)
+    (For JavaDocs, look right.)
 - PNGJ
     https://code.google.com/p/pngj/
+    (For JavaDocs, scroll down.)
 - JDOM 2.x
     http://www.jdom.org/
-- log4j
+    (For JavaDocs, look left.)
+- log4j2
     http://logging.apache.org/log4j/2.x/
+    (JavaDocs are not available.)
 
 
 
