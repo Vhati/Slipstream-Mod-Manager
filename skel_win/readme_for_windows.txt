@@ -70,12 +70,17 @@ Troubleshooting
       http://johann.loefflmann.net/en/software/jarfix/index.html
 
 * If you get permission errors...
-    Start Menu -> Programs -> Accessories.
-    Right-click "Command Prompt" to run as an admin.
-    Type this, then hit enter: cd "c:\location\of\Slipstream"
-    Type this, then hit enter: java -jar modman.jar
+    Option 1:
+      Right-click modman.exe to run as an admin.
 
-    Make sure that your resource.dat and data.dat files are not read-only.
+    Option 2:
+      Start Menu -> Programs -> Accessories.
+      Right-click "Command Prompt" to run as an admin.
+      Type this, then hit enter: cd "c:\location\of\Slipstream"
+      Type this, then hit enter: java -jar modman.jar
+
+    Option 3:
+      Make sure resource.dat and data.dat aren't read-only.
 
 * If the game shows exclamation marks for everything...
     See the suggestion below for replacing corrupt resources.

@@ -28,6 +28,8 @@ Setup
   FTL resources. Specifically "data.dat" in the "resources\"
   directory under your FTL install.
 
+  On OSX, you can select "FTL.app", because the resources are inside it.
+
   In most cases, this should be located automatically.
 
 
@@ -37,7 +39,7 @@ Usage
     Put it in the Slipstream/mods/ folder.
 
   To start the mod manager:
-    Double-click modman.jar.
+    Double-click modman.command.
 
   To install mods:
     Tick checkboxes to select the mods you want to install.
@@ -62,7 +64,7 @@ Troubleshooting
     You need a newer version of Java.
 
 * If you get permission errors...
-    Make sure that your resource.dat and data.dat files are not read-only.
+    Make sure resource.dat and data.dat aren't read-only.
 
 * If the game shows exclamation marks for everything...
     See the suggestion below for replacing corrupt resources.
