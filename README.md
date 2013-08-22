@@ -5,7 +5,7 @@ Slipstream is a mod manager for the game FasterThanLight ([FTL](http://www.ftlga
 
 It is the successor to Grognak's Mod Manager ([GMM](http://www.ftlgame.com/forum/viewtopic.php?p=9994)).
 
-<img src="https://github.com/Vhati/Slipstream-Mod-Manager/master/img/screenshot01.png" width="145px" height="auto" />
+<a href="https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/img/screenshot01.png"><img src="https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/img/screenshot01.png" width="145px" height="auto" /></a>
 
 To download compiled binaries, [click here](https://sourceforge.net/projects/slipstreammodmanager/).
 
