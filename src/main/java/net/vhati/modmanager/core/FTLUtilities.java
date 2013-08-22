@@ -61,7 +61,7 @@ public class FTLUtilities {
 	/**
 	 * Modally prompts the user for the FTL resources dir.
 	 *
-	 * @param parentComponent a parent for Swing popups, or null
+	 * @param parentComponent a parent for Swing dialogs, or null
 	 */
 	public static File promptForDatsDir( Component parentComponent ) {
 		File result = null;
@@ -70,7 +70,7 @@ public class FTLUtilities {
 		message += "You will now be prompted to locate FTL manually.\n";
 		message += "Select '(FTL dir)/resources/data.dat'.\n";
 		message += "Or 'FTL.app', if you're on OSX.";
-		JOptionPane.showMessageDialog(null,  message, "Find FTL", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog( parentComponent,  message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
 
 		final JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle( "Find data.dat or FTL.app" );
@@ -86,7 +86,7 @@ public class FTLUtilities {
 		});
 		fc.setMultiSelectionEnabled(false);
 
-		if ( fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION ) {
+		if ( fc.showOpenDialog( parentComponent ) == JFileChooser.APPROVE_OPTION ) {
 			File f = fc.getSelectedFile();
 			if ( f.getName().equals("data.dat") ) {
 				result = f.getParentFile();
