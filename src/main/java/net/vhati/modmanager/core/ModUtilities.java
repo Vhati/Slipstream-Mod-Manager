@@ -93,6 +93,8 @@ public class ModUtilities {
 			Map<String,Exception> errorMap = new LinkedHashMap<String,Exception>();
 			for ( String guess : new String[] {"UTF-8", "windows-1252"} ) {
 				try {
+					byteBuffer.rewind();
+					byteBuffer.limit( allBytes.length );
 					CharsetDecoder decoder = Charset.forName( guess ).newDecoder();
 					result = decoder.decode( byteBuffer ).toString();
 					encoding = guess;

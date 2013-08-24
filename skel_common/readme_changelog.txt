@@ -3,6 +3,7 @@ Changelog
 ???:
 - Added LF to CR-LF conversion for *.xml.append, *.xml, and *.txt
 - Added a Validate warning for text files with LF line endings
+- Fixed data loss when decoding Windows-1252 text with accented characters
 
 1.0:
 - Changed mod list to a table with checkboxes
