@@ -151,7 +151,7 @@ public class ModUtilities {
 		StringBuilder buf = new StringBuilder( srcText.length() +100+ dstText.length() );
 		buf.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
 		buf.append( dstText );
-		buf.append( "\n\n<!-- Appended by GMM -->\n\n" );
+		buf.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
 		buf.append( srcText );
 		buf.append( "\n" );
 
