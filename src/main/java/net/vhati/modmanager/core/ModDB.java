@@ -9,6 +9,10 @@ import net.vhati.modmanager.core.ModInfo;
 
 public class ModDB {
 
+	public static final String EXACT = "exact";
+	public static final String FUZZY = "fuzzy";
+
+
 	// Accociates Forum thread urls with hashes of their forst post's content.
 	private HashMap<String,String> threadHashMap = new HashMap<String,String>();
 
@@ -37,6 +41,7 @@ public class ModDB {
 		catalog.remove( modInfo );
 	}
 
+
 	/**
 	 * Stores the first-post content hash of a forum thread.
 	 */
@@ -58,5 +63,38 @@ public class ModDB {
 	 */
 	public List<ModInfo> getCatalog() {
 		return catalog;
+	}
+
+
+	/**
+	 * Returns ModInfos that are likely revisions in the same series.
+	 *
+	 * The searched item will appear in the results as well.
+	 *
+	 * The returned map contains two lists, keyed to constants:
+	 *   EXACT - All attributes match (excluding fileHash/fileVersion).
+	 *   FUZZY - Title and URL match, but not everything.
+	 */
+	public HashMap<String,List<ModInfo>> getSimilarMods( ModInfo modInfo ) {
+		HashMap<String,List<ModInfo>> resultsMap = new HashMap<String,List<ModInfo>>();
+		resultsMap.put( EXACT, new ArrayList<ModInfo>() );
+		resultsMap.put( FUZZY, new ArrayList<ModInfo>() );
+
+		for ( ModInfo altInfo : catalog ) {
+			if ( altInfo.getTitle().equals( modInfo.getTitle() ) ) {
+				if ( altInfo.getURL().equals( modInfo.getURL() ) ) {
+					boolean exact = true;
+
+					if ( !altInfo.getDescription().equals( modInfo.getDescription() ) )
+						exact = false;
+					else if ( !altInfo.getAuthor().equals( modInfo.getAuthor() ) )
+						exact = false;
+
+					resultsMap.get( exact ? EXACT : FUZZY ).add( altInfo );
+				}
+			}
+		}
+
+		return resultsMap;
 	}
 }
