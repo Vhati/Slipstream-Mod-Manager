@@ -233,6 +233,21 @@ public class ModPatchThread extends Thread {
 									moddedItems.add( innerPath );
 							}
 						}
+						else if ( fileName.endsWith( ".xml" ) || fileName.endsWith( ".txt" ) ) {
+							String innerPath = checkCase( item.getName(), knownPaths, knownPathsLower );
+
+							// Normalize line endings for other text files to CR-LF.
+							InputStream fixedStream = ModUtilities.setLineEndings( zis, "\r\n", modFile.getName()+":"+parentPath+fileName );
+
+							if ( !moddedItems.contains(innerPath) )
+								moddedItems.add( innerPath );
+							else
+								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
+
+							if ( ftlP.contains( innerPath ) )
+								ftlP.remove( innerPath );
+							ftlP.add( innerPath, fixedStream );
+						}
 						else {
 							String innerPath = checkCase( item.getName(), knownPaths, knownPathsLower );
 

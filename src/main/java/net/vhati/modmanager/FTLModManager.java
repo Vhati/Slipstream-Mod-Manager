@@ -26,7 +26,7 @@ public class FTLModManager {
 	private static final Logger log = LogManager.getLogger(FTLModManager.class);
 
 	private static final String APP_NAME = "Slipstream Mod Manager";
-	private static final ComparableVersion APP_VERSION = new ComparableVersion( "1.0" );
+	private static final ComparableVersion APP_VERSION = new ComparableVersion( "???" );
 	private static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
 	private static final String APP_AUTHOR = "Vhati";
 
@@ -34,8 +34,8 @@ public class FTLModManager {
 	public static void main( String[] args ) {
 
 		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
-		log.debug( System.getProperty("os.name") +" "+ System.getProperty("os.version") +" "+ System.getProperty("os.arch") );
-		log.debug( System.getProperty("java.vm.name") +", "+ System.getProperty("java.version") );
+		log.debug( String.format( "%s %s", System.getProperty("os.name"), System.getProperty("os.version") ) );
+		log.debug( String.format( "%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch") ) );
 
 
 		File configFile = new File( "modman.cfg" );
@@ -154,7 +154,9 @@ public class FTLModManager {
 				configComments += " update_catalog - If true, periodically download descriptions for the latest mods. If invalid, you'll be prompted.\n";
 				configComments += " use_default_ui - If true, no attempt will be made to resemble a native GUI. Default: false.\n";
 
-				config.store( new OutputStreamWriter( out, "UTF-8" ), configComments );
+				OutputStreamWriter writer = new OutputStreamWriter( out, "UTF-8" );
+				config.store( writer, configComments );
+				writer.flush();
 			}
 			catch ( IOException e ) {
 				log.error( "Error saving config to "+ configFile.getPath(), e );

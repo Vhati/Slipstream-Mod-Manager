@@ -1,13 +1,17 @@
 Changelog
 
+???:
+- Added LF to CR-LF conversion for *.xml.append, *.xml, and *.txt
+- Added a Validate warning for text files with LF line endings
+
 1.0:
 - Changed mod list to a table with checkboxes
 - Instead of extracting to temp, mod data is transferred directly into dats
 - Added a GUI progress bar during patching
 - Added a Validate warning for paths with non-ASCII chars
+- Added support for windows-1252 ANSI and UTF-16 text in mods
 
 Changes shared with Grognaks Mod Manager 1.8:
-- Added support for windows-1252 ANSI and UTF-16 text in mods
 - Added periodic updates to the catalog of mod metadata
 - Added ini setting: update_catalog
 - Added a log warning during patching if a mod gets clobbered

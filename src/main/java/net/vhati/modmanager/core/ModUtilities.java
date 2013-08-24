@@ -112,8 +112,17 @@ public class ModUtilities {
 			}
 		}
 
+		// Determine the original line endings.
+		int eol = DecodeResult.EOL_NONE;
+		Matcher m = Pattern.compile( "(\r(?!\n))|((?<!\r)\n)|(\r\n)" ).matcher( result );
+		if ( m.find() ) {
+			if ( m.group(3) != null ) eol = DecodeResult.EOL_CRLF;
+			else if ( m.group(2) != null ) eol = DecodeResult.EOL_LF;
+			else if ( m.group(1) != null ) eol = DecodeResult.EOL_CR;
+		}
+
 		result = result.replaceAll( "\r(?!\n)|\r\n", "\n" );
-		return new DecodeResult( result, encoding, bom );
+		return new DecodeResult( result, encoding, eol, bom );
 	}
 
 
@@ -126,6 +135,8 @@ public class ModUtilities {
 	 * The returned stream is a ByteArrayInputStream
 	 * which doesn't need closing.
 	 *
+	 * The result will be UTF-8 with CR-LF line endings.
+	 *
 	 * The description arguments identify the streams for log messages.
 	 */
 	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String srcDescription, String dstDescription ) throws IOException {
@@ -137,19 +148,49 @@ public class ModUtilities {
 		String dstText = decodeText( dstStream, dstDescription ).text;
 		dstText = xmlDeclPtn.matcher(dstText).replaceFirst( "" );
 
+		StringBuilder buf = new StringBuilder( srcText.length() +100+ dstText.length() );
+		buf.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
+		buf.append( dstText );
+		buf.append( "\n\n<!-- Appended by GMM -->\n\n" );
+		buf.append( srcText );
+		buf.append( "\n" );
+
+		String mergedString = Pattern.compile("\n").matcher( buf ).replaceAll("\r\n");
+
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, "UTF-8" ) );
-
-		bw.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
-		bw.write( dstText );
-		bw.write( "\n\n<!-- Appended by GMM -->\n\n");
-		bw.write( srcText );
-		bw.write( "\n" );
+		bw.write( mergedString );
 		bw.flush();
 
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 		return result;
 	}
+
+
+	/**
+	 * Calls decodeText() on a stream, replaces line endings, and re-encodes.
+	 *
+	 * The returned stream is a ByteArrayInputStream
+	 * which doesn't need closing.
+	 *
+	 * The result will be UTF-8 with the desired line endings.
+	 *
+	 * The description argument identifies the stream for log messages.
+	 */
+	public static InputStream setLineEndings( InputStream srcStream, String eol, String srcDescription ) throws IOException {
+		// decodeText() returns a LF string.
+		String srcText = decodeText( srcStream, srcDescription ).text;
+		String fixedText = Pattern.compile("\n").matcher( srcText ).replaceAll( Matcher.quoteReplacement(eol) );
+
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, "UTF-8" ) );
+		bw.write( fixedText );
+		bw.flush();
+
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+		return result;
+	}
+
 
 	/**
 	 * Checks a mod file for common problems.
@@ -215,7 +256,7 @@ public class ModUtilities {
 					) );
 					modValid = false;
 				}
-				else if ( innerPath.endsWith( ".png" ) ) {
+				else if ( innerPath.endsWith( "[.]png" ) ) {
 					try {
 						PngReader pngr = new PngReader( zis );
 
@@ -249,9 +290,7 @@ public class ModUtilities {
 						modValid = false;
 					}
 				}
-				else if ( innerPath.matches( "^.*(?:.xml.append|.append.xml|.xml)$" ) ) {
-					if ( innerPath.matches( "^.*(?:.xml.append|.append.xml)$" ) )
-						seenAppend = true;
+				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml|[.]txt)$" ) ) {
 
 					DecodeResult decodeResult = ModUtilities.decodeText( zis, modFile.getName()+":"+innerPath );
 
@@ -259,6 +298,15 @@ public class ModUtilities {
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.WARNING,
 							String.format( "%s BOM detected. (ascii is safest)", decodeResult.encoding )
+						) );
+						modValid = false;
+					}
+
+					if ( decodeResult.eol != DecodeResult.EOL_CRLF &&
+					     decodeResult.eol != DecodeResult.EOL_NONE ) {
+						pendingMsgs.add( new ReportMessage(
+							ReportMessage.ERROR,
+							String.format( "%s line endings (CR-LF is safest)", decodeResult.getEOLName() )
 						) );
 						modValid = false;
 					}
@@ -310,17 +358,22 @@ public class ModUtilities {
 
 					// TODO: Nag if there are chars FTL can't show.
 
-					Report xmlReport = validateModXML( decodeResult.text, formatter );
+					if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" ) ) {
+						if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" ) )
+							seenAppend = true;
 
-					if ( xmlReport.text.length() > 0 ) {
-						pendingMsgs.add( new ReportMessage(
-							ReportMessage.NESTED_BLOCK,
-							xmlReport.text
-						) );
+						Report xmlReport = validateModXML( decodeResult.text, formatter );
+
+						if ( xmlReport.text.length() > 0 ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.NESTED_BLOCK,
+								xmlReport.text
+							) );
+						}
+
+						if ( xmlReport.outcome == false )
+							modValid = false;
 					}
-
-					if ( xmlReport.outcome == false )
-						modValid = false;
 				}
 
 				if ( !pendingMsgs.isEmpty() ) {
@@ -644,17 +697,32 @@ public class ModUtilities {
 	 *
 	 * text     - The decoded string.
 	 * encoding - The encoding used.
+	 * eol      - A constant describing the original line endings.
 	 * bom      - The BOM bytes found, or null.
 	 */
 	public static class DecodeResult {
+		public static final int EOL_NONE = 0;
+		public static final int EOL_CRLF = 1;
+		public static final int EOL_LF = 2;
+		public static final int EOL_CR = 3;
+
 		public final String text;
 		public final String encoding;
+		public final int eol;
 		public final byte[] bom;
 
-		public DecodeResult( String text, String encoding, byte[] bom ) {
+		public DecodeResult( String text, String encoding, int eol, byte[] bom ) {
 			this.text = text;
 			this.encoding = encoding;
+			this.eol = eol;
 			this.bom = bom;
+		}
+
+		public String getEOLName() {
+			if ( eol == EOL_CRLF ) return "CR-LF";
+			if ( eol == EOL_LF ) return "LF";
+			if ( eol == EOL_CR ) return "CR";
+			return "None";
 		}
 	}
 }

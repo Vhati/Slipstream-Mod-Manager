@@ -30,17 +30,22 @@ The Append Extension
   to your pleasure by writing an event of the same name. Whenever multiple
   tags share the same name, only the last one counts.
 
+  When you're not overriding something, try to use unique names, so that
+  it won't clobber another mod and vice versa.
+
 
 General
 
   When developing a mod, save your text files as ANSI/ASCII, or UTF-8.
-  UTF-16 is tolerated. If all else fails, Slipstream will try decoding
-  text as Windows-1252 ANSI.
+  Slipstream will tolerate UTF-16 and Windows-1252 ANSI.
 
-  Unless you're overriding something, try to use unique names in your xml
-  so that it won't clobber another mod and vice versa. File and directory
-  names must be plain ASCII (no accents). That restriction isn't confirmed
-  for the game, but the mod manager enforces it just to be safe.
+  Dos style (CR-LF) line endings are preferred. The game only partially
+  accepts the unix style (LF): fine for xml, crashing for layout.txt.
+  Slipstream will convert both to CR-LF as it patches.
+
+  File and directory names must be plain ASCII (no accents). That
+  restriction isn't confirmed for the game, but the mod manager enforces
+  it just to be safe.
 
   Images should be 32bit PNGs (24bit color + 8bit alpha transparency).
   Things that *should* be opaque rectangles like backgrounds may vary,
