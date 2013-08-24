@@ -26,7 +26,7 @@ public class GrognakCatalogFetcher {
 
 	private static final Logger log = LogManager.getLogger(GrognakCatalogFetcher.class);
 
-	public static final String CATALOG_URL = "https://raw.github.com/Grognak/Grognaks-Mod-Manager/master/backup/current_catalog.json";
+	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
 
 
 	/**
