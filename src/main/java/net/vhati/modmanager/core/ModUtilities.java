@@ -223,6 +223,15 @@ public class ModUtilities {
 				String innerPath = item.getName();
 				pendingMsgs.clear();
 
+				if ( innerPath.indexOf( "\\" ) != -1 ) {
+					pendingMsgs.add( new ReportMessage(
+						ReportMessage.ERROR,
+						String.format( "Backslashes in path. (Non-standard zip archive)" )
+					) );
+					modValid = false;
+					innerPath = innerPath.replace( '\\', '/' );
+				}
+
 				if ( !asciiEncoder.canEncode( innerPath ) ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.ERROR,
@@ -379,9 +388,10 @@ public class ModUtilities {
 				}
 
 				if ( !pendingMsgs.isEmpty() ) {
+					// Prepend the original path.
 					messages.add( new ReportMessage(
 						ReportMessage.SUBSECTION,
-						innerPath
+						item.getName()
 					) );
 					messages.addAll( pendingMsgs );
 				}

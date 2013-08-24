@@ -414,6 +414,7 @@ public class FTLDat {
 		 * The location it represents is not guaranteed to exist.
 		 */
 		public File getFile( String innerPath ) {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			return new File( rootDir, innerPath );
 		}
 	}
@@ -672,6 +673,7 @@ public class FTLDat {
 
 		@Override
 		public void add( String innerPath, InputStream is ) throws IOException {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			if ( pathToIndexMap.containsKey( innerPath ) ) {
 				throw new IOException( "InnerPath already exists: "+ innerPath );
 			}
@@ -716,6 +718,7 @@ public class FTLDat {
 
 		@Override
 		public void extractTo( String innerPath, OutputStream os ) throws FileNotFoundException, IOException {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}
@@ -741,6 +744,7 @@ public class FTLDat {
 
 		@Override
 		public void remove( String innerPath ) throws FileNotFoundException, IOException {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}
@@ -760,11 +764,13 @@ public class FTLDat {
 
 		@Override
 		public boolean contains( String innerPath ) {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			return pathToIndexMap.containsKey( innerPath );
 		}
 
 		@Override
 		public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException {
+			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}

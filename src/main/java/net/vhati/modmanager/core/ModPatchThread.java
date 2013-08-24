@@ -190,9 +190,12 @@ public class ModPatchThread extends Thread {
 					while ( (item = zis.getNextEntry()) != null ) {
 						if ( item.isDirectory() ) continue;
 
-						Matcher m = pathPtn.matcher( item.getName() );
+						String innerPath = item.getName();
+						innerPath = innerPath.replace( '\\', '/' );  // Non-standard zips.
+
+						Matcher m = pathPtn.matcher( innerPath );
 						if ( !m.matches() ) {
-							log.warn( String.format( "Unexpected innerPath: %s", item.getName() ) );
+							log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
 							zis.closeEntry();
 							continue;
 						}
@@ -203,13 +206,13 @@ public class ModPatchThread extends Thread {
 
 						AbstractPack ftlP = topFolderMap.get( topFolder );
 						if ( ftlP == null ) {
-							log.warn( String.format( "Unexpected innerPath: %s", item.getName() ) );
+							log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
 							zis.closeEntry();
 							continue;
 						}
 
 						if ( fileName.endsWith( ".xml.append" ) || fileName.endsWith( ".append.xml" ) ) {
-							String innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]append|append[.]xml)$", ".xml" );
+							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]append|append[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							if ( !ftlP.contains( innerPath ) ) {
@@ -234,7 +237,7 @@ public class ModPatchThread extends Thread {
 							}
 						}
 						else if ( fileName.endsWith( ".xml" ) || fileName.endsWith( ".txt" ) ) {
-							String innerPath = checkCase( item.getName(), knownPaths, knownPathsLower );
+							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							// Normalize line endings for other text files to CR-LF.
 							InputStream fixedStream = ModUtilities.setLineEndings( zis, "\r\n", modFile.getName()+":"+parentPath+fileName );
@@ -249,7 +252,7 @@ public class ModPatchThread extends Thread {
 							ftlP.add( innerPath, fixedStream );
 						}
 						else {
-							String innerPath = checkCase( item.getName(), knownPaths, knownPathsLower );
+							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							if ( !moddedItems.contains(innerPath) )
 								moddedItems.add( innerPath );
