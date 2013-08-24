@@ -2,6 +2,7 @@ package net.vhati.modmanager.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.vhati.modmanager.core.ModInfo;
 
@@ -11,7 +12,7 @@ public class ModDB {
 	// Accociates Forum thread urls with hashes of their forst post's content.
 	private HashMap<String,String> threadHashMap = new HashMap<String,String>();
 
-	private ArrayList<ModInfo> catalog = new ArrayList<ModInfo>();
+	private List<ModInfo> catalog = new ArrayList<ModInfo>();
 
 
 	/**
@@ -55,7 +56,7 @@ public class ModDB {
 	/**
 	 * Returns the internal ArrayList of mod info.
 	 */
-	public ArrayList<ModInfo> getCatalog() {
+	public List<ModInfo> getCatalog() {
 		return catalog;
 	}
 }

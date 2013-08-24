@@ -30,28 +30,28 @@ public class JacksonGrognakCatalogReader {
 		Exception exception = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			mapper.configure( JsonParser.Feature.ALLOW_SINGLE_QUOTES, true );
+			mapper.setVisibility( PropertyAccessor.FIELD, Visibility.ANY );
 
-			JsonNode rootNode = mapper.readTree(jsonFile);
-			JsonNode catalogsNode = rootNode.get("catalog_versions");
-			JsonNode catalogNode = catalogsNode.get("1");
+			JsonNode rootNode = mapper.readTree( jsonFile );
+			JsonNode catalogsNode = rootNode.get( "catalog_versions" );
+			JsonNode catalogNode = catalogsNode.get( "1" );
 
 			for ( JsonNode infoNode : catalogNode ) {
-				String threadURL = infoNode.get("url").textValue();
-				String threadHash = infoNode.get("thread_hash").textValue();
+				String threadURL = infoNode.get( "url" ).textValue();
+				String threadHash = infoNode.get( "thread_hash" ).textValue();
 				if ( !threadURL.equals("???") && !threadHash.equals("???") )
 					modDB.putThreadHash( threadURL, threadHash );
 
-				JsonNode versionsNode = infoNode.get("versions");
+				JsonNode versionsNode = infoNode.get( "versions" );
 				for ( JsonNode versionNode : versionsNode ) {
 					ModInfo modInfo = new ModInfo();
-					modInfo.setTitle( infoNode.get("title").textValue() );
-					modInfo.setAuthor( infoNode.get("author").textValue() );
-					modInfo.setURL( infoNode.get("url").textValue() );
-					modInfo.setDescription( infoNode.get("desc").textValue() );
-					modInfo.setFileHash( versionNode.get("hash").textValue() );
-					modInfo.setVersion( versionNode.get("version").textValue() );
+					modInfo.setTitle( infoNode.get( "title" ).textValue() );
+					modInfo.setAuthor( infoNode.get( "author" ).textValue() );
+					modInfo.setURL( infoNode.get( "url" ).textValue() );
+					modInfo.setDescription( infoNode.get( "desc" ).textValue() );
+					modInfo.setFileHash( versionNode.get( "hash" ).textValue() );
+					modInfo.setVersion( versionNode.get( "version" ).textValue() );
 					modDB.addMod( modInfo );
 				}
 			}
