@@ -198,10 +198,31 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		contentPane.add( statusPanel, BorderLayout.SOUTH );
 
 
+		// Double-click toggles checkboxes.
 		localModsTable.addMouseListener(new MouseAdapter() {
+			int prevRow = -1;
+			int streak = 0;
+
 			@Override
 			public void mouseClicked( MouseEvent e ) {
-				if ( e.getClickCount() % 2 != 0 ) return;
+				if ( e.getSource() != localModsTable ) return;
+				int thisRow = localModsTable.rowAtPoint( e.getPoint() );
+
+				// Reset on first click and when no longer on that row.
+				if ( e.getClickCount() == 1 ) prevRow = -1;
+				if ( thisRow != prevRow ) {
+					streak = 1;
+					prevRow = thisRow;
+					return;
+				} else {
+					streak++;
+				}
+				if ( streak % 2 != 0 ) return;  // Respond to click pairs.
+
+				// Don't further toggle a multi-clicked checkbox.
+				int viewCol = localModsTable.columnAtPoint( e.getPoint() );
+				int modelCol = localModsTable.getColumnModel().getColumn(viewCol).getModelIndex();
+				if ( modelCol == 0 ) return;
 
 				int row = localModsTable.getSelectedRow();
 				if ( row != -1 ) {
@@ -210,6 +231,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				}
 			}
 		});
+
+		// Highlighted row shows mod info.
 		localModsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged( ListSelectionEvent e ) {

@@ -8,6 +8,7 @@ Changelog
 - Added tolerance for non-standard zips containing backslash paths
 - Added a Validate warning for non-standard zips containing backslash paths
 - Fixed Validation checking that scanned selected mods in reverse order
+- Restricted double-click selection to repeated clicks on one title cell
 
 1.0:
 - Changed mod list to a table with checkboxes
