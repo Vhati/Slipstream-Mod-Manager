@@ -308,7 +308,15 @@ public class ModUtilities {
 					if ( decodeResult.bom != null ) {
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.WARNING,
-							String.format( "%s BOM detected. (ascii is safest)", decodeResult.encoding )
+							String.format( "%s BOM detected. (ASCII is safest)", decodeResult.encoding )
+						) );
+						modValid = false;
+					}
+
+					if ( decodeResult.encoding.equalsIgnoreCase( "windows-1252" ) ) {
+						pendingMsgs.add( new ReportMessage(
+							ReportMessage.WARNING,
+							String.format( "Fancy %s chars. (UTF-8 is recommended for that)", decodeResult.encoding )
 						) );
 						modValid = false;
 					}
