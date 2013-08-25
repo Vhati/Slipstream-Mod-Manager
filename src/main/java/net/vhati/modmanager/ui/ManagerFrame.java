@@ -485,7 +485,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			StringBuilder resultBuf = new StringBuilder();
 			boolean anyInvalid = false;
 
-			for ( int i = localModsTableModel.getRowCount()-1; i >= 0; i-- ) {
+			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
 				if ( !localModsTableModel.isSelected(i) ) continue;
 
 				ModFileInfo modFileInfo = localModsTableModel.getItem( i );

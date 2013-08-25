@@ -7,6 +7,7 @@ Changelog
 - Changed catalog auto-update url from GMM's repository to SMM's
 - Added tolerance for non-standard zips containing backslash paths
 - Added a Validate warning for non-standard zips containing backslash paths
+- Fixed Validation checking that scanned selected mods in reverse order
 
 1.0:
 - Changed mod list to a table with checkboxes
