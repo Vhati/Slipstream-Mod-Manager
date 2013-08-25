@@ -475,28 +475,26 @@ public class ModUtilities {
 		// Wrap everything in a root tag, while mindful of the xml declaration.
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml version=\"1.0\" encoding=\"[^\"]+?\"[?]>" );
 		m = xmlDeclPtn.matcher( srcBuf );
-		if ( m.find() ) {
+		boolean foundTopDecl = false;
+		while ( m.find() ) {
 			if ( m.start() == 0 ) {
-				dstBuf.append( srcBuf.subSequence( 0, m.end() ) );
-				dstBuf.append( "\n<wrapper>\n" );
-				dstBuf.append( srcBuf.subSequence( m.end(), srcBuf.length() ) );
+				foundTopDecl = true;
+				m.appendReplacement( dstBuf, "$0\n<wrapper>\n" );
 			}
 			else {
 				messages.add( new ReportMessage(
 					ReportMessage.ERROR,
 					"<?xml... ?> should only occur on the first line."
 				) );
-				dstBuf.append( "<wrapper>\n" );
-				dstBuf.append( srcBuf.subSequence( 0, m.start() ) );
-				dstBuf.append( srcBuf.subSequence( m.end(), srcBuf.length() ) );
+				m.appendReplacement( dstBuf, "" );
 			}
-			dstBuf.append( "\n</wrapper>" );
 		}
-		else {
+		m.appendTail( dstBuf );
+		dstBuf.append( "\n</wrapper>" );
+
+		if ( !foundTopDecl )
 			dstBuf.insert( 0, "<wrapper>\n" );
-			dstBuf.append( srcBuf );
-			dstBuf.append( "\n</wrapper>" );
-		}
+
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
 
 		// Comments with long tails or double-dashes.
@@ -661,7 +659,7 @@ public class ModUtilities {
 				int badStart = -1;
 				int badEnd = -1;
 				String badLine = "???";
-				m = Pattern.compile( "\n" ).matcher( srcBuf );
+				m = Pattern.compile( "\n|\\z" ).matcher( srcBuf );
 				for ( int i=1; i <= lineNum && m.find(); i++) {
 					if ( i == lineNum-1 ) {
 						badStart = m.end();
