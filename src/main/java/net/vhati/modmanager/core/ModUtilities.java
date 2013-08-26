@@ -27,7 +27,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.vhati.modmanager.core.Report;
-import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.Report.ReportMessage;
 
 import ar.com.hjg.pngj.PngReader;
@@ -199,10 +198,8 @@ public class ModUtilities {
 	 * Checks a mod file for common problems.
 	 *
 	 * @param modFile an *.ftl file to check
-	 * @param formatter custom message decoration/indention, or null
 	 */
-	public static Report validateModFile( File modFile, ReportFormatter formatter ) {
-		if ( formatter == null ) formatter = new ReportFormatter();
+	public static Report validateModFile( File modFile ) {
 
 		List<ReportMessage> messages = new ArrayList<ReportMessage>();
 		List<ReportMessage> pendingMsgs = new ArrayList<ReportMessage>();
@@ -392,16 +389,22 @@ public class ModUtilities {
 					if ( isXML ) {
 						if ( isXMLAppend ) seenAppend = true;
 
-						Report xmlReport = validateModXML( decodeResult.text, formatter );
+						Report xmlReport = validateModXML( decodeResult.text );
 
-						if ( xmlReport.text.length() > 0 ) {
+						if ( xmlReport.messages.size() > 0 ) {
+							List<ReportMessage> condensedList = new ArrayList<ReportMessage>();
+							ReportMessage prevMessage = null;
+							for ( ReportMessage message : xmlReport.messages ) {
+								if ( !message.equals(prevMessage) ) {
+									condensedList.add( message );
+									prevMessage = message;
+								}
+							}
+
 							pendingMsgs.add( new ReportMessage(
 								ReportMessage.WARNING_SUBSECTION,
-								"XML Syntax Issues:"
-							) );
-							pendingMsgs.add( new ReportMessage(
-								ReportMessage.NESTED_BLOCK,
-								xmlReport.text
+								"XML Syntax Issues:",
+								condensedList
 							) );
 						}
 						if ( xmlReport.outcome == false )
@@ -457,9 +460,7 @@ public class ModUtilities {
 			String.format( "%s:", modFile.getName() )
 		) );
 
-		StringBuilder resultBuf = new StringBuilder();
-		formatter.format( messages, resultBuf );
-		return new Report( resultBuf, modValid );
+		return new Report( messages, modValid );
 	}
 
 
@@ -473,10 +474,8 @@ public class ModUtilities {
 	 * first typo it sees. :/
 	 *
 	 * @param text unparsed xml
-	 * @param formatter custom message decoration/indention, or null
 	 */
-	public static Report validateModXML( String text, ReportFormatter formatter ) {
-		if ( formatter == null ) formatter = new ReportFormatter();
+	public static Report validateModXML( String text ) {
 
 		List<ReportMessage> messages = new ArrayList<ReportMessage>();
 		boolean xmlValid = true;
@@ -711,17 +710,7 @@ public class ModUtilities {
 			xmlValid = false;
 		}
 
-		StringBuilder resultBuf = new StringBuilder();
-
-		ReportMessage prevMessage = null;
-		for ( ReportMessage message : messages ) {
-			if ( message.equals(prevMessage) ) continue;
-
-			formatter.format( message, resultBuf );
-			prevMessage = message;
-		}
-
-		return new Report( resultBuf, xmlValid );
+		return new Report( messages, xmlValid );
 	}
 
 

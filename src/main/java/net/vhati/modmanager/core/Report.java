@@ -1,37 +1,35 @@
 package net.vhati.modmanager.core;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 /**
- * A human-readable block of text, with a boolean outcome.
+ * A list of messages, with a boolean outcome.
  */
 public class Report {
-	public final CharSequence text;
+	public final List<ReportMessage> messages;
 	public final boolean outcome;
 
-	public Report( CharSequence text, boolean outcome ) {
-		this.text = text;
+	public Report( List<ReportMessage> messages, boolean outcome ) {
 		this.outcome = outcome;
+
+		List<ReportMessage> tmpList = new ArrayList<ReportMessage>( messages );
+		this.messages = Collections.unmodifiableList( tmpList );
 	}
 
 
 
 	/**
-	 * Formats ReportMessages to include in buffered reports.
+	 * Formats ReportMessages.
 	 *
 	 * Symbols are prepended to indicate type.
 	 *
-	 * Methods can accept a formatter as an argument,
-	 * internally accumulate messages, format them,
-	 * and return an Appendable CharSequence.
-	 *
-	 * To nest reports, that buffer can be intented
-	 * and appended to another buffer; or it can be
-	 * wrapped in a NESTED_BLOCK message of its own.
+	 * Nested messages are indented.
 	 *
 	 * The Appendable interface claims to throw
 	 * IOException, but StringBuffer and StringBuilder
@@ -55,31 +53,56 @@ public class Report {
 				case ReportMessage.SUBSECTION:         return "> ";
 				case ReportMessage.WARNING_SUBSECTION: return "~ ";
 				case ReportMessage.ERROR_SUBSECTION:   return "! ";
-				case ReportMessage.NESTED_BLOCK:       return "";
 				default: return getIndent();
 			}
 		}
 
-		public void format( List<ReportMessage> messages, Appendable buf ) throws IOException {
-			for ( ReportMessage message : messages )
-				format( message, buf );
+		/**
+		 * Returns the given CharSequence, or a new one decorated for the type.
+		 */
+		public CharSequence getDecoratedText( int messageType, CharSequence text ) {
+			// Sections get underlined.
+			if ( messageType == ReportMessage.SECTION ) {
+				StringBuilder buf = new StringBuilder( text.length()*2+1 );
+				buf.append( text ).append( "\n" );
+
+				buf.append( getPrefix( messageType ).replaceAll( "\\S", " " ) );
+				for ( int i=0; i < text.length(); i++ )
+					buf.append( "-" );
+				return buf;
+			}
+			else {
+				return text;
+			}
 		}
 
-		public void format( ReportMessage message, Appendable buf ) throws IOException {
-			if ( message.type == ReportMessage.NESTED_BLOCK ) {
-				// Already formatted this once, indent it instead.
-
-				// Skip leading newlines
-				int start = 0;
-				while ( start < message.text.length() && message.text.charAt(start) == '\n' )
-					start++;
-				if ( start > 0 )
-					indent( message.text.subSequence( start, message.text.length() ), buf );
-				else
-					indent( message.text, buf );
-				return;
+		/**
+		 * Formats a list of messages.
+		 *
+		 * Leading newlines in the first message will be omitted.
+		 */
+		public void format( List<ReportMessage> messages, Appendable buf, int indentCount ) throws IOException {
+			for ( int i=0; i < messages.size(); i++ ) {
+				ReportMessage message = messages.get( i );
+				if ( i == 0 ) {
+					// Skip leading newlines in first message.
+					int start = 0;
+					while ( start < message.text.length() && message.text.charAt(start) == '\n' )
+						start++;
+					if ( start > 0 ) {
+						// Create a substitute message without them.
+						CharSequence newText = message.text.subSequence( start, message.text.length() );
+						message = new ReportMessage( message.type, newText, message.nestedMessages );
+					}
+				}
+				format( message, buf, indentCount );
 			}
+		}
 
+		/**
+		 * Indents and decorates a message, then formats any nested messages.
+		 */
+		public void format( ReportMessage message, Appendable buf, int indentCount ) throws IOException {
 			// Subsections get an extra linebreak above them.
 			switch ( message.type ) {
 				case ReportMessage.SUBSECTION:
@@ -90,69 +113,61 @@ public class Report {
 					// Not a subsection.
 			}
 
-			buf.append( getPrefix( message.type ) );
-			buf.append( message.text );
-			buf.append( "\n" );
+			CharSequence seq = getDecoratedText( message.type, message.text );
 
-			// Sections get underlined.
-			if ( message.type == ReportMessage.SECTION ) {
+			// Indent the first line.
+			for ( int i=0; i < indentCount; i++ )
 				buf.append( getIndent() );
-				for ( int i=0; i < message.text.length(); i++ )
-					buf.append( "-" );
-				buf.append( "\n" );
-			}
-		}
+			buf.append( getPrefix( message.type ) );
 
-		public void indent( CharSequence src, Appendable dst ) throws IOException {
-			Matcher m = breakPtn.matcher( src );
+			// Indent multi-line message text.
+			Matcher m = breakPtn.matcher( seq );
 			int lastEnd = 0;
 			while ( m.find() ) {
 				if ( m.start() - lastEnd > 0 )
-					dst.append( src.subSequence( lastEnd, m.start() ) );
+					buf.append( seq.subSequence( lastEnd, m.start() ) );
 
-				if ( m.group(1).length() > 0 )  // Didn't match beginning (^).
-					dst.append( "\n" );
-				dst.append( getIndent() );
+				if ( m.group(1).length() > 0 ) {
+					// At \n, instead of 0-length beginning (^).
+					buf.append( "\n" );
+					for ( int i=0; i < indentCount; i++ ) {
+						buf.append( getIndent() );
+					}
+				}
 				lastEnd = m.end();
 			}
-			int srcLen = src.length();
+			int srcLen = seq.length();
 			if ( lastEnd < srcLen )
-				dst.append( src.subSequence( lastEnd, srcLen ) );
+				buf.append( seq.subSequence( lastEnd, srcLen ) );
+
+			buf.append( "\n" );
+
+			if ( message.nestedMessages != null ) {
+				format( message.nestedMessages, buf, indentCount+1 );
+			}
 		}
 
 		/** Exception-swallowing wrapper. */
-		public void format( List<ReportMessage> messages, StringBuffer buf ) {
-			try { format( messages, (Appendable)buf ); }
+		public void format( List<ReportMessage> messages, StringBuffer buf, int indentCount ) {
+			try { format( messages, (Appendable)buf, indentCount ); }
 			catch( IOException e ) {}
 		}
 
 		/** Exception-swallowing wrapper. */
-		public void format( List<ReportMessage> messages, StringBuilder buf ) {
-			try { format( messages, (Appendable)buf ); }
+		public void format( List<ReportMessage> messages, StringBuilder buf, int indentCount ) {
+			try { format( messages, (Appendable)buf, indentCount ); }
 			catch( IOException e ) {}
 		}
 
 		/** Exception-swallowing wrapper. */
-		public void format( ReportMessage message, StringBuffer buf ) {
-			try { format( message, (Appendable)buf ); }
+		public void format( ReportMessage message, StringBuffer buf, int indentCount ) {
+			try { format( message, (Appendable)buf, indentCount ); }
 			catch( IOException e ) {}
 		}
 
 		/** Exception-swallowing wrapper. */
-		public void format( ReportMessage message, StringBuilder buf ) {
-			try { format( message, (Appendable)buf ); }
-			catch( IOException e ) {}
-		}
-
-		/** Exception-swallowing wrapper. */
-		public void indent( CharSequence src, StringBuffer dst ) {
-			try { indent( src, (Appendable)dst ); }
-			catch( IOException e ) {}
-		}
-
-		/** Exception-swallowing wrapper. */
-		public void indent( CharSequence src, StringBuilder dst ) {
-			try { indent( src, (Appendable)dst ); }
+		public void format( ReportMessage message, StringBuilder buf, int indentCount ) {
+			try { format( message, (Appendable)buf, indentCount ); }
 			catch( IOException e ) {}
 		}
 	}
@@ -174,14 +189,20 @@ public class Report {
 		public static final int SUBSECTION = 5;
 		public static final int WARNING_SUBSECTION = 6;
 		public static final int ERROR_SUBSECTION = 7;
-		public static final int NESTED_BLOCK = 8;
 
 		public final int type;
 		public final CharSequence text;
+		public final List<ReportMessage> nestedMessages;
 
 		public ReportMessage( int type, CharSequence text ) {
+			this( type, text, new ArrayList() );
+		}
+
+		public ReportMessage( int type, CharSequence text, List<ReportMessage> nestedMessages ) {
 			this.type = type;
 			this.text = text;
+			List<ReportMessage> tmpList = new ArrayList<ReportMessage>( nestedMessages );
+			this.nestedMessages = Collections.unmodifiableList( tmpList );
 		}
 
 		@Override
@@ -190,16 +211,33 @@ public class Report {
 			if ( o == this ) return true;
 			if ( o instanceof ReportMessage == false ) return false;
 			ReportMessage other = (ReportMessage)o;
-			return ( this.type == other.type && this.text.equals(other.text) );
+			if ( this.type != other.type ) return false;
+			if ( this.text.equals(other.text) ) return false;
+
+			if ( this.nestedMessages == null ) {
+				if ( other.nestedMessages != null )
+					return false;
+			} else {
+				if ( !this.nestedMessages.equals( other.nestedMessages ) )
+					return false;
+			}
+			return true;
 		}
 
 		@Override
 		public int hashCode() {
 			int result = 236;
 			int salt = 778;
+			int nullCode = 99;
 
 			result = salt * result + this.type;
 			result = salt * result + text.hashCode();
+
+			if ( this.nestedMessages != null )
+				result = salt * result + this.nestedMessages.hashCode();
+			else
+				result = salt * result + nullCode;
+
 			return result;
 		}
 	}

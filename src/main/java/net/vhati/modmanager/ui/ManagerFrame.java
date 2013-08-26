@@ -60,6 +60,7 @@ import net.vhati.modmanager.core.ModPatchThread;
 import net.vhati.modmanager.core.ModPatchThread.BackedUpDat;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
+import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.json.GrognakCatalogFetcher;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
 import net.vhati.modmanager.ui.ChecklistTableModel;
@@ -556,8 +557,10 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				if ( !localModsTableModel.isSelected(i) ) continue;
 
 				ModFileInfo modFileInfo = localModsTableModel.getItem( i );
-				Report validateReport = ModUtilities.validateModFile( modFileInfo.getFile(), null );
-				resultBuf.append( validateReport.text );
+				Report validateReport = ModUtilities.validateModFile( modFileInfo.getFile() );
+
+				ReportFormatter formatter = new ReportFormatter();
+				formatter.format( validateReport.messages, resultBuf, 0 );
 				resultBuf.append( "\n" );
 
 				if ( validateReport.outcome == false ) anyInvalid = true;
