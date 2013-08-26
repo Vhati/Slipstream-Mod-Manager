@@ -113,6 +113,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		this.appAuthor = appAuthor;
 
 		this.setTitle( String.format( "%s v%s", appName, appVersion ) );
+		this.setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
 
 		JPanel contentPane = new JPanel( new BorderLayout() );
 
@@ -197,6 +198,21 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		statusPanel.add( statusLbl );
 		contentPane.add( statusPanel, BorderLayout.SOUTH );
 
+
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing( WindowEvent e ) {
+				List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
+
+				for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
+					sortedMods.add( localModsTableModel.getItem(i) );
+				}
+				saveModOrder( sortedMods );
+				ManagerFrame.this.setVisible( false );
+				ManagerFrame.this.dispose();
+				System.exit( 0 );
+			}
+		});
 
 		// Double-click toggles checkboxes.
 		localModsTable.addMouseListener(new MouseAdapter() {

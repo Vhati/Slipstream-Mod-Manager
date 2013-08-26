@@ -171,7 +171,6 @@ public class FTLModManager {
 		// Create the GUI.
 		try {
 			final ManagerFrame frame = new ManagerFrame( config, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
-			frame.setDefaultCloseOperation( frame.EXIT_ON_CLOSE );
 			frame.setVisible(true);
 
 			SwingUtilities.invokeLater(new Runnable() {
