@@ -709,6 +709,38 @@ public class ModUtilities {
 	}
 
 
+	/**
+	 * Returns the latest modification time among files within a mod.
+	 *
+	 * If no files have timestamps, -1 is returned.
+	 *
+	 * Presumably, this time is measured in milliseconds since the
+	 * epoch (00:00:00 GMT, January 1, 1970).
+	 *
+	 * @see java.util.zip.ZipEntry#getTime()
+	 */
+	public static long getModFileTime( File modFile ) throws IOException {
+		long result = -1;
+
+		ZipInputStream zis = null;
+		try {
+			zis = new ZipInputStream( new FileInputStream( modFile ) );
+			ZipEntry item;
+			while ( (item = zis.getNextEntry()) != null ) {
+				long n = item.getTime();
+				if ( n > result ) result = n;
+				zis.closeEntry();
+			}
+		}
+		finally {
+			try {if ( zis != null ) zis.close();}
+			catch ( IOException e ) {}
+		}
+
+		return result;
+	}
+
+
 
 	/**
 	 * A holder for results from decodeText().

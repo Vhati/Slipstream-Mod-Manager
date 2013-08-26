@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -457,11 +458,29 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			infoArea.setDescription( modInfo.getTitle(), modInfo.getAuthor(), modInfo.getVersion(), modInfo.getURL(), modInfo.getDescription() );
 		}
 		else {
+			long epochTime = -1;
+			try {
+				epochTime = ModUtilities.getModFileTime( modFileInfo.getFile() );
+			} catch ( IOException e ) {
+				log.error( String.format( "Error while getting modified time of mod file contents for \"%s\".", modFileInfo.getFile() ), e );
+			}
+
 			String body = "";
 			body += "No info is available for the selected mod.\n\n";
-			body += "If it's stable, please let the Slipstream devs know ";
-			body += "where you found it and include this md5 hash:\n";
-			body += modHash +"\n";
+
+			if ( epochTime != -1 ) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
+				String dateString = dateFormat.format( new Date( epochTime ) );
+				body += "It was released sometime after "+ dateString +".\n\n";
+			} else {
+				body += "The date of its release could not be determined.\n\n";
+			}
+
+			body += "If it is stable and has been out for over a month,\n";
+			body += "please let the Slipstream devs know where you ";
+			body += "found it.\n";
+			body += "Include the mod's version, and this hash.\n";
+			body += "MD5: "+ modHash +"\n";
 			infoArea.setDescription( modFileInfo.getName(), body );
 		}
 	}
