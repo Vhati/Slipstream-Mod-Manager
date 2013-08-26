@@ -61,6 +61,42 @@ Mac-Specific
       zip -d mymod.zip \*.DS_Store
 
 
+Encoding!?
+
+  Text ultimately boils down to 1's and 0's. There are numerous standards
+  for encoding that information. If an app reads the 1's and 0's assuming
+  the wrong standard, it can come out as gibberish.
+
+  ANSI - A family of related standards, often incompatible because each has
+  language-specific characters and lacks others. They can at least agree on
+  certain characters, called ASCII. When only ASCII characters are present,
+  it doesn't matter which ANSI encoding was used.
+
+  ASCII - abcdefghijklmnopqrstuvwxyz0123456789 (and uppercase)
+          !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+
+  Windows-1252 - The most popular flavor of ANSI.
+
+  Unicode - A series of standards, all capable of handling the same huge
+  pool of characters, each successively less optimized for common
+  characters in favor of consistency. Sometimes they come with a BOM
+  header, a distinctive binary blob, that indicates what encoding was
+  used.
+
+  UTF-8 - A flavor of Unicode. For ASCII characters, it is identical
+  with all the ANSI encodings. The BOM is optional. Apps often fairly
+  safely assume all text is UTF-8 without a BOM. However, some apps may
+  not know what to do when they see BOM bytes (eek weird binary), and if
+  the document WERE written in ANSI with characters beyond ASCII, they
+  may get garbled.
+
+  UTF-16 - Windows uses this sometimes. Always has a BOM. It is not
+  identical with any other encodings. The whole thing looks like a mess
+  when decoded incorrectly. Apps have to deliberately support it -
+  usually by including tests to determine when they're dealing with
+  UTF-16 or something else.
+
+
 Pitfalls
 
   FTL Bug (fixed in 1.03.3): If a ship is modded to have level 5 shields,
