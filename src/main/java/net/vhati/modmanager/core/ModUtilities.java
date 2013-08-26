@@ -404,7 +404,7 @@ public class ModUtilities {
 
 							pendingMsgs.add( new ReportMessage(
 								ReportMessage.WARNING_SUBSECTION,
-								"Normal XML Parser Issues:",
+								"Strict XML Parser Issues:",
 								condensedList
 							) );
 						}
