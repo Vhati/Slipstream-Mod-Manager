@@ -1,6 +1,11 @@
 Changelog
 
 ???:
+- Added a button to open the mods/ folder
+- Made the mods list resizable (drag the divider)
+- Changed modorder saving to occur on exit, instead of after patching
+- Added a mod's estimated release date to the "No info" notice
+- Added an explanation of encodings to the modder readme
 - Added LF to CR-LF conversion for *.xml.append, *.xml, and *.txt
 - Added a Validate warning for text files with LF line endings
 - Fixed data loss when decoding Windows-1252 text with accented characters
