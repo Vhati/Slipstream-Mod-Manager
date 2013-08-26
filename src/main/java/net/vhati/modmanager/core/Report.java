@@ -212,7 +212,7 @@ public class Report {
 			if ( o instanceof ReportMessage == false ) return false;
 			ReportMessage other = (ReportMessage)o;
 			if ( this.type != other.type ) return false;
-			if ( this.text.equals(other.text) ) return false;
+			if ( !this.text.equals(other.text) ) return false;
 
 			if ( this.nestedMessages == null ) {
 				if ( other.nestedMessages != null )

@@ -396,7 +396,7 @@ public class ModUtilities {
 							List<ReportMessage> condensedList = new ArrayList<ReportMessage>();
 							ReportMessage prevMessage = null;
 							for ( ReportMessage message : xmlReport.messages ) {
-								if ( !message.equals(prevMessage) ) {
+								if ( !message.equals( prevMessage ) ) {
 									condensedList.add( message );
 									prevMessage = message;
 								}
