@@ -2,6 +2,7 @@ package net.vhati.modmanager.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -99,6 +100,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JButton patchBtn;
 	private JButton toggleAllBtn;
 	private JButton validateBtn;
+	private JButton modsFolderBtn;
 	private JButton aboutBtn;
 
 	private ModInfoArea infoArea;
@@ -163,6 +165,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		validateBtn.addActionListener(this);
 		modActionsPanel.add( validateBtn );
 
+		modsFolderBtn = new JButton("Open mods/");
+		modsFolderBtn.setMargin( actionInsets );
+		modsFolderBtn.addMouseListener( new StatusbarMouseListener( this, "Open the mods/ folder." ) );
+		modsFolderBtn.addActionListener(this);
+		modsFolderBtn.setEnabled( Desktop.isDesktopSupported() );
+		modActionsPanel.add( modsFolderBtn );
+
 		aboutBtn = new JButton("About");
 		aboutBtn.setMargin( actionInsets );
 		aboutBtn.addMouseListener( new StatusbarMouseListener( this, "Show info about this program." ) );
@@ -171,7 +180,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		topPanel.add( modActionsPanel, BorderLayout.EAST );
 
-		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, aboutBtn};
+		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, modsFolderBtn, aboutBtn};
 		int actionBtnWidth = Integer.MIN_VALUE;
 		int actionBtnHeight = Integer.MIN_VALUE;
 		for ( JButton btn : actionBtns ) {
@@ -563,6 +572,17 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				resultBuf.append( "and it hinders the development of new tools.\n" );
 			}
 			infoArea.setDescription( "Results", resultBuf.toString() );
+		}
+		else if ( source == modsFolderBtn ) {
+			try {
+				if ( Desktop.isDesktopSupported() )
+					Desktop.getDesktop().open( modsDir.getCanonicalFile() );
+				else
+					log.error( "This feature is not available on your OS." );
+			}
+			catch ( IOException f ) {
+				log.error( "Error opening mods/ folder.", f );
+			}
 		}
 		else if ( source == aboutBtn ) {
 			showAboutInfo();
