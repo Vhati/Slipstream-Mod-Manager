@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
@@ -140,7 +141,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		JPanel modActionsPanel = new JPanel();
 		modActionsPanel.setLayout( new BoxLayout(modActionsPanel, BoxLayout.Y_AXIS) );
-		modActionsPanel.setBorder( BorderFactory.createEmptyBorder(0,5,5,0) );
+		modActionsPanel.setBorder( BorderFactory.createEmptyBorder(5,5,5,5) );
 		Insets actionInsets = new Insets(5,10,5,10);
 
 		patchBtn = new JButton("Patch");
@@ -183,11 +184,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			btn.setMaximumSize( size );
 		}
 
-		mainPane.add( topPanel, BorderLayout.NORTH );
-
 		infoArea = new ModInfoArea();
 		infoArea.setPreferredSize( new Dimension(504, 220) );
-		mainPane.add( infoArea, BorderLayout.CENTER );
+
+		JSplitPane splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
+		splitPane.setTopComponent( topPanel );
+		splitPane.setBottomComponent( infoArea );
+		mainPane.add( splitPane, BorderLayout.CENTER );
 
 		JPanel statusPanel = new JPanel();
 		statusPanel.setLayout( new BoxLayout(statusPanel, BoxLayout.Y_AXIS) );
