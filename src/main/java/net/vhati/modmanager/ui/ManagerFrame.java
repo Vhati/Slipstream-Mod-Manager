@@ -570,9 +570,15 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				resultBuf.append( "No mods were checked." );
 			}
 			else if ( anyInvalid ) {
-				resultBuf.append( "FTL itself can tolerate lots of errors and still run. " );
-				resultBuf.append( "But invalid XML may break tools that do proper parsing, " );
+				resultBuf.append( "FTL itself can tolerate lots of XML typos and still run. " );
+				resultBuf.append( "But malformed XML may break tools that do proper parsing, " );
 				resultBuf.append( "and it hinders the development of new tools.\n" );
+				resultBuf.append( "\n" );
+				resultBuf.append( "In future releases, Slipstream will try to parse XML while " );
+				resultBuf.append( "patching: first strictly, then failing over to a sloppy " );
+				resultBuf.append( "parser. The sloppy parser will tolerate similar errors, " );
+				resultBuf.append( "at the risk of unforseen behavior, so satisfying the " );
+				resultBuf.append( "strict parser is advised.\n" );
 			}
 			infoArea.setDescription( "Results", resultBuf.toString() );
 		}

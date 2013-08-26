@@ -28,6 +28,7 @@ import java.util.zip.ZipInputStream;
 
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportMessage;
+import net.vhati.modmanager.core.SloppyXMLParser;
 
 import ar.com.hjg.pngj.PngReader;
 
@@ -403,11 +404,23 @@ public class ModUtilities {
 
 							pendingMsgs.add( new ReportMessage(
 								ReportMessage.WARNING_SUBSECTION,
-								"XML Syntax Issues:",
+								"Normal XML Parser Issues:",
 								condensedList
 							) );
 						}
 						if ( xmlReport.outcome == false )
+							modValid = false;
+
+						Report sloppyReport = validateSloppyModXML( decodeResult.text );
+
+						if ( sloppyReport.messages.size() > 0 ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.ERROR_SUBSECTION,
+								"Sloppy XML Parser Issues:",
+								sloppyReport.messages
+							) );
+						}
+						if ( sloppyReport.outcome == false )
 							modValid = false;
 					}
 				}
@@ -683,7 +696,7 @@ public class ModUtilities {
 						badLine = srcBuf.substring( badStart, badEnd );
 					}
 				}
-				String msg = String.format( "Fix this and try again:\n%s", e );
+				String msg = String.format( "Fix this and try again:\n%s", e.toString() );
 				msg += "\n";
 				msg += "~  ~  ~  ~  ~\n";
 				msg += badLine +"\n";
@@ -707,6 +720,58 @@ public class ModUtilities {
 				ReportMessage.EXCEPTION,
 				"An error occurred. See log for details."
 			) );
+			xmlValid = false;
+		}
+
+		return new Report( messages, xmlValid );
+	}
+
+
+	/**
+	 * Checks if a mod's xml can be parsed sloppily.
+	 *
+	 * @param text unparsed xml
+	 */
+	public static Report validateSloppyModXML( String text ) {
+
+		List<ReportMessage> messages = new ArrayList<ReportMessage>();
+		boolean xmlValid = true;
+
+		try {
+			SloppyXMLParser parser = new SloppyXMLParser();
+			parser.build( text );
+		}
+		catch ( JDOMParseException e ) {
+			int lineNum = e.getLineNumber();
+			if ( lineNum != -1 ) {
+				int badStart = -1;
+				int badEnd = -1;
+				String badLine = "???";
+				Matcher m = Pattern.compile( "\n|\\z" ).matcher( text );
+				for ( int i=1; i <= lineNum && m.find(); i++) {
+					if ( i == lineNum-1 ) {
+						badStart = m.end();
+					} else if ( i == lineNum ) {
+						badEnd = m.start();
+						badLine = text.substring( badStart, badEnd );
+					}
+				}
+				String msg = String.format( "Fix this and try again:\n%s", e.toString() );
+				msg += "\n";
+				msg += "~  ~  ~  ~  ~\n";
+				msg += badLine +"\n";
+				msg += "~  ~  ~  ~  ~";
+				messages.add( new ReportMessage(
+					ReportMessage.EXCEPTION,
+					msg
+				) );
+			}
+			else {
+				messages.add( new ReportMessage(
+					ReportMessage.EXCEPTION,
+					"An error occurred. See log for details."
+				) );
+			}
 			xmlValid = false;
 		}
 
