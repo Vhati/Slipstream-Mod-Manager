@@ -68,7 +68,15 @@ public class Report {
 		public void format( ReportMessage message, Appendable buf ) throws IOException {
 			if ( message.type == ReportMessage.NESTED_BLOCK ) {
 				// Already formatted this once, indent it instead.
-				indent( message.text, buf );
+
+				// Skip leading newlines
+				int start = 0;
+				while ( start < message.text.length() && message.text.charAt(start) == '\n' )
+					start++;
+				if ( start > 0 )
+					indent( message.text.subSequence( start, message.text.length() ), buf );
+				else
+					indent( message.text, buf );
 				return;
 			}
 
