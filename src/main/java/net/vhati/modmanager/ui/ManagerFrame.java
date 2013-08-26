@@ -478,16 +478,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		Object source = e.getSource();
 
 		if ( source == patchBtn ) {
-			List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
 			List<File> modFiles = new ArrayList<File>();
 
 			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
 				if ( localModsTableModel.isSelected(i) ) {
-					sortedMods.add( localModsTableModel.getItem(i) );
 					modFiles.add( localModsTableModel.getItem(i).getFile() );
 				}
 			}
-			saveModOrder( sortedMods );
 
 			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
 
