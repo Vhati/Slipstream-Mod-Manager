@@ -578,7 +578,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				if ( Desktop.isDesktopSupported() )
 					Desktop.getDesktop().open( modsDir.getCanonicalFile() );
 				else
-					log.error( "This feature is not available on your OS." );
+					log.error( "Opening the mods/ folder is not possible on your OS." );
 			}
 			catch ( IOException f ) {
 				log.error( "Error opening mods/ folder.", f );
