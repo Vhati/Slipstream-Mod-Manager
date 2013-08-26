@@ -32,6 +32,7 @@ import net.vhati.modmanager.core.Report.ReportMessage;
 
 import ar.com.hjg.pngj.PngReader;
 
+import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 
@@ -302,13 +303,16 @@ public class ModUtilities {
 					}
 				}
 				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml|[.]txt)$" ) ) {
+					boolean isTxt = innerPath.matches( "^.*(?:[.]txt)$" );
+					boolean isXML = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" );
+					boolean isXMLAppend = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" );
 
 					DecodeResult decodeResult = ModUtilities.decodeText( zis, modFile.getName()+":"+innerPath );
 
 					if ( decodeResult.bom != null ) {
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.WARNING,
-							String.format( "%s BOM detected. (ASCII is safest)", decodeResult.encoding )
+							String.format( "%s BOM detected. (Some tools may not handle BOMs)", decodeResult.encoding )
 						) );
 						modValid = false;
 					}
@@ -323,10 +327,18 @@ public class ModUtilities {
 
 					if ( decodeResult.eol != DecodeResult.EOL_CRLF &&
 					     decodeResult.eol != DecodeResult.EOL_NONE ) {
-						pendingMsgs.add( new ReportMessage(
-							ReportMessage.ERROR,
-							String.format( "%s line endings (CR-LF is safest)", decodeResult.getEOLName() )
-						) );
+						if ( isXML ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.WARNING,
+								String.format( "%s line endings (CR-LF is safest)", decodeResult.getEOLName() )
+							) );
+						}
+						else if ( isTxt ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.ERROR,
+								String.format( "%s line endings (Non-CR-LF txt crashes FTL unless tools fix it)", decodeResult.getEOLName() )
+							) );
+						}
 						modValid = false;
 					}
 
@@ -377,19 +389,21 @@ public class ModUtilities {
 
 					// TODO: Nag if there are chars FTL can't show.
 
-					if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" ) ) {
-						if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" ) )
-							seenAppend = true;
+					if ( isXML ) {
+						if ( isXMLAppend ) seenAppend = true;
 
 						Report xmlReport = validateModXML( decodeResult.text, formatter );
 
 						if ( xmlReport.text.length() > 0 ) {
 							pendingMsgs.add( new ReportMessage(
+								ReportMessage.WARNING_SUBSECTION,
+								"XML Syntax Issues:"
+							) );
+							pendingMsgs.add( new ReportMessage(
 								ReportMessage.NESTED_BLOCK,
 								xmlReport.text
 							) );
 						}
-
 						if ( xmlReport.outcome == false )
 							modValid = false;
 					}
@@ -454,6 +468,7 @@ public class ModUtilities {
 	 *
 	 * It first tries to preemptively fix and report
 	 * common typos all at once.
+	 *
 	 * Then a real XML parser runs, which stops at the
 	 * first typo it sees. :/
 	 *
@@ -627,7 +642,7 @@ public class ModUtilities {
 
 		// <textList>...</text>
 		ptn = "";
-		ptn += "(?u)(<textList *(?: [^>]*)?>\\s*";
+		ptn += "(<textList *(?: [^>]*)?>\\s*";
 		ptn += "(?:<text *(?: [^>]*)?>[^<]*</text>\\s*)*)";
 		ptn += "</text>";  // Wrong closing tag.
 		m = Pattern.compile( ptn ).matcher( srcBuf );
@@ -641,9 +656,10 @@ public class ModUtilities {
 		m.appendTail( dstBuf );
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
 
+		Document doc = null;
 		try {
 			SAXBuilder saxBuilder = new SAXBuilder();
-			saxBuilder.build( new StringReader(srcBuf.toString()) );
+			doc = saxBuilder.build( new StringReader(srcBuf.toString()) );
 
 			xmlValid = true;
 			for ( ReportMessage message : messages ) {
