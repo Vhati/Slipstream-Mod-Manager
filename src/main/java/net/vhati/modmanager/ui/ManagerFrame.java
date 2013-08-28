@@ -669,49 +669,16 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			if ( extractChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION )
 				return;
 
-			FTLDat.AbstractPack srcP = null;
-			FTLDat.AbstractPack dstP = null;
-			InputStream is = null;
-			try {
-				File extractDir = extractChooser.getSelectedFile();
-				if ( !extractDir.exists() ) extractDir.mkdirs();
+			File extractDir = extractChooser.getSelectedFile();
 
-				File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
-				File dataDatFile = new File( datsDir, "data.dat" );
-				File resDatFile = new File( datsDir, "resource.dat" );
-				JOptionPane.showMessageDialog( this, "This may take a few seconds.\nClick OK to proceed.", "About to Extract", JOptionPane.PLAIN_MESSAGE );
+			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+			File dataDatFile = new File( datsDir, "data.dat" );
+			File resDatFile = new File( datsDir, "resource.dat" );
+			File[] datFiles = new File[] {dataDatFile, resDatFile};
 
-				dstP = new FTLDat.FolderPack( extractDir );
-
-				for ( File datFile : new File[] {dataDatFile, resDatFile} ) {
-					srcP = new FTLDat.FTLPack( datFile, false );
-					for ( String innerPath : srcP.list() ) {
-						if ( dstP.contains( innerPath ) ) {
-							log.info( "While extracting resources, this file was overwritten: "+ innerPath );
-							dstP.remove( innerPath );
-						}
-						is = srcP.getInputStream( innerPath );
-						dstP.add( innerPath, is );
-					}
-					srcP.close();
-				}
-
-				JOptionPane.showMessageDialog( this, "All resources extracted successfully.", "Extraction Complete", JOptionPane.PLAIN_MESSAGE );
-			}
-			catch ( IOException ex ) {
-				log.error( "Error extracting dats.", ex );
-				JOptionPane.showMessageDialog( this, "Error extracting dats:\n"+ ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE );
-			}
-			finally {
-				try {if ( is != null ) is.close();}
-				catch ( IOException ex ) {}
-
-				try {if ( srcP != null ) srcP.close();}
-				catch ( IOException ex ) {}
-
-				try {if ( dstP != null ) dstP.close();}
-				catch ( IOException ex ) {}
-			}
+			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datFiles );
+			extractDlg.extract();
+			extractDlg.setVisible( true );
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );
