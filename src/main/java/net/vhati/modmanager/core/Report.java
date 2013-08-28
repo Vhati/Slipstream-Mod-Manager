@@ -195,7 +195,7 @@ public class Report {
 		public final List<ReportMessage> nestedMessages;
 
 		public ReportMessage( int type, CharSequence text ) {
-			this( type, text, new ArrayList() );
+			this( type, text, new ArrayList<ReportMessage>() );
 		}
 
 		public ReportMessage( int type, CharSequence text, List<ReportMessage> nestedMessages ) {
