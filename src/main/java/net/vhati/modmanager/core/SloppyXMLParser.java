@@ -6,11 +6,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.xml.sax.SAXParseException;
 
+import org.jdom2.Attribute;
+import org.jdom2.AttributeType;
 import org.jdom2.CDATA;
 import org.jdom2.Comment;
 import org.jdom2.Content;
+import org.jdom2.DefaultJDOMFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMFactory;
 import org.jdom2.Namespace;
 import org.jdom2.Parent;
 import org.jdom2.Text;
@@ -38,30 +42,36 @@ public class SloppyXMLParser {
 	private Pattern sTagPtn = Pattern.compile( "(\\s*)<(?:(\\w+):)?(\\w+)((?: [^>]+?)??)\\s*(/?)>" );
 	private Pattern eTagPtn = Pattern.compile( "([^<]*)</\\s*([^>]+)>" );
 	private Pattern endSpacePtn = Pattern.compile( "\\s+$" );
-	private Pattern strayECommentPtn = Pattern.compile( "(\\s*)-->" );
-	private Pattern strayCharsPtn = Pattern.compile( "(\\s*)[-.>,]" );
+	private Pattern strayCharsPtn = Pattern.compile( "(\\s*)(?:-->|[-.>,])" );
 
 	private Pattern attrPtn = Pattern.compile( "\\s*(?:(\\w+):)?(\\w+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
 
 	private List<Pattern> chunkPtns = new ArrayList<Pattern>();
 
+	private JDOMFactory factory;
+
 
 	public SloppyXMLParser() {
+		this( null );
+	}
+
+	public SloppyXMLParser( JDOMFactory factory ) {
+		if ( factory == null ) factory = new DefaultJDOMFactory();
+		this.factory = factory;
+
 		chunkPtns.add( declPtn );
 		chunkPtns.add( commentPtn );
 		chunkPtns.add( cdataPtn );
 		chunkPtns.add( sTagPtn );
 		chunkPtns.add( eTagPtn );
 		chunkPtns.add( endSpacePtn );
-		chunkPtns.add( strayECommentPtn );
 		chunkPtns.add( strayCharsPtn );
 	}
 
 
 	public Document build( CharSequence s ) throws JDOMParseException {
-		Document doc = new Document();
-		Element rootNode = new Element( "wrapper" );
-		doc.setRootElement( rootNode );
+		Element rootNode = factory.element( "wrapper" );
+		Document doc = factory.document( rootNode );
 
 		Parent parentNode = rootNode;
 		int sLen = s.length();
@@ -84,25 +94,25 @@ public class SloppyXMLParser {
 				else if ( chunkPtn == commentPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new Text( whitespace ) );
+						factory.addContent( parentNode, factory.text( whitespace ) );
 
 					tmp = m.group( 2 );
 					tmp = tmp.replaceAll( "^-+|(?<=-)-+|-+$", "" );
-					Comment commentNode = new Comment( tmp );
-					parentNode.addContent( commentNode );
+					Comment commentNode = factory.comment( tmp );
+					factory.addContent( parentNode, commentNode );
 				}
 				else if ( chunkPtn == cdataPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new Text( whitespace ) );
+						factory.addContent( parentNode, factory.text( whitespace ) );
 
-					CDATA cdataNode = new CDATA( m.group(2) );
-					parentNode.addContent( cdataNode );
+					CDATA cdataNode = factory.cdata( m.group(2) );
+					factory.addContent( parentNode, cdataNode );
 				}
 				else if ( chunkPtn == sTagPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new Text( whitespace ) );
+						factory.addContent( parentNode, factory.text( whitespace ) );
 
 					String nodePrefix = m.group( 2 );  // Might be null.
 					String nodeName = m.group( 3 );
@@ -112,10 +122,10 @@ public class SloppyXMLParser {
 					Element tagNode;
 					if ( nodePrefix != null ) {
 						Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
-						rootNode.addNamespaceDeclaration( nodeNS );
-						tagNode = new Element( nodeName, nodeNS );
+						factory.addNamespaceDeclaration( rootNode, nodeNS );
+						tagNode = factory.element( nodeName, nodeNS );
 					} else {
-						tagNode = new Element( nodeName );
+						tagNode = factory.element( nodeName );
 					}
 
 					if ( attrString.length() > 0 ) {
@@ -131,15 +141,17 @@ public class SloppyXMLParser {
 									// This is a pseudo attribute declaring a namespace.
 									// Move it to the root node.
 									Namespace attrNS = Namespace.getNamespace( attrName, attrName );  // URI? *shrug*
-									rootNode.addNamespaceDeclaration( attrNS );
+									factory.addNamespaceDeclaration( rootNode, attrNS );
 								}
 								else {
 									Namespace attrNS = Namespace.getNamespace( attrPrefix, attrPrefix );  // URI? *shrug*
-									rootNode.addNamespaceDeclaration( attrNS );
-									tagNode.setAttribute( attrName, attrValue, attrNS );
+									factory.addNamespaceDeclaration( rootNode, attrNS );
+									Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, attrNS );
+									factory.setAttribute( tagNode, attrObj );
 								}
 							} else {
-								tagNode.setAttribute( attrName, attrValue );
+								Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, Namespace.NO_NAMESPACE );
+								factory.setAttribute( tagNode, attrObj );
 							}
 							am.region( am.end(), am.regionEnd() );
 						}
@@ -153,30 +165,23 @@ public class SloppyXMLParser {
 						}
 					}
 
-					parentNode.addContent( tagNode );
+					factory.addContent( parentNode, tagNode );
 					if ( !selfClosing ) parentNode = tagNode;
 				}
 				else if ( chunkPtn == eTagPtn ) {
 					String interimText = m.group( 1 );
-					parentNode.addContent( new Text( interimText ) );
+					factory.addContent( parentNode, factory.text( interimText ) );
 					parentNode = parentNode.getParent();
 				}
 				else if ( chunkPtn == endSpacePtn ) {
 					// This is the end of the document.
-				}
-				else if ( chunkPtn == strayECommentPtn ) {
-					// Stray end-comment bracket.
-
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						parentNode.addContent( new Text( whitespace ) );
 				}
 				else if ( chunkPtn == strayCharsPtn ) {
 					// Non-space junk between an end tag and a start tag.
 
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new Text( whitespace ) );
+						factory.addContent( parentNode, factory.text( whitespace ) );
 				}
 
 				matchedChunk = true;
@@ -201,9 +206,9 @@ public class SloppyXMLParser {
 			Element newRoot = rootNode.getChildren().get( 0 );
 			newRoot.detach();
 			for ( Namespace ns : rootNode.getAdditionalNamespaces() ) {
-				newRoot.addNamespaceDeclaration( ns );
+				factory.addNamespaceDeclaration( newRoot, ns );
 			}
-			doc.setRootElement( newRoot );
+			factory.setRoot( doc, newRoot );
 		}
 
 		return doc;
