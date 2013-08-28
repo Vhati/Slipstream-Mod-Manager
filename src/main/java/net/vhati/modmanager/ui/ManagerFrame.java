@@ -674,6 +674,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			InputStream is = null;
 			try {
 				File extractDir = extractChooser.getSelectedFile();
+				if ( !extractDir.exists() ) extractDir.mkdirs();
+
 				File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
 				File dataDatFile = new File( datsDir, "data.dat" );
 				File resDatFile = new File( datsDir, "resource.dat" );
