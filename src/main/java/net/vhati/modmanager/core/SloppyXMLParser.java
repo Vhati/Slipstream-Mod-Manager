@@ -61,7 +61,7 @@ public class SloppyXMLParser {
 	public Document build( CharSequence s ) throws JDOMParseException {
 		Document doc = new Document();
 		Element rootNode = new Element( "wrapper" );
-		doc.addContent( rootNode );
+		doc.setRootElement( rootNode );
 
 		Parent parentNode = rootNode;
 		int sLen = s.length();
@@ -193,6 +193,17 @@ public class SloppyXMLParser {
 				SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Unexpected characters.", lineNum, colNum ), null, null, lineNum, colNum);
 				throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 			}
+		}
+
+		if ( rootNode.getChildren().size() == 1 ) {
+			// No need for the wrapper, promote its only child to root.
+
+			Element newRoot = rootNode.getChildren().get( 0 );
+			newRoot.detach();
+			for ( Namespace ns : rootNode.getAdditionalNamespaces() ) {
+				newRoot.addNamespaceDeclaration( ns );
+			}
+			doc.setRootElement( newRoot );
 		}
 
 		return doc;
