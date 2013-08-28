@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
+//import java.nio.MappedByteBuffer;  // For Memory-mapped streams
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
@@ -124,10 +124,11 @@ public class FTLDat {
 		return result;
 	}
 
+
 	/**
 	 * Returns an approximate byte count for humans.
 	 */
-	private String humanReadableByteCount( long bytes, boolean si ) {
+	public static String humanReadableByteCount( long bytes, boolean si ) {
     int unit = si ? 1000 : 1024;
     if ( bytes < unit ) return bytes +" B";
     int exp = (int)( Math.log(bytes) / Math.log(unit) );
@@ -189,11 +190,12 @@ public class FTLDat {
 
 
 
-	/**
+	/*
 	 * An InputStream wrapping a ByteBuffer.
 	 *
 	 * A memory-mapped region of a file is a ByteBuffer.
 	 */
+/*
 	public static class ByteBufferBackedInputStream extends InputStream {
 		ByteBuffer buf;
 
@@ -221,6 +223,7 @@ public class FTLDat {
 			return len;
 		}
 	}
+*/
 
 
 
