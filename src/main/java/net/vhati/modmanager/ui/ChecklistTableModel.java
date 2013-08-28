@@ -41,6 +41,11 @@ public class ChecklistTableModel<T> extends AbstractTableModel implements Reorde
 		fireTableRowsDeleted( row, row );
 	}
 
+	public void removeAllItems() {
+		rowsList.clear();
+		fireTableDataChanged();
+	}
+
 	@SuppressWarnings("unchecked")
 	public T getItem( int row ) {
 		return (T)rowsList.get(row).get(DATA_PAYLOAD);

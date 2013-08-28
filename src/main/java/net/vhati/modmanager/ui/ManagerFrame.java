@@ -37,9 +37,13 @@ import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -98,11 +102,17 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private ChecklistTableModel<ModFileInfo> localModsTableModel;
 	private JTable localModsTable;
 
+	private JMenuBar menubar;
+	private JMenu fileMenu;
+	private JMenuItem rescanMenuItem;
+	private JMenuItem exitMenuItem;
+	private JMenu helpMenu;
+	private JMenuItem aboutMenuItem;
+
 	private JButton patchBtn;
 	private JButton toggleAllBtn;
 	private JButton validateBtn;
 	private JButton modsFolderBtn;
-	private JButton aboutBtn;
 
 	private ModInfoArea infoArea;
 
@@ -173,15 +183,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		modsFolderBtn.setEnabled( Desktop.isDesktopSupported() );
 		modActionsPanel.add( modsFolderBtn );
 
-		aboutBtn = new JButton("About");
-		aboutBtn.setMargin( actionInsets );
-		aboutBtn.addMouseListener( new StatusbarMouseListener( this, "Show info about this program." ) );
-		aboutBtn.addActionListener(this);
-		modActionsPanel.add( aboutBtn );
-
 		topPanel.add( modActionsPanel, BorderLayout.EAST );
 
-		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, modsFolderBtn, aboutBtn};
+		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, modsFolderBtn };
 		int actionBtnWidth = Integer.MIN_VALUE;
 		int actionBtnHeight = Integer.MIN_VALUE;
 		for ( JButton btn : actionBtns ) {
@@ -222,8 +226,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					sortedMods.add( localModsTableModel.getItem(i) );
 				}
 				saveModOrder( sortedMods );
-				ManagerFrame.this.setVisible( false );
-				ManagerFrame.this.dispose();
+
 				System.exit( 0 );
 			}
 		});
@@ -280,6 +283,26 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		localModsTable.setDropMode( DropMode.INSERT );  // Drop between rows, not on them.
 		localModsTable.setDragEnabled( true );
 
+		menubar = new JMenuBar();
+		fileMenu = new JMenu( "File" );
+		rescanMenuItem = new JMenuItem( "Re-Scan mods/" );
+		rescanMenuItem.addMouseListener( new StatusbarMouseListener( this, "Check the mods/ folder for new files." ) );
+		rescanMenuItem.addActionListener(this);
+		fileMenu.add( rescanMenuItem );
+		fileMenu.add( new JSeparator() );
+		exitMenuItem = new JMenuItem( "Exit" );
+		exitMenuItem.addMouseListener( new StatusbarMouseListener( this, "Exit this application." ) );
+		exitMenuItem.addActionListener(this);
+		fileMenu.add( exitMenuItem );
+		menubar.add( fileMenu );
+		helpMenu = new JMenu( "Help" );
+		aboutMenuItem = new JMenuItem( "About" );
+		aboutMenuItem.addMouseListener( new StatusbarMouseListener( this, "Show info about this application." ) );
+		aboutMenuItem.addActionListener(this);
+		helpMenu.add( aboutMenuItem );
+		menubar.add( helpMenu );
+		this.setJMenuBar( menubar );
+
 		this.setContentPane( contentPane );
 		this.pack();
 		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
@@ -293,34 +316,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	 * This must be called on the Swing event thread (use invokeLater()).
 	 */
 	public void init() {
-		File[] modFiles = modsDir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept( File f ) {
-				if ( f.isFile() ) {
-					if ( f.getName().endsWith(".ftl") ) return true;
 
-					if ( config.getProperty( "allow_zip", "false" ).equals( "true" ) ) {
-						if ( f.getName().endsWith(".zip") ) return true;
-					}
-				}
-				return false;
-			}
-		});
-
-		List<ModFileInfo> unsortedMods = new ArrayList<ModFileInfo>();
-		for ( File f : modFiles ) {
-			ModFileInfo modFileInfo = new ModFileInfo( f );
-			unsortedMods.add( modFileInfo );
-		}
-
-		List<ModFileInfo> sortedMods = loadModOrder( unsortedMods );
-		for ( ModFileInfo modFileInfo : sortedMods ) {
-			localModsTableModel.addItem( modFileInfo );
-		}
-
-		HashThread hashThread = new HashThread( modFiles, this );
-		hashThread.setDaemon( true );
-		hashThread.start();
+		List<String> preferredOrder = loadModOrder();
+		rescanMods( preferredOrder );
 
 		boolean needNewCatalog = false;
 
@@ -382,15 +380,38 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 
 	/**
-	 * Reads modorder.txt and returns a mod list in that order.
+	 * Returns a mod list with names sorted in a preferred order.
 	 *
-	 * Mods not mentioned in the text appear at the end, alphabetically.
-	 * If an error occurs, an alphabetized list is returned.
+	 * Mods not mentioned in the name list appear at the end, alphabetically.
 	 */
-	private List<ModFileInfo> loadModOrder( List<ModFileInfo> unsortedMods ) {
+	private List<ModFileInfo> reorderMods( List<ModFileInfo> unsortedMods, List<String> preferredOrder ) {
 		List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
 		List<ModFileInfo> availableMods = new ArrayList<ModFileInfo>( unsortedMods );
 		Collections.sort( availableMods );
+
+		if ( preferredOrder != null ) {
+			for ( String name : preferredOrder ) {
+				Iterator<ModFileInfo> it = availableMods.iterator();
+				while ( it.hasNext() ) {
+					ModFileInfo modFileInfo = it.next();
+					if ( modFileInfo.getName().equals( name ) ) {
+						it.remove();
+						sortedMods.add( modFileInfo );
+						break;
+					}
+				}
+			}
+		}
+		sortedMods.addAll( availableMods );
+
+		return sortedMods;
+	}
+
+	/**
+	 * Reads modorder.txt and returns a list of mod names in preferred order.
+	 */
+	private List<String> loadModOrder() {
+		List<String> result = new ArrayList<String>();
 
 		FileInputStream is = null;
 		try {
@@ -398,15 +419,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			BufferedReader br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
 			String line;
 			while ( (line = br.readLine()) != null ) {
-				Iterator<ModFileInfo> it = availableMods.iterator();
-				while ( it.hasNext() ) {
-					ModFileInfo modFileInfo = it.next();
-					if ( modFileInfo.getName().equals(line) ) {
-						it.remove();
-						sortedMods.add( modFileInfo );
-						break;
-					}
-				}
+				result.add( line );
 			}
 		}
 		catch ( FileNotFoundException e ) {
@@ -418,9 +431,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			try {if (is != null) is.close();}
 			catch (Exception e) {}
 		}
-		sortedMods.addAll( availableMods );
 
-		return sortedMods;
+		return result;
 	}
 
 	private void saveModOrder( List<ModFileInfo> sortedMods ) {
@@ -442,6 +454,35 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			try {if (os != null) os.close();}
 			catch (Exception e) {}
 		}
+	}
+
+	/**
+	 * Clears and syncs the mods list with mods/ dir, then starts a new hash thread.
+	 */
+	private void rescanMods( List<String> preferredOrder ) {
+		if ( rescanMenuItem.isEnabled() == false ) return;
+		rescanMenuItem.setEnabled( false );
+
+		modFileHashes.clear();
+		localModsTableModel.removeAllItems();
+
+		boolean allowZip = config.getProperty( "allow_zip", "false" ).equals( "true" );
+		File[] modFiles = modsDir.listFiles( new ModFileFilter( allowZip ) );
+
+		List<ModFileInfo> unsortedMods = new ArrayList<ModFileInfo>();
+		for ( File f : modFiles ) {
+			ModFileInfo modFileInfo = new ModFileInfo( f );
+			unsortedMods.add( modFileInfo );
+		}
+
+		List<ModFileInfo> sortedMods = reorderMods( unsortedMods, preferredOrder );
+		for ( ModFileInfo modFileInfo : sortedMods ) {
+			localModsTableModel.addItem( modFileInfo );
+		}
+
+		HashThread hashThread = new HashThread( modFiles, this );
+		hashThread.setDaemon( true );
+		hashThread.start();
 	}
 
 
@@ -493,6 +534,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			body += "MD5: "+ modHash +"\n";
 			infoArea.setDescription( modFileInfo.getName(), body );
 		}
+	}
+
+	public void exitApp() {
+		this.setVisible( false );
+		this.dispose();
 	}
 
 
@@ -593,7 +639,23 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				log.error( "Error opening mods/ folder.", f );
 			}
 		}
-		else if ( source == aboutBtn ) {
+		else if ( source == rescanMenuItem ) {
+			setStatusText( "" );
+			if ( rescanMenuItem.isEnabled() == false ) return;
+
+			List<String> preferredOrder = new ArrayList<String>();
+
+			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
+				preferredOrder.add( localModsTableModel.getItem(i).getName() );
+			}
+			rescanMods( preferredOrder );
+		}
+		else if ( source == exitMenuItem ) {
+			setStatusText( "" );
+			exitApp();
+		}
+		else if ( source == aboutMenuItem ) {
+			setStatusText( "" );
 			showAboutInfo();
 		}
 	}
@@ -605,6 +667,16 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			@Override
 			public void run() {
 				modFileHashes.put( f, hash );
+			}
+		});
+	}
+
+	@Override
+	public void hashingEnded() {
+		SwingUtilities.invokeLater( new Runnable() {
+			@Override
+			public void run() {
+				rescanMenuItem.setEnabled( true );
 			}
 		});
 	}
@@ -628,10 +700,32 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 						} catch ( Exception e ) {
 							log.error( "Error launching FTL.", e );
 						}
-						System.exit( 0 );
+						exitApp();
 					}
 				}
 			}
+		}
+	}
+
+
+
+	private static class ModFileFilter implements FileFilter {
+		boolean allowZip;
+
+		public ModFileFilter( boolean allowZip ) {
+			this.allowZip = allowZip;
+		}
+
+		@Override
+		public boolean accept( File f ) {
+			if ( f.isFile() ) {
+				if ( f.getName().endsWith(".ftl") ) return true;
+
+				if ( allowZip ) {
+					if ( f.getName().endsWith(".zip") ) return true;
+				}
+			}
+			return false;
 		}
 	}
 }

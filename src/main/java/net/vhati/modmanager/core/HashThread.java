@@ -42,6 +42,7 @@ public class HashThread extends Thread {
 		}
 
 		log.info( "Background hashing finished." );
+		hashObserver.hashingEnded();
 	}
 
 
