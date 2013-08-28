@@ -131,18 +131,23 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 		}
 
 		// Technically, nstack.push(), super.printElement(), nstack.pop()
-		//   would do to make namespaces look already declared.
+		//   would be enough to make namespaces look already declared.
 		// But to avoid having to loop over root's child content to feed
-		//   XMLOutputter means writing most of this method just for
+		//   XMLOutputter, means writing most of this method just for
 		//   root (omitting the tag printing parts).
 		// And to expand tags that have blank content while still
-		//   trimming means writing the whole method (excluding root with
-		//   if blocks).
+		//   trimming, means writing the whole method (excluding root
+		//    with if blocks).
 	}
 
 
 	/**
 	 * Creates an outputter and writes an XML tree.
+	 *
+	 * The encoding argument here only sets an attribute in the
+	 * XML declaration. It's up to the caller to ensure the writer
+	 * is encoding bytes to match. If encoding is null, the default
+	 * is "UTF-8".
 	 */
 	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
 		Format format = Format.getPrettyFormat();
