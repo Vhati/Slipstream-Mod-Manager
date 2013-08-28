@@ -1,11 +1,7 @@
 package net.vhati.modmanager.core;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.xml.sax.SAXParseException;
@@ -15,11 +11,10 @@ import org.jdom2.Comment;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.Namespace;
 import org.jdom2.Parent;
+import org.jdom2.Text;
 import org.jdom2.input.JDOMParseException;
-import org.jdom2.located.LocatedText;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
 
 /**
@@ -30,6 +25,8 @@ import org.jdom2.output.XMLOutputter;
  *   <!-- <!-- blah --> is valid (but the extra dashes will be discarded).
  *   --> can occur alone (discarded).
  *   An attribute name can start right after the quote from a prior value.
+ *   Namespace prefixes for nodes and attributes are unique.
+ *     (Each prefix will be used as the namespace's URI).
  *
  * Only use this as a last resort, after a real parser fails.
  */
@@ -44,7 +41,7 @@ public class SloppyXMLParser {
 	private Pattern strayECommentPtn = Pattern.compile( "(\\s*)-->" );
 	private Pattern strayCharsPtn = Pattern.compile( "(\\s*)[-.>,]" );
 
-	private Pattern attrPtn = Pattern.compile( "\\s*([^=]+?)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
+	private Pattern attrPtn = Pattern.compile( "\\s*(?:(\\w+):)?(\\w+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
 
 	private List<Pattern> chunkPtns = new ArrayList<Pattern>();
 
@@ -87,7 +84,7 @@ public class SloppyXMLParser {
 				else if ( chunkPtn == commentPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new LocatedText( whitespace ) );
+						parentNode.addContent( new Text( whitespace ) );
 
 					tmp = m.group( 2 );
 					tmp = tmp.replaceAll( "^-+|(?<=-)-+|-+$", "" );
@@ -97,7 +94,7 @@ public class SloppyXMLParser {
 				else if ( chunkPtn == cdataPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new LocatedText( whitespace ) );
+						parentNode.addContent( new Text( whitespace ) );
 
 					CDATA cdataNode = new CDATA( m.group(2) );
 					parentNode.addContent( cdataNode );
@@ -105,22 +102,45 @@ public class SloppyXMLParser {
 				else if ( chunkPtn == sTagPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new LocatedText( whitespace ) );
+						parentNode.addContent( new Text( whitespace ) );
 
-					String nodeNS = m.group( 2 );  // Might be null.
+					String nodePrefix = m.group( 2 );  // Might be null.
 					String nodeName = m.group( 3 );
 					String attrString = m.group( 4 );
 					boolean selfClosing = ( m.group( 5 ).length() > 0 );
 
-					Element tagNode = new Element( nodeName );
+					Element tagNode;
+					if ( nodePrefix != null ) {
+						Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
+						rootNode.addNamespaceDeclaration( nodeNS );
+						tagNode = new Element( nodeName, nodeNS );
+					} else {
+						tagNode = new Element( nodeName );
+					}
 
 					if ( attrString.length() > 0 ) {
 						Matcher am = attrPtn.matcher( attrString );
 						while ( am.lookingAt() ) {
-							String attrName = am.group( 1 );
-							String attrValue = am.group( 2 );
+							String attrPrefix = am.group( 1 );  // Might be null.
+							String attrName = am.group( 2 );
+							String attrValue = am.group( 3 );
 							attrValue = attrValue.substring( 1, attrValue.length()-1 );
-							tagNode.setAttribute( attrName, attrValue );
+
+							if ( attrPrefix != null ) {
+								if ( attrPrefix.equals( "xmlns" ) ) {
+									// This is a pseudo attribute declaring a namespace.
+									// Move it to the root node.
+									Namespace attrNS = Namespace.getNamespace( attrName, attrName );  // URI? *shrug*
+									rootNode.addNamespaceDeclaration( attrNS );
+								}
+								else {
+									Namespace attrNS = Namespace.getNamespace( attrPrefix, attrPrefix );  // URI? *shrug*
+									rootNode.addNamespaceDeclaration( attrNS );
+									tagNode.setAttribute( attrName, attrValue, attrNS );
+								}
+							} else {
+								tagNode.setAttribute( attrName, attrValue );
+							}
 							am.region( am.end(), am.regionEnd() );
 						}
 						if ( am.regionStart() < attrString.length() ) {
@@ -138,7 +158,7 @@ public class SloppyXMLParser {
 				}
 				else if ( chunkPtn == eTagPtn ) {
 					String interimText = m.group( 1 );
-					parentNode.addContent( new LocatedText( interimText ) );
+					parentNode.addContent( new Text( interimText ) );
 					parentNode = parentNode.getParent();
 				}
 				else if ( chunkPtn == endSpacePtn ) {
@@ -149,14 +169,14 @@ public class SloppyXMLParser {
 
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new LocatedText( whitespace ) );
+						parentNode.addContent( new Text( whitespace ) );
 				}
-				else if ( chunkPtn == strayECommentPtn ) {
+				else if ( chunkPtn == strayCharsPtn ) {
 					// Non-space junk between an end tag and a start tag.
 
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
-						parentNode.addContent( new LocatedText( whitespace ) );
+						parentNode.addContent( new Text( whitespace ) );
 				}
 
 				matchedChunk = true;
@@ -198,20 +218,5 @@ public class SloppyXMLParser {
 			colNum = pos - lastBreakPos;
 
 		return new int[] { lineNum, colNum };
-	}
-
-
-	public String prettyPrint( Document doc ) {
-		Format format = Format.getPrettyFormat();
-		//format.setExpandEmptyElements( true );
-
-		StringWriter writer = new StringWriter();
-		XMLOutputter outputter = new XMLOutputter( format );
-		try {
-			outputter.output( doc, writer );
-		}
-		catch ( IOException e ) {e.printStackTrace();}
-
-		return writer.toString();
 	}
 }
