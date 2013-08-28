@@ -1,6 +1,6 @@
 Changelog
 
-???:
+1.1:
 - Added a button to open the mods/ folder
 - Added FTL resource extraction
 - Made the mods list resizable (drag the divider)
