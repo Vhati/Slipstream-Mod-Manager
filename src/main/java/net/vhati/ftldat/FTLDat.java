@@ -353,7 +353,7 @@ public class FTLDat {
 		@Override
 		public void add( String innerPath, InputStream is ) throws IOException {
 			File dstFile = getFile( innerPath );
-			if ( dstFile.exists() ) throw new IOException( "File already exists" );
+			if ( dstFile.exists() ) throw new IOException( "InnerPath already exists: "+ innerPath );
 
 			dstFile.getParentFile().mkdirs();
 
@@ -418,7 +418,16 @@ public class FTLDat {
 		 */
 		public File getFile( String innerPath ) {
 			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
-			return new File( rootDir, innerPath );
+			File tmpFile = new File( rootDir, innerPath )
+
+			// Check if the file is inside rootDir.
+			File parentDir = tmpFile.getParentFile();
+			while( parentDir != null ) {
+				if ( parentDir.equals( rootDir ) ) return tmpFile;
+				parentDir = parentDir.getParentFile();
+			}
+
+			throw new IllegalArgumentException( String.format( "InnerPath \"%s\" is outside the FolderPack at \"%s\".", innerPath, rootDir ) );
 		}
 	}
 
