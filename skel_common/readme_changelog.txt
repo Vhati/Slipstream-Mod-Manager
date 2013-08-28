@@ -2,6 +2,7 @@ Changelog
 
 ???:
 - Added a button to open the mods/ folder
+- Added FTL resource extraction
 - Made the mods list resizable (drag the divider)
 - Changed modorder saving to occur on exit, instead of after patching
 - Added a mod's estimated release date to the "No info" notice

@@ -18,6 +18,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -35,6 +36,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -53,6 +55,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
+import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.HashObserver;
@@ -105,6 +108,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JMenuBar menubar;
 	private JMenu fileMenu;
 	private JMenuItem rescanMenuItem;
+	private JMenuItem extractDatsMenuItem;
 	private JMenuItem exitMenuItem;
 	private JMenu helpMenu;
 	private JMenuItem aboutMenuItem;
@@ -289,6 +293,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		rescanMenuItem.addMouseListener( new StatusbarMouseListener( this, "Check the mods/ folder for new files." ) );
 		rescanMenuItem.addActionListener(this);
 		fileMenu.add( rescanMenuItem );
+		fileMenu.add( new JSeparator() );
+		extractDatsMenuItem = new JMenuItem( "Extract Dats..." );
+		extractDatsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Extract FTL resources into a folder." ) );
+		extractDatsMenuItem.addActionListener(this);
+		fileMenu.add( extractDatsMenuItem );
 		fileMenu.add( new JSeparator() );
 		exitMenuItem = new JMenuItem( "Exit" );
 		exitMenuItem.addMouseListener( new StatusbarMouseListener( this, "Exit this application." ) );
@@ -649,6 +658,58 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				preferredOrder.add( localModsTableModel.getItem(i).getName() );
 			}
 			rescanMods( preferredOrder );
+		}
+		else if ( source == extractDatsMenuItem ) {
+			setStatusText( "" );
+			JFileChooser extractChooser = new JFileChooser();
+			extractChooser.setDialogTitle("Choose a dir to extract into");
+			extractChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			extractChooser.setMultiSelectionEnabled(false);
+
+			if ( extractChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION )
+				return;
+
+			FTLDat.AbstractPack srcP = null;
+			FTLDat.AbstractPack dstP = null;
+			InputStream is = null;
+			try {
+				File extractDir = extractChooser.getSelectedFile();
+				File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+				File dataDatFile = new File( datsDir, "data.dat" );
+				File resDatFile = new File( datsDir, "resource.dat" );
+				JOptionPane.showMessageDialog( this, "This may take a few seconds.\nClick OK to proceed.", "About to Extract", JOptionPane.PLAIN_MESSAGE );
+
+				dstP = new FTLDat.FolderPack( extractDir );
+
+				for ( File datFile : new File[] {dataDatFile, resDatFile} ) {
+					srcP = new FTLDat.FTLPack( datFile, false );
+					for ( String innerPath : srcP.list() ) {
+						if ( dstP.contains( innerPath ) ) {
+							log.info( "While extracting resources, this file was overwritten: "+ innerPath );
+							dstP.remove( innerPath );
+						}
+						is = srcP.getInputStream( innerPath );
+						dstP.add( innerPath, is );
+					}
+					srcP.close();
+				}
+
+				JOptionPane.showMessageDialog( this, "All resources extracted successfully.", "Extraction Complete", JOptionPane.PLAIN_MESSAGE );
+			}
+			catch ( IOException ex ) {
+				log.error( "Error extracting dats.", ex );
+				JOptionPane.showMessageDialog( this, "Error extracting dats:\n"+ ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE );
+			}
+			finally {
+				try {if ( is != null ) is.close();}
+				catch ( IOException ex ) {}
+
+				try {if ( srcP != null ) srcP.close();}
+				catch ( IOException ex ) {}
+
+				try {if ( dstP != null ) dstP.close();}
+				catch ( IOException ex ) {}
+			}
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );
