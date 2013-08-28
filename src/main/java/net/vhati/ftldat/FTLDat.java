@@ -418,7 +418,7 @@ public class FTLDat {
 		 */
 		public File getFile( String innerPath ) {
 			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
-			File tmpFile = new File( rootDir, innerPath )
+			File tmpFile = new File( rootDir, innerPath );
 
 			// Check if the file is inside rootDir.
 			File parentDir = tmpFile.getParentFile();
