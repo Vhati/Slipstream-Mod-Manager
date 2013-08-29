@@ -1,21 +1,11 @@
 package net.vhati.modmanager.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import net.vhati.ftldat.FTLDat;
@@ -24,59 +14,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class DatExtractDialog extends JDialog implements ActionListener {
+public class DatExtractDialog extends ProgressDialog {
 
 	private static final Logger log = LogManager.getLogger(DatExtractDialog.class);
 
-	private JProgressBar progressBar;
-	private JTextArea statusArea;
-	private JButton continueBtn;
-
-	private boolean extracting = false;
-	private boolean done = false;
+	private boolean started = false;
 
 	private File extractDir;
 	private File[] datFiles;
 
 
-	DatExtractDialog( Frame owner, File extractDir, File[] datFiles ) {
-		super( owner, "Extracting...", true );
-		this.setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
+	public DatExtractDialog( Frame owner, File extractDir, File[] datFiles ) {
+		super( owner, false );
+		this.setTitle( "Extracting..." );
 
 		this.extractDir = extractDir;
 		this.datFiles = datFiles;
-
-		progressBar = new JProgressBar();
-		progressBar.setBorderPainted( true );
-		progressBar.setStringPainted( false );
-
-		JPanel progressHolder = new JPanel( new BorderLayout() );
-		progressHolder.setBorder( BorderFactory.createEmptyBorder( 10, 15, 0, 15 ) );
-		progressHolder.add( progressBar );
-		getContentPane().add( progressHolder, BorderLayout.NORTH );
-
-		statusArea = new JTextArea();
-		statusArea.setBorder( BorderFactory.createEtchedBorder() );
-		statusArea.setLineWrap( true );
-		statusArea.setWrapStyleWord( true );
-		statusArea.setEditable( false );
-
-		JPanel statusHolder = new JPanel( new BorderLayout() );
-		statusHolder.setBorder( BorderFactory.createEmptyBorder( 15, 15, 15, 15 ) );
-		statusHolder.add( statusArea );
-		getContentPane().add( statusHolder, BorderLayout.CENTER );
-
-		continueBtn = new JButton( "Continue" );
-		continueBtn.setEnabled( false );
-		continueBtn.addActionListener( this );
-
-		JPanel continueHolder = new JPanel();
-		continueHolder.setLayout( new BoxLayout( continueHolder, BoxLayout.X_AXIS ) );
-		continueHolder.setBorder( BorderFactory.createEmptyBorder( 0, 0, 10, 0 ) );
-		continueHolder.add( Box.createHorizontalGlue() );
-		continueHolder.add( continueBtn );
-		continueHolder.add( Box.createHorizontalGlue() );
-		getContentPane().add( continueHolder, BorderLayout.SOUTH );
 
 		this.setSize( 400, 160 );
 		this.setMinimumSize( this.getPreferredSize() );
@@ -85,85 +38,25 @@ public class DatExtractDialog extends JDialog implements ActionListener {
 
 	/**
 	 * Starts the background extraction thread.
+	 * Call this immediately before setVisible().
 	 */
 	public void extract() {
-		if ( extracting ) return;
+		if ( started ) return;
 
 		DatExtractThread t = new DatExtractThread( extractDir, datFiles );
 		t.start();
+		started = true;
 	}
-
 
 	@Override
-	public void actionPerformed( ActionEvent e ) {
-		Object source = e.getSource();
+	protected void setTaskOutcome( boolean outcome, Exception e ) {
+		super.setTaskOutcome( outcome, e );
+		if ( !this.isShowing() ) return;
 
-		if ( source == continueBtn ) {
-			this.setVisible( false );
-			this.dispose();
-		}
-	}
-
-
-	private void setStatusText( String message ) {
-		statusArea.setText( message != null ? message : "..." );
-	}
-
-	private void setProgress( final int n ) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setValue( n );
-			}
-		});
-	}
-
-	private void setMaximum( final int n ) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setMaximum( n );
-			}
-		});
-	}
-
-	public void extractingInnerPath( final String innerPath ) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				setStatusText( innerPath );
-			}
-		});
-	}
-
-	public void extractingEnded( final boolean success, final Exception e ) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if ( success )
-					setStatusText( "All resources extracted successfully." );
-				else
-					setStatusText( String.format( "Error extracting dats: %s", e ) );
-
-				done = true;
-				continueBtn.setEnabled( true );
-
-				if ( !DatExtractDialog.this.isShowing() ) {
-					// The window's not visible, no continueBtn to click.
-					DatExtractDialog.this.dispose();
-				}
-			}
-		});
-	}
-
-
-	/**
-	 * Shows or hides this component depending on the value of parameter b.
-	 *
-	 * If extracting has already completed, this method will do nothing.
-	 */
-	public void setVisible( boolean b ) {
-		if ( !done ) super.setVisible( b );
+		if ( succeeded )
+			setStatusText( "All resources extracted successfully." );
+		else
+			setStatusText( String.format( "Error extracting dats: %s", e ) );
 	}
 
 
@@ -193,27 +86,26 @@ public class DatExtractDialog extends JDialog implements ActionListener {
 				for ( File datFile : datFiles ) {
 					srcP = new FTLDat.FTLPack( datFile, false );
 					progress = 0;
-					setProgress( progress );
 					List<String> innerPaths = srcP.list();
-					setMaximum( innerPaths.size() );
+					setProgressLater( progress, innerPaths.size() );
 
 					for ( String innerPath : innerPaths ) {
-						extractingInnerPath( innerPath );
+						setStatusTextLater( innerPath );
 						if ( dstP.contains( innerPath ) ) {
 							log.info( "While extracting resources, this file was overwritten: "+ innerPath );
 							dstP.remove( innerPath );
 						}
 						is = srcP.getInputStream( innerPath );
 						dstP.add( innerPath, is );
-						setProgress( progress++ );
+						setProgressLater( progress++ );
 					}
 					srcP.close();
 				}
-				extractingEnded( true, null );
+				setTaskOutcomeLater( true, null );
 			}
 			catch ( Exception ex ) {
 				log.error( "Error extracting dats.", ex );
-				extractingEnded( false, ex );
+				setTaskOutcomeLater( false, ex );
 			}
 			finally {
 				try {if ( is != null ) is.close();}

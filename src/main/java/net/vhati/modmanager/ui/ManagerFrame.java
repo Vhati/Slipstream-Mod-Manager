@@ -582,7 +582,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			resDat.datFile = new File( datsDir, "resource.dat" );
 			resDat.bakFile = new File( backupDir, "resource.dat.bak" );
 
-			ModPatchDialog patchDlg = new ModPatchDialog( this );
+			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
 			patchDlg.setSuccessTask( new SpawnGameTask() );
 
 			log.info( "" );
