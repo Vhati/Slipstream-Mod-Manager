@@ -63,10 +63,9 @@ public class ModPatchThread extends Thread {
 				keepRunning = false;
 				boolean interrupted = false;
 				try {
-					while ( true ) {
+					while ( ModPatchThread.this.isAlive() ) {
 						try {
 							ModPatchThread.this.join();
-							break;
 						}
 						catch ( InterruptedException e ) {
 							interrupted = true;
@@ -84,7 +83,7 @@ public class ModPatchThread extends Thread {
 			result = patch();
 		}
 		catch ( Exception e ) {
-			log.error( "Patching failed. See log for details.", e );
+			log.error( "Patching failed.", e );
 			exception = e;
 			result = false;
 		}

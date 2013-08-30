@@ -39,6 +39,10 @@ This project depends on the following libraries.
     http://logging.apache.org/log4j/2.x/
     (JavaDocs are not available.)
 
+- Apache Commons CLI 1.2
+    http://commons.apache.org/proper/commons-cli/
+    (For JavaDocs, scroll down.)
+
 
 
 Here's a batch file that builds when double-clicked (edit the vars).

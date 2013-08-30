@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration status="warn">
   <appenders>
-    <Console name="Console" target="SYSTEM_OUT">
+    <Console name="Console" target="SYSTEM_ERR">
       <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
       <PatternLayout>
         <pattern>%-5level %logger{1} - %msg%throwable%n</pattern>

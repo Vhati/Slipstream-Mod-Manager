@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import net.vhati.modmanager.cli.SlipstreamCLI;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.ui.ManagerFrame;
@@ -25,13 +26,14 @@ public class FTLModManager {
 
 	private static final Logger log = LogManager.getLogger(FTLModManager.class);
 
-	private static final String APP_NAME = "Slipstream Mod Manager";
-	private static final ComparableVersion APP_VERSION = new ComparableVersion( "???" );
-	private static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
-	private static final String APP_AUTHOR = "Vhati";
+	public static final String APP_NAME = "Slipstream Mod Manager";
+	public static final ComparableVersion APP_VERSION = new ComparableVersion( "???" );
+	public static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
+	public static final String APP_AUTHOR = "Vhati";
 
 
 	public static void main( String[] args ) {
+		if ( args.length > 0 ) SlipstreamCLI.main( args );
 
 		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
 		log.debug( String.format( "%s %s", System.getProperty("os.name"), System.getProperty("os.version") ) );

@@ -1,5 +1,8 @@
 Changelog
 
+???:
+- Added a commandline interface
+
 1.1:
 - Added a button to open the mods/ folder
 - Added FTL resource extraction

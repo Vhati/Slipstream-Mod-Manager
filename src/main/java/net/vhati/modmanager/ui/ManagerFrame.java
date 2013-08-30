@@ -724,7 +724,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				if ( exeFile != null ) {
 					int response = JOptionPane.showConfirmDialog( ManagerFrame.this, "Do you want to run the game now?", "Ready to Play", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 					if ( response == JOptionPane.YES_OPTION ) {
-						log.info( "Launching FTL..." );
+						log.info( "Running FTL..." );
 						try {
 							FTLUtilities.launchGame( exeFile );
 						} catch ( Exception e ) {

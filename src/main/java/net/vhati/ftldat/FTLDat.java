@@ -81,11 +81,11 @@ public class FTLDat {
 			}
 		}
 		finally {
-			try {if (is != null) is.close();}
-			catch (IOException e) {}
+			try {if ( is != null ) is.close();}
+			catch ( IOException e ) {}
 
-			try {if (os != null) os.close();}
-			catch (IOException e) {}
+			try {if ( os != null ) os.close();}
+			catch ( IOException e ) {}
 		}
 	}
 
@@ -368,8 +368,8 @@ public class FTLDat {
 				}
 			}
 			finally {
-				try {if (os != null) os.close();}
-				catch (IOException e) {}
+				try {if ( os != null ) os.close();}
+				catch ( IOException e ) {}
 			}
 		}
 
@@ -388,8 +388,8 @@ public class FTLDat {
 				}
 			}
 			finally {
-				try {if (is != null) is.close();}
-				catch (IOException e) {}
+				try {if ( is != null ) is.close();}
+				catch ( IOException e ) {}
 			}
 		}
 

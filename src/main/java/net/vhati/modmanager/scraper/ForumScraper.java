@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,6 +51,13 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,135 +77,142 @@ public class ForumScraper {
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11083" );
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2938" );
 		ignoredURLs.add( "http://www.moddb.com/mods/better-planets-and-backgrounds/downloads/better-asteroids" );
+		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2947" );
+		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11604" );
 		// SpaceDock is an app.
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=16842" );
 		// Beginning Scrap Advantage is bundled in GMM.
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2464" );
 
-		List<Option> options = new ArrayList<Option>();
-		options.add( new Option( "load-json",   "--load-json",   null, true, true ) );
-		options.add( new Option( "load-xml",    "--load-xml",    null, true, true ) );
-		options.add( new Option( "scrape",      "--scrape",      null, true, true ) );
-		options.add( new Option( "dump-json",   "--dump-json",   null, true, true ) );
-		options.add( new Option( "dump-xml",    "--dump-xml",    null, true, true ) );
-		options.add( new Option( "hash-thread", "--hash-thread", null, true, true ) );
-		options.add( new Option( "first-post",  "--first-post",  null, true, true ) );
-		options.add( new Option( "help",        "--help",        "-h", true, true ) );
 
-		List<String[]> tasks = parseArgs( args, options );
+		BasicParser parser = new BasicParser();
 
-		if ( tasks.isEmpty() )
-			tasks.add( new String[] {"help"} );
+		Options options = new Options();
+		options.addOption( OptionBuilder.withLongOpt( "load-json" )
+		                                .withDescription( "load moddb from a json catalog" )
+		                                .hasArg()
+		                                .withArgName("FILE")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "load-xml" )
+		                                .withDescription( "load moddb from an xml file" )
+		                                .hasArg()
+		                                .withArgName("FILE")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "scrape" )
+		                                .withDescription( "write changed forum posts to an xml file" )
+		                                .hasArg()
+		                                .withArgName("FILE")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "dump-json" )
+		                                .withDescription( "write the moddb to a json file" )
+		                                .hasArg()
+		                                .withArgName("FILE")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "dump-xml" )
+		                                .withDescription( "write the moddb to an xml file" )
+		                                .hasArg()
+		                                .withArgName("FILE")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "hash-thread" )
+		                                .withDescription( "print the hash of a specific thread" )
+		                                .hasArg()
+		                                .withArgName("URL")
+		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "first-post" )
+		                                .withDescription( "print the first post of a thread (debugging)" )
+		                                .hasArg()
+		                                .withArgName("URL")
+		                                .create() );
+		options.addOption( "h", "help", false, "display this help and exit" );
+
+		CommandLine cmdline = null;
+		try {
+			cmdline = parser.parse( options, args, true );
+		}
+		catch( ParseException e ) {
+			System.err.println( "Error parsing commandline: "+ e.getMessage() );
+			System.exit( 1 );
+		}
+
+		if ( cmdline.hasOption( "h" ) ) {
+			HelpFormatter formatter = new HelpFormatter();
+
+			String syntax = ForumScraper.class.getCanonicalName() +" [OPTIONS]";
+
+			String helpHeader = "Load an existing catalog as the moddb, and scrape."+ formatter.getNewLine();
+			helpHeader += "Edit the catalog by copy/pasting scrape snippets."+ formatter.getNewLine();
+			helpHeader += "Load the edited catalog and dump json."+ formatter.getNewLine();
+
+			PrintWriter pw = new PrintWriter( System.out );
+			formatter.printUsage( pw, formatter.getWidth(), syntax );
+			pw.write( helpHeader );
+			pw.write( formatter.getNewLine() );
+			formatter.printOptions( pw, formatter.getWidth(), options, formatter.getLeftPadding(), formatter.getDescPadding() );
+			pw.flush();
+
+			System.exit( 0 );
+		}
 
 		ModDB modDB = new ModDB();
 
 		try {
-			for ( String[] task : tasks ) {
-				if ( task[0].equals( "load-json" ) ) {
-					log.info( "Loading json catalog..." );
-					ModDB newDB = JacksonGrognakCatalogReader.parse( new File(task[1]) );
-					if ( newDB != null ) modDB = newDB;
-				}
-				else if ( task[0].equals( "load-xml" ) ) {
-					log.info( "Loading xml catalog..." );
-					ModDB newDB = parseCatalogXML( new File(task[1]) );
-					if ( newDB != null ) modDB = newDB;
-				}
-				else if ( task[0].equals( "scrape" ) ) {
-					log.info( "Scraping..." );
-					List<ModsInfo> data = scrape( modDB, MASTER_LIST_URL, ignoredURLs );
-					if ( data.size() > 0 ) writeXML( data, new File(task[1]) );
-				}
-				else if ( task[0].equals( "dump-json" ) ) {
-					log.info( "Dumping json..." );
-					List<ModsInfo> data = getCollatedModInfo( modDB );
-					if ( data.size() > 0 ) writeJSON( data, new File(task[1]) );
-				}
-				else if ( task[0].equals( "dump-xml" ) ) {
-					log.info( "Dumping xml..." );
-					List<ModsInfo> data = getCollatedModInfo( modDB );
-					if ( data.size() > 0 ) writeXML( data, new File(task[1]) );
-				}
-				else if ( task[0].equals( "hash-thread" ) ) {
-					log.info( "Hashing thread..." );
-					System.out.println( hashThread( task[1] ) );
-				}
-				else if ( task[0].equals( "first-post" ) ) {
-					log.info( "Getting thread's first post..." );
-					System.out.println( getFirstPost( task[1] ) );
-				}
-				else if ( task[0].equals( "help" ) ) {
-					System.out.println( "Usage: java -cp modman.jar net.vhati.modmanager.scraper.ForumScraper [OPTION]" );
-					System.out.println( "" );
-					System.out.println( "Load an existing catalog as the moddb, and scrape." );
-					System.out.println( "Edit the catalog by copy/pasting scrape snippets." );
-					System.out.println( "Load the edited catalog and dump json." );
-					System.out.println( "" );
-					System.out.println( "      --load-json FILE   load moddb from a json GMM catalog" );
-					System.out.println( "      --load-xml FILE    load moddb from an xml file" );
-					System.out.println( "      --scrape FILE      write changed forum posts to an xml file" );
-					System.out.println( "      --dump-json FILE   write the moddb to a json file" );
-					System.out.println( "      --dump-xml FILE    write the moddb to an xml file" );
-					System.out.println( "" );
-					System.out.println( "      --hash-thread URL  print the hash of a specific thread" );
-					System.out.println( "      --first-post URL   print the first post of a thread (debugging)" );
-					System.out.println( "" );
-					System.out.println( "  -h, --help             display this help and exit" );
-					System.out.println( "" );
-					System.out.println( "" );
-				}
+			if ( cmdline.hasOption( "load-json" ) ) {
+				log.info( "Loading json catalog..." );
+
+				File srcFile = new File( cmdline.getOptionValue( "load-json" ) );
+				ModDB newDB = JacksonGrognakCatalogReader.parse( srcFile );
+				if ( newDB != null ) modDB = newDB;
+			}
+
+			if ( cmdline.hasOption( "load-xml" ) ) {
+				log.info( "Loading xml catalog..." );
+
+				File srcFile = new File( cmdline.getOptionValue( "load-xml" ) );
+				ModDB newDB = parseCatalogXML( srcFile );
+				if ( newDB != null ) modDB = newDB;
+			}
+
+			if ( cmdline.hasOption( "scrape" ) ) {
+				log.info( "Scraping..." );
+
+				File dstFile = new File( cmdline.getOptionValue( "scrape" ) );
+				List<ModsInfo> data = scrape( modDB, MASTER_LIST_URL, ignoredURLs );
+				if ( data.size() > 0 ) writeXML( data, dstFile );
+			}
+
+			if ( cmdline.hasOption( "dump-json" ) ) {
+				log.info( "Dumping json..." );
+
+				File dstFile = new File( cmdline.getOptionValue( "dump-json" ) );
+				List<ModsInfo> data = getCollatedModInfo( modDB );
+				if ( data.size() > 0 ) writeJSON( data, dstFile );
+			}
+
+			if ( cmdline.hasOption( "dump-xml" ) ) {
+				log.info( "Dumping xml..." );
+
+				File dstFile = new File( cmdline.getOptionValue( "dump-xml" ) );
+				List<ModsInfo> data = getCollatedModInfo( modDB );
+				if ( data.size() > 0 ) writeXML( data, dstFile );
+			}
+
+			if ( cmdline.hasOption( "hash-thread" ) ) {
+				log.info( "Hashing thread..." );
+
+				String threadURL = cmdline.getOptionValue( "hash-thread" );
+				System.out.println( hashThread( threadURL ) );
+			}
+
+			if ( cmdline.hasOption( "first-post" ) ) {
+				log.info( "Getting thread's first post..." );
+
+				String threadURL = cmdline.getOptionValue( "first-post" );
+				System.out.println( getFirstPost( threadURL ) );
 			}
 		}
 		catch ( Exception e ) {
 			log.error( "An error occurred.", e );
 		}
-	}
-
-
-	/**
-	 * I want to take args, but not badly enough for another library. :P
-	 */
-	private static List<String[]> parseArgs( String[] args, List<Option> options ) {
-		List<String[]> tasks = new ArrayList<String[]>();
-
-		for ( int i=0; i < args.length; ) {
-			boolean foundOption = false;
-
-			for ( Option opt : options ) {
-				String[] result = null;
-				boolean matches = false;
-				if ( opt.shortName != null && opt.shortName.equals(args[i]) ) matches = true;
-				if ( opt.longName != null && opt.longName.equals(args[i]) ) matches = true;
-				if ( matches ) {
-					foundOption = true;
-					if ( opt.acceptsValue ) {
-						result = new String[] {opt.action, null};
-
-						if ( i+1 < args.length && !args[i+1].startsWith("-") ) {
-							result[1] = args[i+1];
-							i += 2;
-						} else if ( opt.requiresValue ) {
-							log.error( String.format( "The \"%s\" option requires an argument.", args[i] ) );
-							i++;
-						} else {
-							i++;
-						}
-						tasks.add( result );
-					}
-					else {
-						result = new String[] {opt.action};
-						tasks.add( result );
-						i++;
-					}
-				}
-				if ( foundOption ) break;
-			}
-			if ( !foundOption ) {
-				log.info( "Unrecognized option: "+ args[i] );
-				i++;
-			}
-		}
-		return tasks;
 	}
 
 
@@ -365,7 +380,7 @@ public class ForumScraper {
 					log.error( "Request failed: "+ e.getMessage() );
 				}
 				try {Thread.sleep( 5000 );}
-				catch ( InterruptedException e ) {log.info( "Re-fetch sleep interrupted." );}
+				catch ( InterruptedException e ) {log.error( "Re-fetch sleep interrupted.", e );}
 			}
 		}
 
@@ -694,23 +709,6 @@ public class ForumScraper {
 
 		public void putVersion( String fileHash, String fileVersion ) {
 			versions.add( new String[] {fileHash, fileVersion} );
-		}
-	}
-
-	/** A potential commandline option. */
-	private static class Option {
-		String action;
-		String longName;
-		String shortName;
-		boolean acceptsValue;
-		boolean requiresValue;
-
-		public Option( String action, String longName, String shortName, boolean acceptsValue, boolean requiresValue ) {
-			this.action = action;
-			this.longName = longName;
-			this.shortName = shortName;
-			this.acceptsValue = acceptsValue;
-			this.requiresValue = requiresValue;
 		}
 	}
 }
