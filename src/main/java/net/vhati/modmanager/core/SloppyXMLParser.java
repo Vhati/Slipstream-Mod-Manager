@@ -39,12 +39,12 @@ public class SloppyXMLParser {
 	private Pattern declPtn = Pattern.compile( "(\\s*)<[?]xml [^?]*[?]>" );
 	private Pattern commentPtn = Pattern.compile( "(?s)(\\s*)<!--((?:.(?!-->))*.)-->" );
 	private Pattern cdataPtn = Pattern.compile( "(?s)(\\s*)<!\\[CDATA\\[((?:.(?!\\]\\]>))*.)\\]\\]>" );
-	private Pattern sTagPtn = Pattern.compile( "(\\s*)<(?:(\\w+):)?(\\w+)((?: [^>]+?)??)\\s*(/?)>" );
+	private Pattern sTagPtn = Pattern.compile( "(\\s*)<(?:([\\w.-]+):)?([\\w.-]+)((?: [^>]+?)??)\\s*(/?)>" );
 	private Pattern eTagPtn = Pattern.compile( "([^<]*)</\\s*([^>]+)>" );
 	private Pattern endSpacePtn = Pattern.compile( "\\s+$" );
 	private Pattern strayCharsPtn = Pattern.compile( "(\\s*)(?:-->|[-.>,])" );
 
-	private Pattern attrPtn = Pattern.compile( "\\s*(?:(\\w+):)?(\\w+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
+	private Pattern attrPtn = Pattern.compile( "\\s*(?:([\\w.-]+):)?([\\w.-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
 
 	private List<Pattern> chunkPtns = new ArrayList<Pattern>();
 
@@ -138,7 +138,7 @@ public class SloppyXMLParser {
 
 							if ( attrPrefix != null ) {
 								if ( attrPrefix.equals( "xmlns" ) ) {
-									// This is a pseudo attribute declaring a namespace.
+									// This is a pseudo attribute declaring a namespace prefix.
 									// Move it to the root node.
 									Namespace attrNS = Namespace.getNamespace( attrName, attrName );  // URI? *shrug*
 									factory.addNamespaceDeclaration( rootNode, attrNS );
@@ -149,7 +149,12 @@ public class SloppyXMLParser {
 									Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, attrNS );
 									factory.setAttribute( tagNode, attrObj );
 								}
+							} else if ( attrName.equals("xmlns") ) {
+									// New default namespace URI within this node.
+									Namespace attrNS = Namespace.getNamespace( attrValue );
+									factory.addNamespaceDeclaration( tagNode, attrNS );
 							} else {
+								// Normal attribute.
 								Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, Namespace.NO_NAMESPACE );
 								factory.setAttribute( tagNode, attrObj );
 							}
