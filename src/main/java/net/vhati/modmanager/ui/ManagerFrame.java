@@ -71,9 +71,9 @@ import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.json.GrognakCatalogFetcher;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
 import net.vhati.modmanager.ui.ChecklistTableModel;
-import net.vhati.modmanager.ui.ClipboardMenuMouseListener;
 import net.vhati.modmanager.ui.ModInfoArea;
 import net.vhati.modmanager.ui.ModPatchDialog;
+import net.vhati.modmanager.ui.ModXMLSandbox;
 import net.vhati.modmanager.ui.Statusbar;
 import net.vhati.modmanager.ui.StatusbarMouseListener;
 import net.vhati.modmanager.ui.TableRowTransferHandler;
@@ -109,6 +109,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JMenu fileMenu;
 	private JMenuItem rescanMenuItem;
 	private JMenuItem extractDatsMenuItem;
+	private JMenuItem sandboxMenuItem;
 	private JMenuItem exitMenuItem;
 	private JMenu helpMenu;
 	private JMenuItem aboutMenuItem;
@@ -293,11 +294,14 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		rescanMenuItem.addMouseListener( new StatusbarMouseListener( this, "Check the mods/ folder for new files." ) );
 		rescanMenuItem.addActionListener(this);
 		fileMenu.add( rescanMenuItem );
-		fileMenu.add( new JSeparator() );
 		extractDatsMenuItem = new JMenuItem( "Extract Dats..." );
 		extractDatsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Extract FTL resources into a folder." ) );
 		extractDatsMenuItem.addActionListener(this);
 		fileMenu.add( extractDatsMenuItem );
+		sandboxMenuItem = new JMenuItem( "XML Sandbox..." );
+		sandboxMenuItem.addMouseListener( new StatusbarMouseListener( this, "Experiment with advanced mod syntax." ) );
+		sandboxMenuItem.addActionListener(this);
+		fileMenu.add( sandboxMenuItem );
 		fileMenu.add( new JSeparator() );
 		exitMenuItem = new JMenuItem( "Exit" );
 		exitMenuItem.addMouseListener( new StatusbarMouseListener( this, "Exit this application." ) );
@@ -679,6 +683,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datFiles );
 			extractDlg.extract();
 			extractDlg.setVisible( true );
+		}
+		else if ( source == sandboxMenuItem ) {
+			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+			File dataDatFile = new File( datsDir, "data.dat" );
+
+			ModXMLSandbox sandboxDlg = new ModXMLSandbox( this, dataDatFile );
+			sandboxDlg.setVisible( true );
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );

@@ -470,6 +470,7 @@ public class XMLPatcher {
 		}
 
 		public LikeFilter( String type, Map<String,String> attrMap, String value ) {
+			super();
 			if ( type != null && type.length() == 0 ) type = null;
 			if ( value != null && value.length() == 0 ) value = null;
 
