@@ -2,6 +2,7 @@ Changelog
 
 ???:
 - Added a commandline interface
+- Added XML sandbox for syntax tinkering
 
 1.1:
 - Added a button to open the mods/ folder
