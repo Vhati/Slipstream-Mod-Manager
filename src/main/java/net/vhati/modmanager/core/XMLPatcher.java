@@ -94,12 +94,15 @@ public class XMLPatcher {
 			if ( node.getName().equals( "findName" ) ) {
 
 				String searchName = node.getAttributeValue( "name" );
+				String searchType = node.getAttributeValue( "type" );
 				boolean searchReverse = getAttributeBooleanValue( node, "reverse", true );
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", 1 );
 	
 				if ( searchName == null || searchName.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> requires a name attribute (%s).", node.getName(), getPathToRoot(node) ) );
+				if ( searchType != null && searchType.length() == 0 )
+					throw new IllegalArgumentException( String.format( "<%s> type attribute, when present, can't be empty (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchStart < 0 )
 					throw new IllegalArgumentException( String.format( "<%s> 'start' attribute is not >= 0 (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchLimit < -1 )
@@ -107,7 +110,7 @@ public class XMLPatcher {
 	
 				Map<String,String> attrMap = new HashMap<String,String>();
 				attrMap.put( "name", searchName );
-				LikeFilter searchFilter = new LikeFilter( null, attrMap, null );
+				LikeFilter searchFilter = new LikeFilter( searchType, attrMap, null );
 	
 				List<Element> matchedNodes = new ArrayList<Element>( contextNode.getContent( searchFilter ) );
 				if ( searchReverse ) Collections.reverse( matchedNodes );
