@@ -44,11 +44,15 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.UndoManager;
 
 import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.ModUtilities;
@@ -63,6 +67,7 @@ import org.jdom2.input.JDOMParseException;
 
 public class ModXMLSandbox extends JDialog implements ActionListener {
 
+	private UndoManager undoManager = new UndoManager();
 	private Document mainDoc = null;
 
 	private File dataDatFile;
@@ -109,7 +114,7 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 		messageArea.setTabSize( 4 );
 		messageArea.setEditable( false );
 		messageArea.addMouseListener( new ClipboardMenuMouseListener() );
-		messageArea.setText( "This is a scratchpad to tinker with advanced mod syntax.\n1) Open XML from data.dat to fill the 'main' tab. (ctrl-o)\n2) Write some <mod:command> tags in the 'append' tab.\n3) Click Patch to see the result. (ctrl-p)" );
+		messageArea.setText( "This is a scratchpad to tinker with advanced mod syntax.\n1) Open XML from data.dat to fill the 'main' tab. (ctrl-o)\n2) Write some <mod:command> tags in the 'append' tab. (alt-1,2,3)\n3) Click Patch to see what would happen. (ctrl-p)\nUndo is available. (ctrl-z/ctrl-y)" );
 		messageScroll = new JScrollPane( messageArea );
 
 		JPanel ctrlPanel = new JPanel();
@@ -181,6 +186,27 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 		appendArea.addAncestorListener( caretAncestorListener );
 		resultArea.addAncestorListener( caretAncestorListener );
 
+		appendArea.getDocument().addUndoableEditListener(new UndoableEditListener() {
+			@Override
+			public void undoableEditHappened(UndoableEditEvent e) {
+				undoManager.addEdit( e.getEdit() );
+			}
+		});
+		AbstractAction undoAction = new AbstractAction( "Undo" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				try {undoManager.undo();}
+				catch ( CannotRedoException f ) {}
+			}
+		};
+		AbstractAction redoAction = new AbstractAction( "Redo" ) {
+			@Override
+			public void actionPerformed( ActionEvent e ) {
+				try {undoManager.redo();}
+				catch ( CannotRedoException f ) {}
+			}
+		};
+
 		AbstractAction openAction = new AbstractAction( "Open" ) {
 			@Override
 			public void actionPerformed( ActionEvent e ) {
@@ -212,6 +238,13 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 			}
 		};
 
+		KeyStroke undoShortcut = KeyStroke.getKeyStroke( "control Z" );
+		appendArea.getInputMap().put( undoShortcut, "undo" );
+		appendArea.getActionMap().put( "undo", undoAction );
+		KeyStroke redoShortcut = KeyStroke.getKeyStroke( "control Y" );
+		appendArea.getInputMap().put( redoShortcut, "redo" );
+		appendArea.getActionMap().put( "redo", redoAction );
+
 		KeyStroke openShortcut = KeyStroke.getKeyStroke( "control O" );
 		contentPane.getInputMap( JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT ).put( openShortcut, "open" );
 		contentPane.getActionMap().put( "open", openAction );
@@ -230,6 +263,13 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 
 		findField.getInputMap().put( KeyStroke.getKeyStroke( "released ENTER" ), "find next" );
 		findField.getActionMap().put( "find next", findNextAction );
+
+		areasPane.setMnemonicAt( 0, KeyEvent.VK_1 );
+		areasPane.setMnemonicAt( 1, KeyEvent.VK_2 );
+		areasPane.setMnemonicAt( 2, KeyEvent.VK_3 );
+		mainArea.addAncestorListener( new FocusAncestorListener( mainArea ) );
+		appendArea.addAncestorListener( new FocusAncestorListener( appendArea ) );
+		resultArea.addAncestorListener( new FocusAncestorListener( resultArea ) );
 
 		this.pack();
 		this.setSize( 800, 600 );
