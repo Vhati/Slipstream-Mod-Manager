@@ -72,6 +72,7 @@ import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.json.GrognakCatalogFetcher;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
 import net.vhati.modmanager.ui.ChecklistTableModel;
+import net.vhati.modmanager.ui.InertPanel;
 import net.vhati.modmanager.ui.ModInfoArea;
 import net.vhati.modmanager.ui.ModPatchDialog;
 import net.vhati.modmanager.ui.ModXMLSandbox;
@@ -83,7 +84,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class ManagerFrame extends JFrame implements ActionListener, HashObserver, Statusbar {
+public class ManagerFrame extends JFrame implements ActionListener, HashObserver, Nerfable, Statusbar {
 
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
 
@@ -99,6 +100,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private ComparableVersion appVersion;
 	private String appURL;
 	private String appAuthor;
+
+	private NerfListener nerfListener = new NerfListener( this );
 
 	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
 	private ModDB modDB = new ModDB();
@@ -318,6 +321,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		helpMenu.add( aboutMenuItem );
 		menubar.add( helpMenu );
 		this.setJMenuBar( menubar );
+
+		this.setGlassPane( new InertPanel() );
 
 		this.setContentPane( contentPane );
 		this.pack();
@@ -691,8 +696,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
 			File dataDatFile = new File( datsDir, "data.dat" );
 
-			ModXMLSandbox sandboxDlg = new ModXMLSandbox( this, dataDatFile );
-			sandboxDlg.setVisible( true );
+			ModXMLSandbox sandboxFrame = new ModXMLSandbox( dataDatFile );
+			sandboxFrame.addWindowListener( nerfListener );
+			sandboxFrame.setSize( 800, 600 );
+			sandboxFrame.setLocationRelativeTo( null );
+			sandboxFrame.setVisible( true );
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );
@@ -748,6 +756,37 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					}
 				}
 			}
+		}
+	}
+
+
+	@Override
+	public void setNerfed( boolean b ) {
+		Component glassPane = this.getGlassPane();
+		if (b) {
+			glassPane.setVisible(true);
+			glassPane.requestFocusInWindow();
+		} else {
+			glassPane.setVisible(false);
+		}
+	}
+
+
+
+	private static class NerfListener extends WindowAdapter {
+		private Nerfable nerfObj;
+
+		public NerfListener( Nerfable nerfObj ) {
+			this.nerfObj = nerfObj;
+		}
+
+		@Override
+		public void windowOpened( WindowEvent e ) {
+			nerfObj.setNerfed( true );
+		}
+		@Override
+		public void windowClosing( WindowEvent e ) {
+			nerfObj.setNerfed( false );
 		}
 	}
 

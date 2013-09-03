@@ -28,9 +28,9 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -65,7 +65,10 @@ import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 
 
-public class ModXMLSandbox extends JDialog implements ActionListener {
+/**
+ * A basic text editor to test XML modding.
+ */
+public class ModXMLSandbox extends JFrame implements ActionListener {
 
 	private UndoManager undoManager = new UndoManager();
 	private Document mainDoc = null;
@@ -76,6 +79,7 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 	private JScrollPane mainScroll;
 	private JScrollPane appendScroll;
 	private JScrollPane resultScroll;
+	private JSplitPane splitPane;
 	private JScrollPane messageScroll;
 
 	private JTextArea mainArea;
@@ -88,8 +92,8 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 	private JLabel statusLbl;
 
 
-	public ModXMLSandbox( Frame owner, File dataDatFile ) {
-		super( owner, "Mod XML Sandbox", true );
+	public ModXMLSandbox( File dataDatFile ) {
+		super( "Mod XML Sandbox" );
 
 		this.dataDatFile = dataDatFile;
 
@@ -145,7 +149,7 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 		topPanel.add( areasPane, BorderLayout.CENTER );
 		topPanel.add( ctrlPanel, BorderLayout.SOUTH );
 
-		final JSplitPane splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
+		splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		splitPane.setTopComponent( topPanel );
 		splitPane.setBottomComponent( messageArea );
 
@@ -272,15 +276,22 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 		resultArea.addAncestorListener( new FocusAncestorListener( resultArea ) );
 
 		this.pack();
-		this.setSize( 800, 600 );
-		this.setLocationRelativeTo( null );
+	}
 
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				splitPane.setDividerLocation( 0.80d );
-			}
-		});
+
+	@Override
+	public void setVisible( boolean b ) {
+		super.setVisible( b );
+
+		if ( b ) {
+			// Splitpane has to be realized before the divider can be moved.
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					splitPane.setDividerLocation( 0.80d );
+				}
+			});
+		}
 	}
 
 
