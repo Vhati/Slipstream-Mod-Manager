@@ -105,7 +105,7 @@ Advanced XML
 
   They take the form:
 
-    <mod:find... reverse="false" start="0" limit="-1">
+    <mod:find... reverse="false" start="0" limit="-1" panic="false">
       <mod:holderForExtraFindArgs />
       <mod:someCommand />
       <mod:someCommand />
@@ -114,8 +114,9 @@ Advanced XML
   Some identify existing tags, using each result as context for commands.
 
     Unless stated otherwise, these all accept optional reverse, start,
-    and limit args: defaulting to search forward, skip 0 matched
-    candidates, and return up to an unlimited number of results.
+    limit, and panic args: defaulting to search forward, skip 0 matched
+    candidates, return up to an unlimited number of results, and not cause
+    an error when no results are found.
     Sometimes the <find...> may have an auxiliary tag just to hold more
     args.
 

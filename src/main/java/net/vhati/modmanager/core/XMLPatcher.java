@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -98,6 +99,7 @@ public class XMLPatcher {
 				boolean searchReverse = getAttributeBooleanValue( node, "reverse", true );
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", 1 );
+				boolean panic = getAttributeBooleanValue( node, "panic", false );
 	
 				if ( searchName == null || searchName.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> requires a name attribute (%s).", node.getName(), getPathToRoot(node) ) );
@@ -122,7 +124,9 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
-	
+				if ( matchedNodes.isEmpty() )
+					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
+
 				result = matchedNodes;
 			}
 			else if ( node.getName().equals( "findLike" ) ) {
@@ -131,6 +135,7 @@ public class XMLPatcher {
 				boolean searchReverse = getAttributeBooleanValue( node, "reverse", false );
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
+				boolean panic = getAttributeBooleanValue( node, "panic", false );
 	
 				if ( searchType != null && searchType.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> type attribute, when present, can't be empty (%s).", node.getName(), getPathToRoot(node) ) );
@@ -170,6 +175,8 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
+				if ( matchedNodes.isEmpty() )
+					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
 	
 				result = matchedNodes;
 			}
@@ -180,6 +187,7 @@ public class XMLPatcher {
 				boolean searchReverse = getAttributeBooleanValue( node, "reverse", false );
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
+				boolean panic = getAttributeBooleanValue( node, "panic", false );
 	
 				if ( searchType != null && searchType.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> type attribute, when present, can't be empty (%s).", node.getName(), getPathToRoot(node) ) );
@@ -218,6 +226,8 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
+				if ( matchedNodes.isEmpty() )
+					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
 	
 				result = matchedNodes;
 			}
@@ -226,6 +236,7 @@ public class XMLPatcher {
 				boolean searchReverse = getAttributeBooleanValue( node, "reverse", false );
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
+				boolean panic = getAttributeBooleanValue( node, "panic", false );
 	
 				if ( searchStart < 0 )
 					throw new IllegalArgumentException( String.format( "<%s> 'start' attribute is not >= 0 (%s).", node.getName(), getPathToRoot(node) ) );
@@ -246,6 +257,8 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
+				if ( matchedNodes.isEmpty() )
+					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
 	
 				result = matchedNodes;
 			}
