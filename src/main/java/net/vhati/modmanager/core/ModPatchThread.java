@@ -19,6 +19,8 @@ import net.vhati.ftldat.FTLDat.FTLPack;
 import net.vhati.modmanager.core.ModPatchObserver;
 import net.vhati.modmanager.core.ModUtilities;
 
+import org.jdom2.JDOMException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -94,7 +96,7 @@ public class ModPatchThread extends Thread {
 	}
 
 
-	private boolean patch() throws IOException {
+	private boolean patch() throws IOException, JDOMException {
 
 		observer.patchingProgress( 0, progMax );
 
@@ -218,16 +220,16 @@ public class ModPatchThread extends Thread {
 								log.warn( String.format( "Non-existent innerPath wasn't appended: %s", innerPath ) );
 							}
 							else {
-								InputStream dstStream = null;
+								InputStream mainStream = null;
 								try {
-									dstStream = ftlP.getInputStream(innerPath);
-									InputStream mergedStream = ModUtilities.appendXMLFile( zis, dstStream, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
-									dstStream.close();
+									mainStream = ftlP.getInputStream(innerPath);
+									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									mainStream.close();
 									ftlP.remove( innerPath );
 									ftlP.add( innerPath, mergedStream );
 								}
 								finally {
-									try {if ( dstStream != null ) dstStream.close();}
+									try {if ( mainStream != null ) mainStream.close();}
 									catch ( IOException e ) {}
 								}
 

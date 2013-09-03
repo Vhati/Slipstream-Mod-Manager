@@ -97,6 +97,99 @@ Encoding!?
   UTF-16 or something else.
 
 
+Advanced XML
+
+  Since v1.2, Slipstream supports special tags to not only append, but
+  insert and edit existing XML. You can practice using them with the
+  "XML Sandbox", under the File menu.
+
+  They take the form:
+
+    <mod:find... reverse="false" start="0" limit="-1">
+      <mod:holderForExtraFindArgs />
+      <mod:someCommand />
+      <mod:someCommand />
+    </mod:find...>
+
+  Some identify existing tags, using each result as context for commands.
+
+    Unless stated otherwise, these all accept optional reverse, start,
+    and limit args: defaulting to search forward, skip 0 matched
+    candidates, and return up to an unlimited number of results.
+    Sometimes the <find...> may have an auxiliary tag just to hold more
+    args.
+
+    <mod:findName type="abc" name="def">
+    </mod:findName>
+
+      Searches for tags of a given type with the given name attribute.
+      The type arg is optional.
+      Its unusual defaults are: reverse="true", start="0", limit="1".
+      It finds the first match from the end.
+
+    <mod:findLike type="abc">
+      <mod:selector a="1" b="2">abc</mod:selector>
+    </mod:findLike>
+
+      Searches for tags of a given type, with all of the given attributes
+      and the given value. All of these find arguments are optional. To
+      omit the value, leave it blank, or make <selector /> self-closing.
+      If no value or attributes are given, <selector> is unnecessary.
+
+    <mod:findWithChildLike type="abc" child-type="def">
+      <mod:selector a="1" b="2" ...>abc</mod:selector>
+    </mod:findWithChildLike>
+
+      As <findLike>, except it searches for tags of a given type, that
+      contain certain children with the attributes and value. All args are
+      optional here as well. Note: The children are only search criteria,
+      not results themselves.
+
+    <mod:findComposite>
+      <mod:par op="AND">
+        <mod:find...>
+        <mod:find...>
+        <mod:find...>
+      </mod:par>
+    </mod:findComposite>
+
+      Collates results from several <find...> criteria, or even multiple
+      nested <par>entheses. The <par> combines results using "OR" (union)
+      or "AND" (intersection) logic. Any commands within those <find...>
+      tags will be ignored.
+
+
+  The following commands that can occur inside a <find...>.
+
+    <mod:find...>
+      Searches the context tag's children and acts on them with its own
+      nested commands.
+
+    <mod:setValue>abc</mod:setValue>
+      Sets a text value for the context tag.
+
+    <mod:setAttributes a="1" b="2" />
+      Sets/adds one or more attributes on the context tag.
+
+    <mod:removeTag />
+      Removes the context tag entirely.
+
+    <mod-append:XYZ>
+    </mod-append:XYZ>
+      Appends a new <XYZ> child to the context tag. Aside from the prefix,
+      the tag's type and content will appear as-is. It can be self-closing.
+
+    <mod-overwrite:XYZ>
+    </mod-overwrite:XYZ>
+      If possible, the first <XYZ> child under the context tag will be
+      removed, and this <XYZ> will be inserted in its place. Otherwise,
+      this has the same effect as <mod-append:XYZ>.
+
+  Special tags and normal append content are processed in the order they
+  occur in your mod. And when patching several mods at once, later mods
+  edit in the wake of earlier ones.
+
+
 Pitfalls
 
   FTL Bug (fixed in 1.03.3): If a ship is modded to have level 5 shields,

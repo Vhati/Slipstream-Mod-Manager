@@ -298,6 +298,8 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 
 
 	private void open() {
+		messageArea.setText( "" );
+
 		FTLDat.FTLPack dataP = null;
 		InputStream is = null;
 		try {
@@ -344,6 +346,8 @@ public class ModXMLSandbox extends JDialog implements ActionListener {
 
 	private void patch() {
 		if ( mainDoc == null ) return;
+
+		messageArea.setText( "" );
 
 		try {
 			String appendText = appendArea.getText();

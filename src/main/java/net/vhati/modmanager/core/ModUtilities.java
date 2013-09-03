@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -33,6 +34,7 @@ import net.vhati.modmanager.core.SloppyXMLParser;
 import ar.com.hjg.pngj.PngReader;
 
 import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 
@@ -43,6 +45,27 @@ import org.apache.logging.log4j.Logger;
 public class ModUtilities {
 
 	private static final Logger log = LogManager.getLogger(ModUtilities.class);
+
+
+	/**
+	 * Encodes a string (throwing an exception on bad chars) to bytes in a stream.
+	 * Line endings will not be normalized.
+	 *
+	 * @param text a String to encode
+	 * @param encoding the name of a Charset
+	 * @param description how error messages should refer to the string, or null
+	 */
+	public static InputStream encodeText( String text, String encoding, String description ) throws IOException {
+		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
+
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) );
+		bw.write( text );
+		bw.flush();
+
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+		return result;
+	}
 
 	/**
 	 * Determines text encoding for an InputStream and decodes its bytes as a string.
@@ -131,6 +154,7 @@ public class ModUtilities {
 
 	/**
 	 * Semi-intelligently appends XML from one file (src) onto another (dst).
+	 * Note: This is how patching used to work prior to SMM 1.2.
 	 *
 	 * The two InputStreams are read, and the combined result
 	 * is returned as a new third InputStream.
@@ -143,7 +167,7 @@ public class ModUtilities {
 	 * The description arguments identify the streams for log messages.
 	 */
 	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String srcDescription, String dstDescription ) throws IOException {
-		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml version=\"1.0\" encoding=\"[^\"]+?\"[?]>\n*" );
+		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String srcText = decodeText( srcStream, srcDescription ).text;
 		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
@@ -160,15 +184,84 @@ public class ModUtilities {
 
 		String mergedString = Pattern.compile("\n").matcher( buf ).replaceAll("\r\n");
 
-		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, "UTF-8" ) );
-		bw.write( mergedString );
-		bw.flush();
-
-		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+		InputStream result = encodeText( mergedString, "UTF-8", srcDescription+"+"+dstDescription );
 		return result;
 	}
 
+
+	/**
+	 * Appends and modifies mainStream, using content from appendStream.
+	 *
+	 * The two InputStreams are read, and the combined result
+	 * is returned as a new third InputStream.
+	 *
+	 * The returned stream is a ByteArrayInputStream
+	 * which doesn't need closing.
+	 *
+	 * The result will be UTF-8 with CR-LF line endings.
+	 *
+	 * The description arguments identify the streams for log messages.
+	 *
+	 * @see net.vhati.modmanager.core.XMLPatcher
+	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
+	 */
+	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String mainDescription, String appendDescription ) throws IOException, JDOMException {
+		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
+
+		String mainText = decodeText( mainStream, mainDescription ).text;
+		mainText = xmlDeclPtn.matcher(mainText).replaceFirst( "" );
+		mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
+		Document mainDoc = parseStrictOrSloppyXML( mainText, mainDescription+" (wrapped)" );
+
+		String appendText = decodeText( appendStream, appendDescription ).text;
+		appendText = xmlDeclPtn.matcher(appendText).replaceFirst( "" );
+		appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
+		Document appendDoc = parseStrictOrSloppyXML( appendText, appendDescription+" (wrapped)" );
+
+		XMLPatcher patcher = new XMLPatcher();
+		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
+
+		StringWriter writer = new StringWriter();
+		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, null );
+		String mergedString = writer.toString();
+
+		InputStream result = encodeText( mergedString, "UTF-8", mainDescription+"+"+appendDescription );
+		return result;
+	}
+
+
+	/**
+	 * Returns an XML Document, parsed strictly if possible, or sloppily.
+	 * Exceptions during strict parsing will be ignored.
+	 *
+	 * This method does NOT strip the XML declaration and add a wrapper
+	 * tag with namespaces. That must be done beforehand.
+	 *
+	 * @see net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory
+	 * @see net.vhati.modmanager.core.SloppyXMLParser
+	 */
+	public static Document parseStrictOrSloppyXML( CharSequence srcSeq, String srcDescription ) throws IOException, JDOMException {
+		Document doc = null;
+
+		try {
+			SAXBuilder strictParser = new SAXBuilder();
+			strictParser.setSAXHandlerFactory( new EmptyAwareSAXHandlerFactory() );
+			doc = strictParser.build( new StringReader( srcSeq.toString() ) );
+		}
+		catch ( JDOMParseException e ) {
+			// Ignore the error, and do a sloppy parse instead.
+
+			try {
+				SloppyXMLParser sloppyParser = new SloppyXMLParser();
+				doc = sloppyParser.build( srcSeq );
+			}
+			catch ( JDOMParseException f ) {
+				throw new JDOMException( String.format( "While processing \"%s\", strict parsing failed, then sloppy parsing failed: %s", srcDescription, f.getMessage() ), f );
+			}
+		}
+
+		return doc;
+	}
 
 	/**
 	 * Calls decodeText() on a stream, replaces line endings, and re-encodes.
@@ -185,12 +278,7 @@ public class ModUtilities {
 		String srcText = decodeText( srcStream, srcDescription ).text;
 		String fixedText = Pattern.compile("\n").matcher( srcText ).replaceAll( Matcher.quoteReplacement(eol) );
 
-		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, "UTF-8" ) );
-		bw.write( fixedText );
-		bw.flush();
-
-		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+		InputStream result = encodeText( fixedText, "UTF-8", srcDescription+" (with new EOL)" );
 		return result;
 	}
 

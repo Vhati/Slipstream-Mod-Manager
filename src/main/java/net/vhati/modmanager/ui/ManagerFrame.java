@@ -636,11 +636,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				resultBuf.append( "But malformed XML may break tools that do proper parsing, " );
 				resultBuf.append( "and it hinders the development of new tools.\n" );
 				resultBuf.append( "\n" );
-				resultBuf.append( "In future releases, Slipstream will try to parse XML while " );
-				resultBuf.append( "patching: first strictly, then failing over to a sloppy " );
-				resultBuf.append( "parser. The sloppy parser will tolerate similar errors, " );
-				resultBuf.append( "at the risk of unforseen behavior, so satisfying the " );
-				resultBuf.append( "strict parser is advised.\n" );
+				resultBuf.append( "Since v1.2, Slipstream will try to parse XML while patching: " );
+				resultBuf.append( "first strictly, then failing over to a sloppy parser. " );
+				resultBuf.append( "The sloppy parser will tolerate similar errors, at the risk " );
+				resultBuf.append( "of unforseen behavior, so satisfying the strict parser " );
+				resultBuf.append( "is advised.\n" );
 			}
 			infoArea.setDescription( "Results", resultBuf.toString() );
 		}
