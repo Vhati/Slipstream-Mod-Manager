@@ -28,7 +28,9 @@ import org.jdom2.input.JDOMParseException;
  *
  * Sloppiness:
  *   Any closing tag, regardless of its name, closes the parent tag.
- *   <!-- <!-- blah --> is valid (but the extra dashes will be discarded).
+ *   <!-- <!-- blah --> is valid.
+ *     The example above will become two comments. Any extra dashes will
+ *     be discarded.
  *   --> can occur alone (discarded).
  *   An attribute name can start right after the quote from a prior value.
  *   Namespace prefixes for nodes and attributes are unique.
@@ -109,9 +111,33 @@ public class SloppyXMLParser {
 						factory.addContent( parentNode, factory.text( whitespace ) );
 
 					tmp = m.group( 2 );
-					tmp = tmp.replaceAll( "^-+|(?<=-)-+|-+$", "" );
-					Comment commentNode = factory.comment( tmp );
-					factory.addContent( parentNode, commentNode );
+					if ( tmp.length() == 0 ) {
+						factory.addContent( parentNode, factory.comment( "" ) );
+					}
+					else {
+						Matcher splicedMatcher = Pattern.compile( "(\\s*)<!--" ).matcher( tmp );
+						int commentStart = 0;
+						while ( splicedMatcher.find() ) {
+							if ( splicedMatcher.start() - commentStart > 0 ) {
+								String splicedChunk = tmp.substring( commentStart, splicedMatcher.start() );
+								splicedChunk = splicedChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
+								if ( splicedChunk.startsWith( " " ) ) splicedChunk += " ";
+								Comment commentNode = factory.comment( splicedChunk );
+								factory.addContent( parentNode, commentNode );
+							}
+							if ( splicedMatcher.group(1).length() > 0 ) {
+								// Whitespace between comments.
+								factory.addContent( parentNode, factory.text( splicedMatcher.group(1) ) );
+							}
+							commentStart = splicedMatcher.end();
+						}
+						if ( commentStart < tmp.length() ) {
+							String finalChunk = tmp.substring( commentStart );
+							finalChunk = finalChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
+							Comment commentNode = factory.comment( finalChunk );
+							factory.addContent( parentNode, commentNode );
+						}
+					}
 				}
 				else if ( chunkPtn == cdataPtn ) {
 					String whitespace = m.group( 1 );
