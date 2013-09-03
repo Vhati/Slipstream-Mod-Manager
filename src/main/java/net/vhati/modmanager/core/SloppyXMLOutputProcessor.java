@@ -10,6 +10,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.output.Format;
+import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.output.support.AbstractXMLOutputProcessor;
 import org.jdom2.output.support.FormatStack;
@@ -148,11 +149,14 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 * XML declaration. It's up to the caller to ensure the writer
 	 * is encoding bytes to match. If encoding is null, the default
 	 * is "UTF-8".
+	 *
+	 * LineEndings will be CR-LF.
 	 */
 	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
 		Format format = Format.getPrettyFormat();
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );
+		format.setLineSeparator( LineSeparator.CRNL );
 
 		if ( encoding != null ) format.setEncoding( encoding );
 
