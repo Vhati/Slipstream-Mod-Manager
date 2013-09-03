@@ -304,6 +304,11 @@ public class FTLDat {
 	 * Files can be independently added/removed/altered
 	 * directly, so long as this class is not busy
 	 * at the time.
+	 *
+	 * The contains() method returns true for directories,
+	 * but remove() will not delete them. The list()
+	 * method will not include directories themselves,
+	 * only files within.
 	 */
 	public static class FolderPack extends AbstractPack {
 		private File rootDir;
