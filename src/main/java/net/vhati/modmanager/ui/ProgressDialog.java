@@ -12,12 +12,14 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 
 public class ProgressDialog extends JDialog implements ActionListener {
 
+	protected JScrollPane statusScroll;
 	protected JProgressBar progressBar;
 	protected JTextArea statusArea;
 	protected JButton continueBtn;
@@ -43,14 +45,14 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		getContentPane().add( progressHolder, BorderLayout.NORTH );
 
 		statusArea = new JTextArea();
-		statusArea.setBorder( BorderFactory.createEtchedBorder() );
 		statusArea.setLineWrap( true );
 		statusArea.setWrapStyleWord( true );
 		statusArea.setEditable( false );
+		statusScroll = new JScrollPane( statusArea );
 
 		JPanel statusHolder = new JPanel( new BorderLayout() );
 		statusHolder.setBorder( BorderFactory.createEmptyBorder( 15, 15, 15, 15 ) );
-		statusHolder.add( statusArea );
+		statusHolder.add( statusScroll );
 		getContentPane().add( statusHolder, BorderLayout.CENTER );
 
 		continueBtn = new JButton( "Continue" );

@@ -3,6 +3,7 @@ Changelog
 ???:
 - Added a commandline interface
 - Added XML sandbox for syntax tinkering
+- Added scrollbars to progress popups to show long error messages
 
 1.1:
 - Added a button to open the mods/ folder
