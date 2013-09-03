@@ -1,7 +1,9 @@
 package net.vhati.modmanager.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.xml.sax.SAXParseException;
@@ -31,6 +33,8 @@ import org.jdom2.input.JDOMParseException;
  *   An attribute name can start right after the quote from a prior value.
  *   Namespace prefixes for nodes and attributes are unique.
  *     (Each prefix will be used as the namespace's URI).
+ *   Unrecognized named entities (&...;) and lone ampersands are accepted
+ *     as literal text. (Those ampersands will be escaped if outputted).
  *
  * Only use this as a last resort, after a real parser fails.
  */
@@ -45,8 +49,10 @@ public class SloppyXMLParser {
 	private Pattern strayCharsPtn = Pattern.compile( "(\\s*)(?:-->|[-.>,])" );
 
 	private Pattern attrPtn = Pattern.compile( "\\s*(?:([\\w.-]+):)?([\\w.-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
+	private Pattern entityPtn = Pattern.compile( "&(?:(?:#([0-9]+))|(?:#x([0-9A-Fa-f]+))|([^;]+));" );
 
 	private List<Pattern> chunkPtns = new ArrayList<Pattern>();
+	private Map<String,String> entityMap = new HashMap<String,String>();
 
 	private JDOMFactory factory;
 
@@ -66,6 +72,12 @@ public class SloppyXMLParser {
 		chunkPtns.add( eTagPtn );
 		chunkPtns.add( endSpacePtn );
 		chunkPtns.add( strayCharsPtn );
+
+		entityMap.put( "lt", "<" );
+		entityMap.put( "gt", ">" );
+		entityMap.put( "amp", "&" );
+		entityMap.put( "apos", "'" );
+		entityMap.put( "quot", "\"" );
 	}
 
 
@@ -135,6 +147,7 @@ public class SloppyXMLParser {
 							String attrName = am.group( 2 );
 							String attrValue = am.group( 3 );
 							attrValue = attrValue.substring( 1, attrValue.length()-1 );
+							attrValue = unescape( attrValue );
 
 							if ( attrPrefix != null ) {
 								if ( attrPrefix.equals( "xmlns" ) ) {
@@ -175,6 +188,7 @@ public class SloppyXMLParser {
 				}
 				else if ( chunkPtn == eTagPtn ) {
 					String interimText = m.group( 1 );
+					interimText = unescape( interimText );
 					factory.addContent( parentNode, factory.text( interimText ) );
 					parentNode = parentNode.getParent();
 				}
@@ -218,6 +232,51 @@ public class SloppyXMLParser {
 
 		return doc;
 	}
+
+
+	/**
+	 * Unescapes standard named entities and numeric character references.
+	 * This applies to attributes and element values.
+	 *
+	 * They are: lt, gt, quot, apos, amp, #1234, #x1a2b.
+	 */
+	public String unescape( String s ) {
+		StringBuffer buf = new StringBuffer( s.length() );
+		Matcher m = entityPtn.matcher( s );
+		String decRef;
+		String hexRef;
+		int charCode;
+		String entName;
+		String entity;
+
+		while ( m.find() ) {
+			decRef = m.group( 1 );
+			hexRef = m.group( 2 );
+			entName = m.group( 3 );
+			if ( (decRef != null) ) {
+				// Decimal character reference.
+				charCode = Integer.parseInt( decRef );
+				entity = Character.toString( (char)charCode );
+			}
+			else if ( (hexRef != null) ) {
+				// Hex character reference.
+				charCode = Integer.parseInt( hexRef, 16 );
+				entity = Character.toString( (char)charCode );
+			}
+			else {
+				entity = entityMap.get( entName );
+				if ( entity == null ) {
+					// Unknown entity, repeat it as-is.
+					entity = "&"+ entName +";";
+				}
+			}
+			m.appendReplacement( buf, entity );
+		}
+		m.appendTail( buf );
+
+		return buf.toString();
+	}
+
 
 	/**
 	 * Returns lineNum and colNum for a position in text.
