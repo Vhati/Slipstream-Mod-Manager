@@ -57,7 +57,6 @@ import javax.swing.undo.UndoManager;
 import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
-import net.vhati.modmanager.core.SloppyXMLParser;
 import net.vhati.modmanager.core.XMLPatcher;
 import net.vhati.modmanager.ui.ClipboardMenuMouseListener;
 
@@ -334,7 +333,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 			mainText = mainText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
 			mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
-
 			mainDoc = ModUtilities.parseStrictOrSloppyXML( mainText, "Sandbox Main XML" );
 
 			StringWriter writer = new StringWriter();
@@ -371,7 +369,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			String appendText = appendArea.getText();
 			appendText = appendText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
 			appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
-			SloppyXMLParser parser = new SloppyXMLParser();
 			Document appendDoc = ModUtilities.parseStrictOrSloppyXML( appendText, "Sandbox Append XML" );
 
 			XMLPatcher patcher = new XMLPatcher();
