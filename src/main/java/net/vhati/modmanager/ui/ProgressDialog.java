@@ -47,6 +47,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		statusArea = new JTextArea();
 		statusArea.setLineWrap( true );
 		statusArea.setWrapStyleWord( true );
+		statusArea.setFont( statusArea.getFont().deriveFont( 13f ) );
 		statusArea.setEditable( false );
 		statusScroll = new JScrollPane( statusArea );
 

@@ -3,7 +3,7 @@ package net.vhati.modmanager.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -97,25 +97,31 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 		this.dataDatFile = dataDatFile;
 
+		Font sandboxFont = new Font( "Monospaced", Font.PLAIN, 13 );
+
 		mainArea = new JTextArea();
 		mainArea.setTabSize( 4 );
+		mainArea.setFont( sandboxFont );
 		mainArea.setEditable( false );
 		mainArea.addMouseListener( new ClipboardMenuMouseListener() );
 		mainScroll = new JScrollPane( mainArea );
 
 		appendArea = new JTextArea();
 		appendArea.setTabSize( 4 );
+		appendArea.setFont( sandboxFont );
 		appendArea.addMouseListener( new ClipboardMenuMouseListener() );
 		appendScroll = new JScrollPane( appendArea );
 
 		resultArea = new JTextArea();
 		resultArea.setTabSize( 4 );
+		resultArea.setFont( sandboxFont );
 		resultArea.setEditable( false );
 		resultArea.addMouseListener( new ClipboardMenuMouseListener() );
 		resultScroll = new JScrollPane( resultArea );
 
 		messageArea = new JTextArea();
 		messageArea.setTabSize( 4 );
+		messageArea.setFont( sandboxFont );
 		messageArea.setEditable( false );
 		messageArea.addMouseListener( new ClipboardMenuMouseListener() );
 		messageArea.setText( "This is a scratchpad to tinker with advanced mod syntax.\n1) Open XML from data.dat to fill the 'main' tab. (ctrl-o)\n2) Write some <mod:command> tags in the 'append' tab. (alt-1,2,3)\n3) Click Patch to see what would happen. (ctrl-p)\nUndo is available. (ctrl-z/ctrl-y)" );
