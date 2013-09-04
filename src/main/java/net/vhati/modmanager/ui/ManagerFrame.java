@@ -72,8 +72,8 @@ import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.SlipstreamConfig;
-import net.vhati.modmanager.json.GrognakCatalogFetcher;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
+import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ChecklistTableModel;
 import net.vhati.modmanager.ui.InertPanel;
 import net.vhati.modmanager.ui.ModInfoArea;
@@ -90,6 +90,9 @@ import org.apache.logging.log4j.Logger;
 public class ManagerFrame extends JFrame implements ActionListener, HashObserver, Nerfable, Statusbar {
 
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
+
+	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
+	public static final String AUTOUPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/auto-update.json";
 
 	private File backupDir = new File( "./backup/" );
 	private File modsDir = new File( "./mods/" );
@@ -429,8 +432,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			Runnable fetchTask = new Runnable() {
 				@Override
 				public void run() {
-					String catalogURL = GrognakCatalogFetcher.CATALOG_URL;
-					boolean fetched = GrognakCatalogFetcher.fetchCatalog( catalogURL, catalogFile, catalogETagFile );
+					boolean fetched = URLFetcher.refetchURL( CATALOG_URL, catalogFile, catalogETagFile );
 
 					if ( fetched ) reloadCatalog();
 				}

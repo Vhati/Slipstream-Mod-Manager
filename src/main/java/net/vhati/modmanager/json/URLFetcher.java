@@ -22,22 +22,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class GrognakCatalogFetcher {
+public class URLFetcher {
 
-	private static final Logger log = LogManager.getLogger(GrognakCatalogFetcher.class);
-
-	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
+	private static final Logger log = LogManager.getLogger(URLFetcher.class);
 
 
 	/**
-	 * Downloads the latest mod catalog.
+	 * Downloads content from a url into a file, if the remote content has changed.
 	 *
-	 * @return true if the catalog successfully downloaded, false otherwise
+	 * @return true if successfully downloaded, false otherwise
 	 */
-	public static boolean fetchCatalog( String catalogURL, File catalogFile, File eTagFile ) {
+	public static boolean refetchURL( String url, File localFile, File eTagFile ) {
 		String localETag = null;
 
-		log.debug( "Attempting to download a newer catalog..." );
+		log.debug( String.format( "Attempting to download the latest \"%s\".", localFile.getName() ) );
 		if ( eTagFile.exists() ) {
 			// Load the old eTag.
 			InputStream etagIn = null;
@@ -50,7 +48,7 @@ public class GrognakCatalogFetcher {
 			}
 			catch ( IOException e ) {
 				// Not serious enough to be a real error.
-				log.debug( String.format( "Error reading catalog eTag from \"%s\".", eTagFile.getName() ), e );
+				log.debug( String.format( "Error reading eTag from \"%s\".", eTagFile.getName() ), e );
 			}
 			finally {
 				try {if ( etagIn != null ) etagIn.close();}
@@ -60,13 +58,12 @@ public class GrognakCatalogFetcher {
 
 		String remoteETag = null;
 		InputStream urlIn = null;
-		OutputStream catalogOut = null;
+		OutputStream localOut = null;
 		try {
-			URL url = new URL( catalogURL );
-			URLConnection conn = url.openConnection();
+			URLConnection conn = new URL( url ).openConnection();
 
 			if ( conn instanceof HttpURLConnection == false ) {
-				log.error( String.format( "Non-Http(s) URL given for catalog fetching: %s", catalogURL ) );
+				log.error( String.format( "Non-Http(s) URL given for fetching: %s", url ) );
 				return false;
 			}
 			HttpURLConnection httpConn = (HttpURLConnection)conn;
@@ -79,10 +76,10 @@ public class GrognakCatalogFetcher {
 			int responseCode = httpConn.getResponseCode();
 
 			if ( responseCode == HttpURLConnection.HTTP_NOT_MODIFIED ) {
-				log.debug( "The server's catalog has not been modified since the previous check." );
+				log.debug( String.format( "The server's \"%s\" has not been modified since the previous check.", httpConn.getURL().getFile() ) );
 
-				// Update the catalog file's timestamp as if it had downloaded.
-				catalogFile.setLastModified( new Date().getTime() );
+				// Update the local file's timestamp as if it had downloaded.
+				localFile.setLastModified( new Date().getTime() );
 
 				return false;
 			}
@@ -93,29 +90,26 @@ public class GrognakCatalogFetcher {
 					remoteETag = eTagValues.get( 0 );
 
 				urlIn = httpConn.getInputStream();
-				catalogOut = new FileOutputStream( catalogFile );
+				localOut = new FileOutputStream( localFile );
 				byte[] buf = new byte[4096];
 				int len;
 				while ( (len = urlIn.read(buf)) >= 0 ) {
-					catalogOut.write( buf, 0, len );
+					localOut.write( buf, 0, len );
 				}
 			}
 			else {
-				log.error( String.format( "Catalog download request failed: HTTP Code %d (%s).", responseCode, httpConn.getResponseMessage() ) );
+				log.error( String.format( "Download request failed: HTTP Code %d (%s).", responseCode, httpConn.getResponseMessage() ) );
 				return false;
 			}
 		}
-		catch ( MalformedURLException e ) {
-			log.error( "Error fetching latest catalog.", e );
-		}
 		catch ( IOException e ) {
-			log.error( "Error fetching latest catalog.", e );
+			log.error( String.format( "Error downloading the latest \"%s\".", localFile.getName() ), e );
 		}
 		finally {
 			try {if ( urlIn != null ) urlIn.close();}
 			catch ( IOException e ) {}
 
-			try {if ( catalogOut != null ) catalogOut.close();}
+			try {if ( localOut != null ) localOut.close();}
 			catch ( IOException e ) {}
 		}
 
@@ -129,7 +123,7 @@ public class GrognakCatalogFetcher {
 				bw.flush();
 			}
 			catch ( IOException e ) {
-				log.error( String.format( "Error writing catalog eTag to \"%s\".", eTagFile.getName() ), e );
+				log.error( String.format( "Error writing eTag to \"%s\".", eTagFile.getName() ), e );
 			}
 			finally {
 				try {if ( etagOut != null ) etagOut.close();}
