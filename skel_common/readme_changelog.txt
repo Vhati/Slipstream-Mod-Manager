@@ -5,6 +5,7 @@ Changelog
 - Incorporated strict-then-sloppy XML parsing into the patch process
 - Added XML Sandbox for syntax tinkering
 - Added scrollbars to progress popups to show long error messages
+- The main window's geometry is saved on exit
 
 1.1:
 - Added a button to open the mods/ folder

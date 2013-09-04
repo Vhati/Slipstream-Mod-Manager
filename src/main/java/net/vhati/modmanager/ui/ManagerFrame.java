@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -32,7 +33,8 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
@@ -69,6 +71,7 @@ import net.vhati.modmanager.core.ModPatchThread.BackedUpDat;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
+import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.json.GrognakCatalogFetcher;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
 import net.vhati.modmanager.ui.ChecklistTableModel;
@@ -95,7 +98,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private File catalogFile = new File( backupDir, "current_catalog.json" );
 	private File catalogETagFile = new File( backupDir, "current_catalog_etag.txt" );
 
-	private Properties config;
+	private SlipstreamConfig appConfig;
 	private String appName;
 	private ComparableVersion appVersion;
 	private String appURL;
@@ -122,15 +125,15 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JButton toggleAllBtn;
 	private JButton validateBtn;
 	private JButton modsFolderBtn;
-
+	private JSplitPane splitPane;
 	private ModInfoArea infoArea;
 
 	private JLabel statusLbl;
 
 
-	public ManagerFrame( Properties config, String appName, ComparableVersion appVersion, String appURL, String appAuthor ) {
+	public ManagerFrame( SlipstreamConfig appConfig, String appName, ComparableVersion appVersion, String appURL, String appAuthor ) {
 		super();
-		this.config = config;
+		this.appConfig = appConfig;
 		this.appName = appName;
 		this.appVersion = appVersion;
 		this.appURL = appURL;
@@ -211,7 +214,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		infoArea = new ModInfoArea();
 		infoArea.setPreferredSize( new Dimension(504, 220) );
 
-		JSplitPane splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
+		splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		splitPane.setTopComponent( topPanel );
 		splitPane.setBottomComponent( infoArea );
 		mainPane.add( splitPane, BorderLayout.CENTER );
@@ -235,6 +238,22 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					sortedMods.add( localModsTableModel.getItem(i) );
 				}
 				saveModOrder( sortedMods );
+
+				SlipstreamConfig appConfig = ManagerFrame.this.appConfig;
+
+				if ( ManagerFrame.this.getExtendedState() == JFrame.NORMAL ) {
+					Rectangle managerBounds = ManagerFrame.this.getBounds();
+					int dividerLoc = splitPane.getDividerLocation();
+					String geometry = String.format( "x,%d;y,%d;w,%d;h,%d;divider,%d", managerBounds.x, managerBounds.y, managerBounds.width, managerBounds.height, dividerLoc );
+					appConfig.setProperty( "manager_geometry", geometry );
+				}
+
+				try {
+					appConfig.writeConfig();
+				}
+				catch ( IOException f ) {
+					log.error( String.format( "Error writing config to \"%s\".", appConfig.getConfigFile() ), f );
+				}
 
 				System.exit( 0 );
 			}
@@ -329,8 +348,43 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
 		this.setLocationRelativeTo(null);
 
+		setGeometryFromConfig();
+
 		showAboutInfo();
   }
+
+	private void setGeometryFromConfig() {
+		String geometry = appConfig.getProperty( "manager_geometry" );
+		if ( geometry != null ) {
+			int[] xywh = new int[4];
+			int dividerLoc = -1;
+			Matcher m = Pattern.compile( "([^;,]+),(\\d+)" ).matcher( geometry );
+			while ( m.find() ) {
+				if ( m.group(1).equals( "x" ) )
+					xywh[0] = Integer.parseInt( m.group(2) );
+				else if ( m.group(1).equals( "y" ) )
+					xywh[1] = Integer.parseInt( m.group(2) );
+				else if ( m.group(1).equals( "w" ) )
+					xywh[2] = Integer.parseInt( m.group(2) );
+				else if ( m.group(1).equals( "h" ) )
+					xywh[3] = Integer.parseInt( m.group(2) );
+				else if ( m.group(1).equals( "divider" ) )
+					dividerLoc = Integer.parseInt( m.group(2) );
+			}
+			boolean badGeometry = false;
+			for ( int n : xywh ) {
+				if ( n <= 0 ) {
+					badGeometry = true;
+					break;
+				}
+			}
+			if ( !badGeometry && dividerLoc > 0 ) {
+				Rectangle newBounds = new Rectangle( xywh[0], xywh[1], xywh[2], xywh[3] );
+				ManagerFrame.this.setBounds( newBounds );
+				splitPane.setDividerLocation( dividerLoc );
+			}
+		}
+	}
 
 	/**
 	 * Extra initialization that must be called after the constructor.
@@ -365,7 +419,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		}
 
 		// Don't update if the user doesn't want to.
-		String updatesAllowed = config.getProperty( "update_catalog", "false" );
+		String updatesAllowed = appConfig.getProperty( "update_catalog", "false" );
 		if ( !updatesAllowed.equals("true") ) needNewCatalog = false;
 
 		if ( needNewCatalog ) {
@@ -487,7 +541,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		modFileHashes.clear();
 		localModsTableModel.removeAllItems();
 
-		boolean allowZip = config.getProperty( "allow_zip", "false" ).equals( "true" );
+		boolean allowZip = appConfig.getProperty( "allow_zip", "false" ).equals( "true" );
 		File[] modFiles = modsDir.listFiles( new ModFileFilter( allowZip ) );
 
 		List<ModFileInfo> unsortedMods = new ArrayList<ModFileInfo>();
@@ -585,7 +639,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				}
 			}
 
-			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 
 			BackedUpDat dataDat = new BackedUpDat();
 			dataDat.datFile = new File( datsDir, "data.dat" );
@@ -683,7 +737,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 			File extractDir = extractChooser.getSelectedFile();
 
-			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 			File dataDatFile = new File( datsDir, "data.dat" );
 			File resDatFile = new File( datsDir, "resource.dat" );
 			File[] datFiles = new File[] {dataDatFile, resDatFile};
@@ -693,7 +747,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			extractDlg.setVisible( true );
 		}
 		else if ( source == sandboxMenuItem ) {
-			File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 			File dataDatFile = new File( datsDir, "data.dat" );
 
 			ModXMLSandbox sandboxFrame = new ModXMLSandbox( dataDatFile );
@@ -738,9 +792,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private class SpawnGameTask implements Runnable {
 		@Override
 		public void run() {
-			String neverRunFtl = config.getProperty( "never_run_ftl", "false" );
+			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
 			if ( !neverRunFtl.equals("true") ) {
-				File datsDir = new File( config.getProperty( "ftl_dats_path" ) );
+				File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 
 				File exeFile = FTLUtilities.findGameExe( datsDir );
 				if ( exeFile != null ) {

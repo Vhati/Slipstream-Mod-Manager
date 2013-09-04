@@ -2,12 +2,9 @@ package net.vhati.modmanager;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.Properties;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -16,6 +13,7 @@ import javax.swing.UIManager;
 import net.vhati.modmanager.cli.SlipstreamCLI;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
+import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.ui.ManagerFrame;
 
 import org.apache.logging.log4j.LogManager;
@@ -144,49 +142,34 @@ public class FTLModManager {
 		}
 
 
+		final SlipstreamConfig appConfig = new SlipstreamConfig( config, configFile );
 		if ( writeConfig ) {
-			OutputStream out = null;
 			try {
-				out = new FileOutputStream( configFile );
-				String configComments = "";
-				configComments += "\n";
-				configComments += " allow_zip - Sets whether to treat .zip files as .ftl files. Default: false.\n";
-				configComments += " ftl_dats_path - The path to FTL's resources folder. If invalid, you'll be prompted.\n";
-				configComments += " never_run_ftl - If true, there will be no offer to run FTL after patching. Default: false.\n";
-				configComments += " update_catalog - If true, periodically download descriptions for the latest mods. If invalid, you'll be prompted.\n";
-				configComments += " use_default_ui - If true, no attempt will be made to resemble a native GUI. Default: false.\n";
-
-				OutputStreamWriter writer = new OutputStreamWriter( out, "UTF-8" );
-				config.store( writer, configComments );
-				writer.flush();
+				appConfig.writeConfig();
 			}
 			catch ( IOException e ) {
-				log.error( "Error saving config to "+ configFile.getPath(), e );
-				showErrorDialog( "Error saving config to "+ configFile.getPath() );
-			}
-			finally {
-				try {if ( out != null ) out.close();}
-				catch ( IOException e ) {}
+				String errorMsg = String.format( "Error writing config to \"%s\".", configFile.getPath() );
+				log.error( errorMsg, e );
+				showErrorDialog( errorMsg );
 			}
 		}
 
 		// Create the GUI.
-		try {
-			final ManagerFrame frame = new ManagerFrame( config, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
-			frame.setVisible(true);
-
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
 					frame.init();
+					frame.setVisible(true);
+				} catch ( Exception e ) {
+					log.error( "Exception while creating ManagerFrame.", e );
+					System.exit(1);
 				}
-			});
-		}
-		catch ( Exception e ) {
-			log.error( "Exception while creating ManagerFrame.", e );
-			System.exit(1);
-		}
+			}
+		});
 	}
+
 
 
 	private static void showErrorDialog( String message ) {
