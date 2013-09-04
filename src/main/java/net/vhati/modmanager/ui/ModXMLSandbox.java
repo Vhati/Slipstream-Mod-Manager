@@ -62,7 +62,7 @@ import net.vhati.modmanager.core.XMLPatcher;
 import net.vhati.modmanager.ui.ClipboardMenuMouseListener;
 
 import org.jdom2.Document;
-import org.jdom2.input.JDOMParseException;
+import org.jdom2.JDOMException;
 
 
 /**
@@ -120,6 +120,8 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		resultScroll = new JScrollPane( resultArea );
 
 		messageArea = new JTextArea();
+		messageArea.setLineWrap( true );
+		messageArea.setWrapStyleWord( true );
 		messageArea.setTabSize( 4 );
 		messageArea.setFont( sandboxFont );
 		messageArea.setEditable( false );
@@ -157,7 +159,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 		splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		splitPane.setTopComponent( topPanel );
-		splitPane.setBottomComponent( messageArea );
+		splitPane.setBottomComponent( messageScroll );
 
 		JPanel statusPanel = new JPanel();
 		statusPanel.setLayout( new BoxLayout(statusPanel, BoxLayout.Y_AXIS) );
@@ -333,8 +335,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			mainText = mainText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
 			mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
 
-			SloppyXMLParser parser = new SloppyXMLParser();
-			mainDoc = parser.build( mainText );
+			mainDoc = ModUtilities.parseStrictOrSloppyXML( mainText, "Sandbox Main XML" );
 
 			StringWriter writer = new StringWriter();
 			SloppyXMLOutputProcessor.sloppyPrint( mainDoc, writer, null );
@@ -347,7 +348,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			messageArea.setText( f.getMessage() );
 			messageArea.setCaretPosition( 0 );
 		}
-		catch ( JDOMParseException f ) {
+		catch ( JDOMException f ) {
 			messageArea.setText( f.getMessage() );
 			messageArea.setCaretPosition( 0 );
 		}
@@ -371,7 +372,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			appendText = appendText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
 			appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
 			SloppyXMLParser parser = new SloppyXMLParser();
-			Document appendDoc = parser.build( appendText );
+			Document appendDoc = ModUtilities.parseStrictOrSloppyXML( appendText, "Sandbox Append XML" );
 
 			XMLPatcher patcher = new XMLPatcher();
 			Document resultDoc = patcher.patch( mainDoc, appendDoc );
