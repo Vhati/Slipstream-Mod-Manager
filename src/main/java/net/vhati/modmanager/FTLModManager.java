@@ -46,7 +46,9 @@ public class FTLModManager {
 		config.setProperty( "ftl_dats_path", "" );
 		config.setProperty( "never_run_ftl", "false" );
 		config.setProperty( "use_default_ui", "false" );
+		config.setProperty( "remember_geometry", "true" );
 		// "update_catalog" doesn't have a default.
+		// "manager_geometry" doesn't have a default.
 
 		// Read the config file.
 		InputStream in = null;

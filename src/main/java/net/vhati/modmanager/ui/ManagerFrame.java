@@ -241,11 +241,13 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 				SlipstreamConfig appConfig = ManagerFrame.this.appConfig;
 
-				if ( ManagerFrame.this.getExtendedState() == JFrame.NORMAL ) {
-					Rectangle managerBounds = ManagerFrame.this.getBounds();
-					int dividerLoc = splitPane.getDividerLocation();
-					String geometry = String.format( "x,%d;y,%d;w,%d;h,%d;divider,%d", managerBounds.x, managerBounds.y, managerBounds.width, managerBounds.height, dividerLoc );
-					appConfig.setProperty( "manager_geometry", geometry );
+				if ( appConfig.getProperty( "remember_geometry" ).equals( "true" ) ) {
+					if ( ManagerFrame.this.getExtendedState() == JFrame.NORMAL ) {
+						Rectangle managerBounds = ManagerFrame.this.getBounds();
+						int dividerLoc = splitPane.getDividerLocation();
+						String geometry = String.format( "x,%d;y,%d;w,%d;h,%d;divider,%d", managerBounds.x, managerBounds.y, managerBounds.width, managerBounds.height, dividerLoc );
+						appConfig.setProperty( "manager_geometry", geometry );
+					}
 				}
 
 				try {
@@ -348,7 +350,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
 		this.setLocationRelativeTo(null);
 
-		setGeometryFromConfig();
+		if ( appConfig.getProperty( "remember_geometry" ).equals( "true" ) )
+			setGeometryFromConfig();
 
 		showAboutInfo();
   }
