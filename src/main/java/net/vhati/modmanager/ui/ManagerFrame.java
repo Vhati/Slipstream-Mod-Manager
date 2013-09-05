@@ -1,6 +1,7 @@
 package net.vhati.modmanager.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -208,6 +209,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		updateBtn = new JButton("Update");
 		updateBtn.setMargin( actionInsets );
+		updateBtn.setForeground( new Color(0, 124, 0) );
 		updateBtn.addMouseListener( new StatusbarMouseListener( this, String.format( "Show info about the latest version of %s.", appName ) ) );
 		updateBtn.addActionListener(this);
 		updateBtn.setEnabled( false );
