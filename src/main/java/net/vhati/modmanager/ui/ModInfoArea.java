@@ -17,6 +17,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import net.vhati.modmanager.ui.Statusbar;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,8 +35,11 @@ public class ModInfoArea extends JScrollPane {
 	public static Color COLOR_HYPER = Color.BLUE;
 	public static final StyleContext DEFAULT_STYLES = ModInfoArea.getDefaultStyleContext();
 
+	private Statusbar statusbar = null;
+
 	private JTextPane textPane;
 	private StyledDocument doc;
+	private boolean browseWorks;
 
 
 	public ModInfoArea() {
@@ -50,8 +55,17 @@ public class ModInfoArea extends JScrollPane {
 		doc = new DefaultStyledDocument(styleContext);
 		textPane.setStyledDocument(doc);
 
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if ( desktop != null && desktop.isSupported(Desktop.Action.BROWSE) ) {
+			browseWorks = true;
+		}
+
 
 		MouseInputAdapter hyperlinkListener = new MouseInputAdapter() {
+			private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+			private Cursor linkCursor = new Cursor(Cursor.HAND_CURSOR);
+			private boolean wasOverLink = false;
+
 			@Override
 			public void mouseClicked( MouseEvent e ) {
 				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel(e.getPoint()) ).getAttributes();
@@ -72,10 +86,20 @@ public class ModInfoArea extends JScrollPane {
 			@Override
 			public void mouseMoved( MouseEvent e ) {
 				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel(e.getPoint()) ).getAttributes();
-				if ( tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET ) != null ) {
-					textPane.setCursor( new Cursor(Cursor.HAND_CURSOR) );
-				} else {
-					textPane.setCursor( new Cursor(Cursor.DEFAULT_CURSOR) );
+				Object targetObj = tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET );
+				if ( targetObj != null ) {
+					textPane.setCursor( linkCursor );
+					if ( statusbar != null )
+						statusbar.setStatusText( targetObj.toString() );
+					wasOverLink = true;
+				}
+				else {
+					if ( wasOverLink ) {
+						textPane.setCursor( defaultCursor );
+						if ( statusbar != null )
+							statusbar.setStatusText( "" );
+					}
+					wasOverLink = false;
 				}
 			}
 		};
@@ -112,17 +136,10 @@ public class ModInfoArea extends JScrollPane {
 			}
 
 			if ( url != null ) {
-				SimpleAttributeSet tmpAttr;
 				doc.insertString( doc.getLength(), "Website: ", regularStyle );
 
-				boolean browseWorks = false;
-				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-				if ( desktop != null && desktop.isSupported(Desktop.Action.BROWSE) ) {
-					browseWorks = true;
-				}
-
 				if ( browseWorks && url.matches("^(?:https?|ftp)://.*") ) {
-					tmpAttr = new SimpleAttributeSet( doc.getStyle( STYLE_HYPERLINK ) );
+					SimpleAttributeSet tmpAttr = new SimpleAttributeSet( doc.getStyle( STYLE_HYPERLINK ) );
 					tmpAttr.addAttribute( ATTR_HYPERLINK_TARGET, url );
 					doc.insertString( doc.getLength(), "Link", tmpAttr );
 				} else {
@@ -139,10 +156,50 @@ public class ModInfoArea extends JScrollPane {
 			}
 		}
 		catch ( BadLocationException e) {
-			log.error( e );
+			log.error( "Error filling info text area.", e );
 		}
 
 		textPane.setCaretPosition(0);
+	}
+
+
+	public void setCaretPosition( int n ) {
+		textPane.setCaretPosition( n );
+	}
+
+	public void clear() {
+		try {
+			doc.remove( 0, doc.getLength() );
+		}
+		catch ( BadLocationException e) {
+			log.error( "Error clearing info text area.", e );
+		}
+	}
+
+	public void appendTitleText( String s ) throws BadLocationException {
+		doc.insertString( doc.getLength(), s, doc.getStyle( STYLE_TITLE ) );
+	}
+
+	public void appendRegularText( String s ) throws BadLocationException {
+		doc.insertString( doc.getLength(), s, doc.getStyle( STYLE_REGULAR ) );
+	}
+
+	public void appendLinkText( String linkURL, String linkTitle ) throws BadLocationException {
+		if ( browseWorks && linkURL.matches("^(?:https?|ftp)://.*") ) {
+			SimpleAttributeSet tmpAttr = new SimpleAttributeSet( doc.getStyle( STYLE_HYPERLINK ) );
+			tmpAttr.addAttribute( ATTR_HYPERLINK_TARGET, linkURL );
+			doc.insertString( doc.getLength(), linkTitle, tmpAttr );
+		} else {
+			doc.insertString( doc.getLength(), linkURL, doc.getStyle( STYLE_REGULAR ) );
+		}
+	}
+
+
+	/**
+	 * Sets a component with a statusbar to be set during mouse events.
+	 */
+	public void setStatusbar( Statusbar comp ) {
+		this.statusbar = comp;
 	}
 
 

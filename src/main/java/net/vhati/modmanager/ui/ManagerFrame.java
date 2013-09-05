@@ -216,6 +216,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		infoArea = new ModInfoArea();
 		infoArea.setPreferredSize( new Dimension(504, 220) );
+		infoArea.setStatusbar( this );
 
 		splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		splitPane.setTopComponent( topPanel );
