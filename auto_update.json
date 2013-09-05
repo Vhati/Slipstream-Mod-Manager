@@ -7,7 +7,7 @@
 					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.1/Slipstream%20Mod%20Manager%20v1.1-Win.zip/download",
 					"Unix" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.1/Slipstream%20Mod%20Manager%20v1.1-Unix.tar.gz/download"
 				}
-			}
+			},
 			"changelog" : [
 				{
 					"version": "1.1",
