@@ -23,6 +23,9 @@ To build, run "mvn clean" and "mvn package" in this folder.
     - Drag modman.exe into "skel_win/".
     - Run "mvn clear" and "mvn package".
 
+"auto_update.json"
+  Info about the latest release, downloaded periodically by clients.
+
 
 
 This project depends on the following libraries.
