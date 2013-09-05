@@ -200,7 +200,10 @@ public class SloppyXMLParser {
 							am.region( am.end(), am.regionEnd() );
 						}
 						if ( am.regionStart() < attrString.length() ) {
-							int[] lineAndCol = getLineAndCol( s, pos );
+							int nonspacePos = findNextNonspace( s, pos );
+							int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
+
+							int[] lineAndCol = getLineAndCol( s, errorPos );
 							int lineNum = lineAndCol[0];
 							int colNum = lineAndCol[1];
 
@@ -236,7 +239,10 @@ public class SloppyXMLParser {
 			}
 
 			if ( !matchedChunk ) {
-				int[] lineAndCol = getLineAndCol( s, pos );
+				int nonspacePos = findNextNonspace( s, pos );
+				int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
+
+				int[] lineAndCol = getLineAndCol( s, errorPos );
 				int lineNum = lineAndCol[0];
 				int colNum = lineAndCol[1];
 
@@ -305,9 +311,23 @@ public class SloppyXMLParser {
 
 
 	/**
+	 * Returns the position of the next non whitespace character after pos.
+	 *
+	 * Returns -1 if there isn't one.
+	 */
+	public int findNextNonspace( CharSequence s, int pos ) {
+		Matcher nonspaceMatcher = Pattern.compile( "\\S" ).matcher( s );
+		if ( nonspaceMatcher.find( pos ) )
+			return nonspaceMatcher.start();
+
+		return -1;
+	}
+
+
+	/**
 	 * Returns lineNum and colNum for a position in text.
 	 */
-	private int[] getLineAndCol( CharSequence s, int pos ) {
+	public int[] getLineAndCol( CharSequence s, int pos ) {
 		Matcher breakMatcher = Pattern.compile( "\n" ).matcher( s );
 		breakMatcher.region( 0, pos+1 );
 		int lastBreakPos = -1;
