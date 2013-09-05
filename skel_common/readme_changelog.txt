@@ -6,6 +6,8 @@ Changelog
 - Added XML Sandbox for syntax tinkering
 - Added scrollbars to progress popups to show long error messages
 - The main window's geometry is saved on exit
+- Added urls in the statusbar when hovering over links
+- Added periodic checking for SMM updates
 
 1.1:
 - Added a button to open the mods/ folder
