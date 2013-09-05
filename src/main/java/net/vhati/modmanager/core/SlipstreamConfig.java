@@ -29,6 +29,14 @@ public class SlipstreamConfig {
 		return config.setProperty( key, value );
 	}
 
+	public int getPropertyAsInt( String key, int defaultValue ) {
+		String s = config.getProperty( key );
+		if ( s != null && s.matches("^\\d+$") )
+			return Integer.parseInt( s );
+		else
+			return defaultValue;
+	}
+
 	public String getProperty( String key, String defaultValue ) {
 		return config.getProperty( key, defaultValue );
 	}
@@ -48,7 +56,8 @@ public class SlipstreamConfig {
 			configComments += " allow_zip         - Sets whether to treat .zip files as .ftl files. Default: false.\n";
 			configComments += " ftl_dats_path     - The path to FTL's resources folder. If invalid, you'll be prompted.\n";
 			configComments += " never_run_ftl     - If true, there will be no offer to run FTL after patching. Default: false.\n";
-			configComments += " update_catalog    - If true, periodically download descriptions for the latest mods.\n";
+			configComments += " update_catalog    - If a number greater than 0, check for new mod descriptions every N days.\n";
+			configComments += " update_app        - If a number greater than 0, check for new app version every N days.\n";
 			configComments += " use_default_ui    - If true, no attempt will be made to resemble a native GUI. Default: false.\n";
 			configComments += " remember_geometry - If true, window geometry will be saved on exit and restored on startup.\n";
 			configComments += "\n";

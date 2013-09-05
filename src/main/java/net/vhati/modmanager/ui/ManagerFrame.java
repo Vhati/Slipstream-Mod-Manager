@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
@@ -59,6 +60,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.vhati.ftldat.FTLDat;
+import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.HashObserver;
@@ -72,6 +74,7 @@ import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.SlipstreamConfig;
+import net.vhati.modmanager.json.JacksonAutoUpdateReader;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
 import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ChecklistTableModel;
@@ -92,14 +95,16 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
 
 	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
-	public static final String AUTOUPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/auto-update.json";
+	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/auto_update.json";
 
 	private File backupDir = new File( "./backup/" );
 	private File modsDir = new File( "./mods/" );
 
-	private int catalogFetchInterval = 7;  // Days.
 	private File catalogFile = new File( backupDir, "current_catalog.json" );
 	private File catalogETagFile = new File( backupDir, "current_catalog_etag.txt" );
+
+	private File appUpdateFile = new File( backupDir, "auto_update.json" );
+	private File appUpdateETagFile = new File( backupDir, "auto_update_etag.txt" );
 
 	private SlipstreamConfig appConfig;
 	private String appName;
@@ -107,10 +112,12 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private String appURL;
 	private String appAuthor;
 
-	private NerfListener nerfListener = new NerfListener( this );
-
 	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
 	private ModDB modDB = new ModDB();
+
+	private AutoUpdateInfo appUpdateInfo = null;
+
+	private NerfListener nerfListener = new NerfListener( this );
 
 	private ChecklistTableModel<ModFileInfo> localModsTableModel;
 	private JTable localModsTable;
@@ -128,6 +135,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JButton toggleAllBtn;
 	private JButton validateBtn;
 	private JButton modsFolderBtn;
+	private JButton updateBtn;
 	private JSplitPane splitPane;
 	private ModInfoArea infoArea;
 
@@ -198,9 +206,16 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		modsFolderBtn.setEnabled( Desktop.isDesktopSupported() );
 		modActionsPanel.add( modsFolderBtn );
 
+		updateBtn = new JButton("Update");
+		updateBtn.setMargin( actionInsets );
+		updateBtn.addMouseListener( new StatusbarMouseListener( this, String.format( "Show info about the latest version of %s.", appName ) ) );
+		updateBtn.addActionListener(this);
+		updateBtn.setEnabled( false );
+		modActionsPanel.add( updateBtn );
+
 		topPanel.add( modActionsPanel, BorderLayout.EAST );
 
-		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, modsFolderBtn };
+		JButton[] actionBtns = new JButton[] {patchBtn, toggleAllBtn, validateBtn, modsFolderBtn, updateBtn };
 		int actionBtnWidth = Integer.MIN_VALUE;
 		int actionBtnHeight = Integer.MIN_VALUE;
 		for ( JButton btn : actionBtns ) {
@@ -402,6 +417,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		List<String> preferredOrder = loadModOrder();
 		rescanMods( preferredOrder );
 
+		int catalogUpdateInterval = appConfig.getPropertyAsInt( "update_catalog", 0 );
 		boolean needNewCatalog = false;
 
 		if ( catalogFile.exists() ) {
@@ -409,15 +425,17 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			ModDB currentDB = JacksonGrognakCatalogReader.parse( catalogFile );
 			if ( currentDB != null ) modDB = currentDB;
 
-			// Check if the downloaded catalog is stale.
-			Date catalogDate = new Date( catalogFile.lastModified() );
-			Calendar cal = Calendar.getInstance();
-			cal.add( Calendar.DATE, catalogFetchInterval * -1 );
-			if ( catalogDate.before( cal.getTime() ) ) {
-				log.debug( String.format( "Catalog is older than %d days.", catalogFetchInterval ) );
-				needNewCatalog = true;
-			} else {
-				log.debug( "Catalog isn't stale yet." );
+			if ( catalogUpdateInterval > 0 ) {
+				// Check if the downloaded catalog is stale.
+				Date catalogDate = new Date( catalogFile.lastModified() );
+				Calendar cal = Calendar.getInstance();
+				cal.add( Calendar.DATE, catalogUpdateInterval * -1 );
+				if ( catalogDate.before( cal.getTime() ) ) {
+					log.debug( String.format( "Catalog is older than %d days.", catalogUpdateInterval ) );
+					needNewCatalog = true;
+				} else {
+					log.debug( "Catalog isn't stale yet." );
+				}
 			}
 		}
 		else {
@@ -426,8 +444,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		}
 
 		// Don't update if the user doesn't want to.
-		String updatesAllowed = appConfig.getProperty( "update_catalog", "false" );
-		if ( !updatesAllowed.equals("true") ) needNewCatalog = false;
+		if ( catalogUpdateInterval <= 0 ) needNewCatalog = false;
 
 		if ( needNewCatalog ) {
 			Runnable fetchTask = new Runnable() {
@@ -441,11 +458,56 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			Thread fetchThread = new Thread( fetchTask );
 			fetchThread.start();
 		}
+
+		int appUpdateInterval = appConfig.getPropertyAsInt( "update_app", 0 );
+		boolean needAppUpdate = false;
+
+		if ( appUpdateFile.exists() ) {
+			// Load the info first, before downloading.
+			AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
+			if ( aui != null ) {
+				appUpdateInfo = aui;
+				updateBtn.setEnabled( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+			}
+
+			if ( appUpdateInterval > 0 ) {
+				// Check if the app update info is stale.
+				Date catalogDate = new Date( appUpdateFile.lastModified() );
+				Calendar cal = Calendar.getInstance();
+				cal.add( Calendar.DATE, catalogUpdateInterval * -1 );
+				if ( catalogDate.before( cal.getTime() ) ) {
+					log.debug( String.format( "App update info is older than %d days.", appUpdateInterval ) );
+					needAppUpdate = true;
+				} else {
+					log.debug( "App update info isn't stale yet." );
+				}
+			}
+		}
+		else {
+			// App update file doesn't exist.
+			needAppUpdate = true;
+		}
+
+		// Don't update if the user doesn't want to.
+		if ( appUpdateInterval <= 0 ) needAppUpdate = false;
+
+		if ( needAppUpdate ) {
+			Runnable fetchTask = new Runnable() {
+				@Override
+				public void run() {
+					boolean fetched = URLFetcher.refetchURL( APP_UPDATE_URL, appUpdateFile, appUpdateETagFile );
+
+					if ( fetched ) reloadAppUpdateInfo();
+				}
+			};
+			Thread fetchThread = new Thread( fetchTask );
+			fetchThread.start();
+		}
 	}
 
 
 	/**
-	 * Reparses and replace the downloaded ModDB catalog. (thread-safe)
+	 * Reparses and replaces the downloaded ModDB catalog. (thread-safe)
 	 */
 	public void reloadCatalog() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -454,6 +516,24 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				if ( catalogFile.exists() ) {
 					ModDB currentDB = JacksonGrognakCatalogReader.parse( catalogFile );
 					if ( currentDB != null ) modDB = currentDB;
+				}
+			}
+		});
+	}
+
+	/**
+	 * Reparses info about available app updates. (thread-safe)
+	 */
+	public void reloadAppUpdateInfo() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if ( appUpdateFile.exists() ) {
+					AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
+					if ( aui != null ) {
+						appUpdateInfo = aui;
+						updateBtn.setEnabled( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+					}
 				}
 			}
 		});
@@ -577,6 +657,42 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		body += "Make sure to visit the forum for updates!";
 
 		infoArea.setDescription( appName, appAuthor, appVersion.toString(), appURL, body );
+	}
+
+	public void showAppUpdateInfo() {
+		StringBuilder buf = new StringBuilder();
+
+		for ( Map.Entry<ComparableVersion,List<String>> entry : appUpdateInfo.getChangelog().entrySet() ) {
+			if ( appVersion.compareTo( entry.getKey() ) >= 0 ) break;
+
+			if ( buf.length() > 0 ) buf.append( "\n" );
+			buf.append( entry.getKey() ).append( ":\n" );
+
+			for ( String change : entry.getValue() ) {
+				buf.append( "  - " ).append( change ).append( "\n" );
+			}
+		}
+
+		try {
+			infoArea.clear();
+			infoArea.appendTitleText( "What's New\n" );
+			infoArea.appendRegularText( String.format( "Version %s: ", appUpdateInfo.getLatestVersion().toString() ) );
+			boolean first = true;
+			for ( Map.Entry<String,String> entry : appUpdateInfo.getLatestURLs().entrySet() ) {
+				if ( !first ) infoArea.appendRegularText( " " );
+				infoArea.appendRegularText( "[" );
+				infoArea.appendLinkText( entry.getValue(), entry.getKey() );
+				infoArea.appendRegularText( "]" );
+				first = false;
+			}
+			infoArea.appendRegularText( "\n" );
+			infoArea.appendRegularText( "\n" );
+			infoArea.appendRegularText( buf.toString() );
+			infoArea.setCaretPosition( 0 );
+		}
+		catch ( Exception e ) {
+			log.error( "Error filling info text area.", e );
+		}
 	}
 
 	/**
@@ -719,6 +835,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			catch ( IOException f ) {
 				log.error( "Error opening mods/ folder.", f );
 			}
+		}
+		else if ( source == updateBtn ) {
+			showAppUpdateInfo();
 		}
 		else if ( source == rescanMenuItem ) {
 			setStatusText( "" );

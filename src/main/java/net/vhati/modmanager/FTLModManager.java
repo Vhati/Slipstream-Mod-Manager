@@ -48,6 +48,7 @@ public class FTLModManager {
 		config.setProperty( "use_default_ui", "false" );
 		config.setProperty( "remember_geometry", "true" );
 		// "update_catalog" doesn't have a default.
+		// "update_app" doesn't have a default.
 		// "manager_geometry" doesn't have a default.
 
 		// Read the config file.
@@ -128,19 +129,30 @@ public class FTLModManager {
 		}
 
 		// Prompt if update_catalog is invalid or hasn't been set.
+		boolean askAboutUpdates = false;
+		String catalogUpdateInterval = config.getProperty( "update_catalog" );
+		String appUpdateInterval = config.getProperty( "update_app" );
 
-		String updateCatalog = config.getProperty( "update_catalog" );
-		if ( updateCatalog == null || !updateCatalog.matches("^true|false$") ) {
+		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches("^\\d+$") )
+			askAboutUpdates = true;
+		if ( appUpdateInterval == null || !appUpdateInterval.matches("^\\d+$") )
+			askAboutUpdates = true;
+
+		if ( askAboutUpdates ) {
 			String message = "";
 			message += "Would you like Slipstream to periodically\n";
-			message += "download descriptions for the latest mods?\n\n";
+			message += "check for updates and download descriptions\n";
+			message += "for the latest mods?\n\n";
 			message += "You can change this later in modman.cfg.";
 
-			int response = JOptionPane.showConfirmDialog(null, message, "Catalog Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-			if ( response == JOptionPane.YES_OPTION )
-				config.setProperty( "update_catalog", "true" );
-			else
-				config.setProperty( "update_catalog", "false" );
+			int response = JOptionPane.showConfirmDialog(null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if ( response == JOptionPane.YES_OPTION ) {
+				config.setProperty( "update_catalog", "7" );
+				config.setProperty( "update_app", "4" );
+			} else {
+				config.setProperty( "update_catalog", "0" );
+				config.setProperty( "update_app", "0" );
+			}
 		}
 
 

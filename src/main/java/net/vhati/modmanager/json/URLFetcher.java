@@ -76,7 +76,7 @@ public class URLFetcher {
 			int responseCode = httpConn.getResponseCode();
 
 			if ( responseCode == HttpURLConnection.HTTP_NOT_MODIFIED ) {
-				log.debug( String.format( "The server's \"%s\" has not been modified since the previous check.", httpConn.getURL().getFile() ) );
+				log.debug( String.format( "No need to update \"%s\", the server's copy has not been modified since the previous check.", localFile.getName() ) );
 
 				// Update the local file's timestamp as if it had downloaded.
 				localFile.setLastModified( new Date().getTime() );
@@ -98,7 +98,7 @@ public class URLFetcher {
 				}
 			}
 			else {
-				log.error( String.format( "Download request failed: HTTP Code %d (%s).", responseCode, httpConn.getResponseMessage() ) );
+				log.error( String.format( "Download request failed for \"%s\": HTTP Code %d (%s).", httpConn.getURL(), responseCode, httpConn.getResponseMessage() ) );
 				return false;
 			}
 		}
