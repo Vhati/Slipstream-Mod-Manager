@@ -8,6 +8,8 @@ Changelog
 - The main window's geometry is saved on exit
 - Added urls in the statusbar when hovering over links
 - Added periodic checking for SMM updates
+- Added FTL launching on Linux
+- Fixed critical bugs in InputStreams returned by FTLDat
 
 1.1:
 - Added a button to open the mods/ folder

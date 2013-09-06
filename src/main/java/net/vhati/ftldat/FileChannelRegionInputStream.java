@@ -62,8 +62,9 @@ public class FileChannelRegionInputStream extends InputStream {
 			}
 		}
 
-		// Do an absolute get() from the buffer.
-		int result = buf.get( (int)(intraPos - bufOffset) );
+		// Do an absolute get() from the buffer,
+		//   and interpret the byte as if it were unsigned.
+		int result = (int)(buf.get( (int)(intraPos - bufOffset) ) & 0xff);
 		intraPos++;
 		return result;
 	}
@@ -78,14 +79,16 @@ public class FileChannelRegionInputStream extends InputStream {
 
 		int bytesTotal = Math.min( bLen, (int)(regionLength - intraPos) );
 		int bytesRemaining = bytesTotal;
+		int bytesRead = 0;
 
-		if ( intraPos >= bufOffset || intraPos < bufOffset+bufLength ) {
+		if ( intraPos >= bufOffset && intraPos < bufOffset+bufLength ) {
 			// Read part of the current buffer, possibly until the end.
 
 			buf.position( (int)(intraPos - bufOffset) );
 			int bufTodo = Math.min( bytesRemaining, bufLength - (int)(intraPos - bufOffset) );
 			buf.get( b, bOff, bufTodo );
 			bytesRemaining -= bufTodo;
+			bytesRead += bufTodo;
 			intraPos += bufTodo;
 		}
 
@@ -105,11 +108,25 @@ public class FileChannelRegionInputStream extends InputStream {
 
 			buf.position( 0 );
 			int bufTodo = Math.min( bytesRemaining, bufLength );
-			buf.get( b, bOff, bufTodo );
+			buf.get( b, bOff + bytesRead, bufTodo );
 			bytesRemaining -= bufTodo;
+			bytesRead += bufTodo;
 			intraPos += bufTodo;
 		}
 
-		return ( bytesTotal - bytesRemaining );  // Return number of bytes read.
+		return bytesRead;
+	}
+
+
+	@Override
+	public long skip( long n ) throws IOException {
+		if ( !channel.isOpen() ) throw new ClosedChannelException();
+		if ( intraPos >= regionLength ) return -1;
+
+		if ( intraPos + n <= regionLength ) {
+			n = regionLength - intraPos;
+		}
+		intraPos += n;
+		return n;
 	}
 }
