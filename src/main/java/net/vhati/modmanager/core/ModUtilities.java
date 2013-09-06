@@ -198,14 +198,16 @@ public class ModUtilities {
 	 * The returned stream is a ByteArrayInputStream
 	 * which doesn't need closing.
 	 *
-	 * The result will be UTF-8 with CR-LF line endings.
+	 * The result will have CR-LF line endings and the desired encoding.
+	 * FTL stubbornly assumes all XML is in windows-1252 encoding, even
+	 * on Linux.
 	 *
 	 * The description arguments identify the streams for log messages.
 	 *
 	 * @see net.vhati.modmanager.core.XMLPatcher
 	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
 	 */
-	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String mainDescription, String appendDescription ) throws IOException, JDOMException {
+	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String encoding, String mainDescription, String appendDescription ) throws IOException, JDOMException {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
@@ -222,10 +224,10 @@ public class ModUtilities {
 		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
 
 		StringWriter writer = new StringWriter();
-		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, null );
+		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
 		String mergedString = writer.toString();
 
-		InputStream result = encodeText( mergedString, "UTF-8", mainDescription+"+"+appendDescription );
+		InputStream result = encodeText( mergedString, encoding, mainDescription+"+"+appendDescription );
 		return result;
 	}
 
@@ -261,25 +263,6 @@ public class ModUtilities {
 		}
 
 		return doc;
-	}
-
-	/**
-	 * Calls decodeText() on a stream, replaces line endings, and re-encodes.
-	 *
-	 * The returned stream is a ByteArrayInputStream
-	 * which doesn't need closing.
-	 *
-	 * The result will be UTF-8 with the desired line endings.
-	 *
-	 * The description argument identifies the stream for log messages.
-	 */
-	public static InputStream setLineEndings( InputStream srcStream, String eol, String srcDescription ) throws IOException {
-		// decodeText() returns a LF string.
-		String srcText = decodeText( srcStream, srcDescription ).text;
-		String fixedText = Pattern.compile("\n").matcher( srcText ).replaceAll( Matcher.quoteReplacement(eol) );
-
-		InputStream result = encodeText( fixedText, "UTF-8", srcDescription+" (with new EOL)" );
-		return result;
 	}
 
 

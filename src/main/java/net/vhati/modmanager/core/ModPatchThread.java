@@ -223,7 +223,7 @@ public class ModPatchThread extends Thread {
 								InputStream mainStream = null;
 								try {
 									mainStream = ftlP.getInputStream(innerPath);
-									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
 									ftlP.remove( innerPath );
 									ftlP.add( innerPath, mergedStream );
@@ -241,7 +241,14 @@ public class ModPatchThread extends Thread {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							// Normalize line endings for other text files to CR-LF.
-							InputStream fixedStream = ModUtilities.setLineEndings( zis, "\r\n", modFile.getName()+":"+parentPath+fileName );
+							//   decodeText() reads anything and returns an LF string.
+							String fixedText = ModUtilities.decodeText( zis, modFile.getName()+":"+parentPath+fileName ).text;
+							fixedText = Pattern.compile("\n").matcher( fixedText ).replaceAll( "\r\n" );
+
+							if ( fileName.endsWith( ".xml" ) )
+								fixedText = fixedText.replaceAll( "<[?]xml [^>]*?[?]>\n*", "<?xml version=\"1.0\" encoding=\"windows-1252\"?>\n" );
+
+							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
 							if ( !moddedItems.contains(innerPath) )
 								moddedItems.add( innerPath );
