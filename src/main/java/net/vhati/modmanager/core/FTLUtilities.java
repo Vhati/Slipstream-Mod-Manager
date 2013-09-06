@@ -110,6 +110,7 @@ public class FTLUtilities {
 	 * Returns the executable that will launch FTL, or null.
 	 *
 	 * On Windows, FTLGame.exe is one dir above "resources/".
+	 * On Linux, FTL is a script, one dir above "resources/".
 	 * On OSX, FTL.app is the grandparent dir itself (a bundle).
 	 */
 	public static File findGameExe( File datsDir ) {
@@ -119,6 +120,13 @@ public class FTLUtilities {
 			File ftlDir = datsDir.getParentFile();
 			if ( ftlDir != null ) {
 				File exeFile = new File( ftlDir, "FTLGame.exe" );
+				if ( exeFile.exists() ) result = exeFile;
+			}
+		}
+		else if ( System.getProperty("os.name").equals("Linux") ) {
+			File ftlDir = datsDir.getParentFile();
+			if ( ftlDir != null ) {
+				File exeFile = new File( ftlDir, "FTL" );
 				if ( exeFile.exists() ) result = exeFile;
 			}
 		}
