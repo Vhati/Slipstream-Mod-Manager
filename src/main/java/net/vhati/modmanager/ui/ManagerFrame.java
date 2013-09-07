@@ -773,7 +773,14 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			resDat.bakFile = new File( backupDir, "resource.dat.bak" );
 
 			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
-			patchDlg.setSuccessTask( new SpawnGameTask() );
+
+			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
+			if ( !neverRunFtl.equals("true") ) {
+				File exeFile = FTLUtilities.findGameExe( datsDir );
+				if ( exeFile != null ) {
+					patchDlg.setSuccessTask( new SpawnGameTask( exeFile ) );
+				}
+			}
 
 			log.info( "" );
 			log.info( "Patching..." );
@@ -917,24 +924,24 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 
 	private class SpawnGameTask implements Runnable {
+		private final File exeFile;
+
+		public SpawnGameTask( File exeFile ) {
+			this.exeFile = exeFile;
+		}
+
 		@Override
 		public void run() {
-			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
-			if ( !neverRunFtl.equals("true") ) {
-				File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
-
-				File exeFile = FTLUtilities.findGameExe( datsDir );
-				if ( exeFile != null ) {
-					int response = JOptionPane.showConfirmDialog( ManagerFrame.this, "Do you want to run the game now?", "Ready to Play", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
-					if ( response == JOptionPane.YES_OPTION ) {
-						log.info( "Running FTL..." );
-						try {
-							FTLUtilities.launchGame( exeFile );
-						} catch ( Exception e ) {
-							log.error( "Error launching FTL.", e );
-						}
-						exitApp();
+			if ( exeFile != null ) {
+				int response = JOptionPane.showConfirmDialog( ManagerFrame.this, "Do you want to run the game now?", "Ready to Play", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+				if ( response == JOptionPane.YES_OPTION ) {
+					log.info( "Running FTL..." );
+					try {
+						FTLUtilities.launchGame( exeFile );
+					} catch ( Exception e ) {
+						log.error( "Error launching FTL.", e );
 					}
+					exitApp();
 				}
 			}
 		}
