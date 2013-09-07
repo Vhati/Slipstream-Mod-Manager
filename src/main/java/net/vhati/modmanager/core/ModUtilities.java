@@ -571,13 +571,15 @@ public class ModUtilities {
 		Matcher m;
 
 		// Wrap everything in a root tag, while mindful of the xml declaration.
-		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml version=\"1.0\" encoding=\"[^\"]+?\"[?]>" );
+		String wrapperSTag = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>";
+
+		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 		m = xmlDeclPtn.matcher( srcBuf );
 		boolean foundTopDecl = false;
 		while ( m.find() ) {
 			if ( m.start() == 0 ) {
 				foundTopDecl = true;
-				m.appendReplacement( dstBuf, "$0\n<wrapper>\n" );
+				m.appendReplacement( dstBuf, "$0\n"+ Matcher.quoteReplacement( wrapperSTag ) );
 			}
 			else {
 				messages.add( new ReportMessage(
@@ -591,7 +593,7 @@ public class ModUtilities {
 		dstBuf.append( "\n</wrapper>" );
 
 		if ( !foundTopDecl )
-			dstBuf.insert( 0, "<wrapper>\n" );
+			dstBuf.insert( 0, Matcher.quoteReplacement( wrapperSTag ) );
 
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
 
