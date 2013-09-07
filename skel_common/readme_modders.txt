@@ -90,11 +90,11 @@ Encoding!?
   the document WERE written in ANSI with characters beyond ASCII, they
   may get garbled.
 
-  UTF-16 - Windows uses this sometimes. Always has a BOM. It is not
+  UTF-16 - Windows uses this sometimes. Ideally always has a BOM. It is not
   identical with any other encodings. The whole thing looks like a mess
-  when decoded incorrectly. Apps have to deliberately support it -
-  usually by including tests to determine when they're dealing with
-  UTF-16 or something else.
+  when decoded incorrectly. Apps have to deliberately support it - usually
+  by including tests to determine when they're dealing with UTF-16 or
+  something else.
 
 
 Advanced XML
