@@ -38,7 +38,21 @@ import org.jdom2.input.JDOMParseException;
  *   Unrecognized named entities (&...;) and lone ampersands are accepted
  *     as literal text. (Those ampersands will be escaped if outputted).
  *
+ * The text must have \n line endings.
+ *
+ * If a line/column aware JDOMFactory is passed to the constructor,
+ *   that factory will receive locations for Elements (start tags).
+ *   That will be the 1-based line/col of the end character,
+ *   plus 1 col.
+ *
+ * If parsing fails, the thrown JDOMParseException has getter methods
+ * to report the nearest upcoming non-whitespace character, from where
+ * the parser gave up.
+ *
  * Only use this as a last resort, after a real parser fails.
+ *
+ * @see org.jdom2.input.JDOMParseException
+ * @see org.jdom2.located.LocatedJDOMFactory
  */
 public class SloppyXMLParser {
 
@@ -52,6 +66,8 @@ public class SloppyXMLParser {
 
 	private Pattern attrPtn = Pattern.compile( "\\s*(?:([\\w.-]+):)?([\\w.-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*')" );
 	private Pattern entityPtn = Pattern.compile( "&(?:(?:#([0-9]+))|(?:#x([0-9A-Fa-f]+))|([^;]+));" );
+
+	private Pattern breakPtn = Pattern.compile( "\n" );
 
 	private List<Pattern> chunkPtns = new ArrayList<Pattern>();
 	private Map<String,String> entityMap = new HashMap<String,String>();
@@ -91,6 +107,7 @@ public class SloppyXMLParser {
 		int sLen = s.length();
 		int lastPos = -1;
 		int pos = 0;
+		int[] lastLineAndCol = new int[] {0, 0};  // Counts \n's and chars after the last \n.
 		String tmp = null;
 		Matcher m = declPtn.matcher( s );
 
@@ -104,6 +121,7 @@ public class SloppyXMLParser {
 
 				if ( chunkPtn == declPtn ) {
 					// Don't care.
+					addLineAndCol( lastLineAndCol, m.group(0) );
 				}
 				else if ( chunkPtn == commentPtn ) {
 					String whitespace = m.group( 1 );
@@ -138,6 +156,8 @@ public class SloppyXMLParser {
 							factory.addContent( parentNode, commentNode );
 						}
 					}
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 				}
 				else if ( chunkPtn == cdataPtn ) {
 					String whitespace = m.group( 1 );
@@ -146,6 +166,8 @@ public class SloppyXMLParser {
 
 					CDATA cdataNode = factory.cdata( m.group(2) );
 					factory.addContent( parentNode, cdataNode );
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 				}
 				else if ( chunkPtn == sTagPtn ) {
 					String whitespace = m.group( 1 );
@@ -157,13 +179,15 @@ public class SloppyXMLParser {
 					String attrString = m.group( 4 );
 					boolean selfClosing = ( m.group( 5 ).length() > 0 );
 
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+
 					Element tagNode;
 					if ( nodePrefix != null ) {
 						Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
 						factory.addNamespaceDeclaration( rootNode, nodeNS );
-						tagNode = factory.element( nodeName, nodeNS );
+						tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName, nodeNS );
 					} else {
-						tagNode = factory.element( nodeName );
+						tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName );
 					}
 
 					if ( attrString.length() > 0 ) {
@@ -218,8 +242,11 @@ public class SloppyXMLParser {
 				else if ( chunkPtn == eTagPtn ) {
 					String interimText = m.group( 1 );
 					interimText = unescape( interimText );
+
 					factory.addContent( parentNode, factory.text( interimText ) );
 					parentNode = parentNode.getParent();
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 				}
 				else if ( chunkPtn == endSpacePtn ) {
 					// This is the end of the document.
@@ -230,6 +257,8 @@ public class SloppyXMLParser {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
 						factory.addContent( parentNode, factory.text( whitespace ) );
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 				}
 
 				matchedChunk = true;
@@ -325,24 +354,66 @@ public class SloppyXMLParser {
 
 
 	/**
-	 * Returns lineNum and colNum for a position in text.
+	 * Increments an ongoing tally of lines and the col on the current line.
+	 *
+	 * @param lastLineAndCol the current tally to increment (0-based)
+	 * @param s a string to check for \n's
+	 * @param start a start index in the string to search from (inclusive)
+	 * @param start an end index in the string (exclusive)
 	 */
-	public int[] getLineAndCol( CharSequence s, int pos ) {
-		Matcher breakMatcher = Pattern.compile( "\n" ).matcher( s );
-		breakMatcher.region( 0, pos+1 );
+	private void addLineAndCol( int[] lastLineAndCol, CharSequence s, int start, int end ) {
+		if ( s.length() == 0 || start == end ) return;
+
+		Matcher breakMatcher = breakPtn.matcher( s );
+		breakMatcher.region( start, end );
+		int breakCount = 0;
 		int lastBreakPos = -1;
-		int lineNum = 1;
 		while ( breakMatcher.find() ) {
 			lastBreakPos = breakMatcher.start();
-			breakMatcher.region( breakMatcher.end(), breakMatcher.regionEnd() );
-			lineNum++;
+			breakCount++;
+		}
+		if ( lastBreakPos == -1 ) {
+			// Same line, a few more chars in. Increment col.
+			lastLineAndCol[1] += end-1 - start;
+		} else {
+			// On a new line now, reset the col.
+			lastLineAndCol[0] += breakCount;
+			lastLineAndCol[1] = end-1 - lastBreakPos;
+		}
+	}
+
+	private void addLineAndCol( int[] lastLineAndCol, CharSequence s ) {
+		addLineAndCol( lastLineAndCol, s, 0, s.length() );
+	}
+
+
+	/**
+	 * Returns lineNum and colNum for a position in text.
+	 * The first line is line 1.
+	 * Line breaks start a new lins as col 0.
+	 * The first char of each line, after the break is col 1.
+	 *
+	 * @param pos a 0-based offset
+	 * @return 1-based ints for line and col (the first char is line 1, col 1)
+	 * @see org.jdom2.input.JDOMParseException
+	 */
+	public int[] getLineAndCol( CharSequence s, int pos ) {
+		pos = Math.min( pos, s.length() );
+
+		Matcher breakMatcher = breakPtn.matcher( s );
+		breakMatcher.region( 0, pos+1 );  // Include pos itself in case it's a break.
+		int breakCount = 0;
+		int lastBreakPos = -1;
+		while ( breakMatcher.find() ) {
+			lastBreakPos = breakMatcher.start();
+			breakCount++;
 		}
 		int colNum;
 		if ( lastBreakPos == -1 )
-			colNum = pos+1;
+			colNum = pos+1;  // Pretend ^ was column 0, as a \n would.
 		else
 			colNum = pos - lastBreakPos;
 
-		return new int[] { lineNum, colNum };
+		return new int[] { breakCount+1, colNum };
 	}
 }
