@@ -199,8 +199,8 @@ public class ModUtilities {
 	 * which doesn't need closing.
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
-	 * FTL stubbornly assumes all XML is in windows-1252 encoding, even
-	 * on Linux.
+	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
+	 * even on Linux.
 	 *
 	 * The description arguments identify the streams for log messages.
 	 *
@@ -228,6 +228,39 @@ public class ModUtilities {
 		String mergedString = writer.toString();
 
 		InputStream result = encodeText( mergedString, encoding, mainDescription+"+"+appendDescription );
+		return result;
+	}
+
+	/**
+	 * Decodes, parses, sloppy prints, and reencodes an XML stream.
+	 * This effectively repairs any XML problems that the sloppy parser
+	 * can tolerate.
+	 *
+	 * The returned stream is a ByteArrayInputStream
+	 * which doesn't need closing.
+	 *
+	 * The result will have CR-LF line endings and the desired encoding.
+	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
+	 * even on Linux.
+	 *
+	 * The description argument identifies the stream for log messages.
+	 *
+	 * @see net.vhati.modmanager.core.XMLPatcher
+	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
+	 */
+	public static InputStream rebuildXMLFile( InputStream srcStream, String encoding, String srcDescription ) throws IOException, JDOMException {
+		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
+
+		String srcText = decodeText( srcStream, srcDescription ).text;
+		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
+		srcText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ srcText +"</wrapper>";
+		Document doc = parseStrictOrSloppyXML( srcText, srcDescription+" (wrapped)" );
+
+		StringWriter writer = new StringWriter();
+		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
+		String resultString = writer.toString();
+
+		InputStream result = encodeText( resultString, encoding, srcDescription+" (cleaned)" );
 		return result;
 	}
 
