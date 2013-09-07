@@ -57,6 +57,9 @@ Usage
     Delete the outdated files in Slipstream/backup/
     If you don't, the game's resources will get corrupted.
 
+  Commandline:
+    Run "./modman-cli.sh -h" for commandline usage.
+
 
 Troubleshooting
 
