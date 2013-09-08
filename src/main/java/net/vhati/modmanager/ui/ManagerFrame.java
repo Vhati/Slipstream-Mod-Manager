@@ -96,7 +96,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
 
 	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
-	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/auto_update.json";
+	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/auto_update.json";
 
 	private File backupDir = new File( "./backup/" );
 	private File modsDir = new File( "./mods/" );
@@ -837,6 +837,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 				resultBuf.append( "No mods were checked." );
 			}
 			else if ( anyInvalid ) {
+				resultBuf.append( "\n" );
 				resultBuf.append( "FTL itself can tolerate lots of XML typos and still run. " );
 				resultBuf.append( "But malformed XML may break tools that do proper parsing, " );
 				resultBuf.append( "and it hinders the development of new tools.\n" );

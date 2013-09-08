@@ -5,8 +5,8 @@
 				"version" : "1.2",
 				"urls" : {
 					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "N/A",
-					"Windows" : "N/A"
+					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.2/Slipstream%20Mod%20Manager%20v1.2-Unix.tar.gz/download",
+					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.2/Slipstream%20Mod%20Manager%20v1.2-Win.zip/download"
 				}
 			},
 			"changelog" : [
