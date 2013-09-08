@@ -536,13 +536,13 @@ public class XMLPatcher {
 	 */
 	protected static class WithChildFilter extends AbstractFilter<Element> {
 		private String type;
-		private Filter childFilter;
+		private Filter<Element> childFilter;
 
-		public WithChildFilter( Filter childFilter ) {
+		public WithChildFilter( Filter<Element> childFilter ) {
 			this( null, childFilter );
 		}
 
-		public WithChildFilter( String type, Filter childFilter ) {
+		public WithChildFilter( String type, Filter<Element> childFilter ) {
 			this.type = type;
 			this.childFilter = childFilter;
 		}
