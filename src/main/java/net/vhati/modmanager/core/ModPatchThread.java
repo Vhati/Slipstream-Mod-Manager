@@ -237,7 +237,7 @@ public class ModPatchThread extends Thread {
 									moddedItems.add( innerPath );
 							}
 						}
-						if ( fileName.endsWith( ".xml" ) ) {
+						else if ( fileName.endsWith( ".xml" ) ) {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							InputStream fixedStream = ModUtilities.rebuildXMLFile( zis, "windows-1252", modFile.getName()+":"+parentPath+fileName );
