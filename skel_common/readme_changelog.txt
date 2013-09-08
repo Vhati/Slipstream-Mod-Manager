@@ -1,9 +1,11 @@
 Changelog
 
-???:
+1.2:
 - Added a commandline interface
 - Incorporated strict-then-sloppy XML parsing into the patch process
-- Added XML Sandbox for syntax tinkering
+- Added special XML tags for advanced appending
+- Added XML Sandbox for tinkering with append tags
+- Added 'Engi Scrap Advantage' example mod
 - Added scrollbars to progress popups to show long error messages
 - The main window's geometry is saved on exit
 - Added urls in the statusbar when hovering over links

@@ -2,13 +2,30 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.1",
+				"version" : "1.2",
 				"urls" : {
-					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.1/Slipstream%20Mod%20Manager%20v1.1-Win.zip/download",
-					"Unix" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.1/Slipstream%20Mod%20Manager%20v1.1-Unix.tar.gz/download"
+					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
+					"Mac/Linux" : "N/A",
+					"Windows" : "N/A"
 				}
 			},
 			"changelog" : [
+				{
+					"version" : "1.2",
+					"changes" : [
+						"Added a commandline interface",
+						"Incorporated strict-then-sloppy XML parsing into the patch process",
+						"Added special XML tags for advanced appending",
+						"Added XML Sandbox for tinkering with append tags",
+						"Added 'Engi Scrap Advantage' example mod",
+						"Added scrollbars to progress popups to show long error messages",
+						"The main window's geometry is saved on exit",
+						"Added urls in the statusbar when hovering over links",
+						"Added periodic checking for SMM updates",
+						"Added FTL launching on Linux",
+						"Fixed critical bugs in InputStreams returned by FTLDat"
+					]
+				},
 				{
 					"version": "1.1",
 					"changes" : [
