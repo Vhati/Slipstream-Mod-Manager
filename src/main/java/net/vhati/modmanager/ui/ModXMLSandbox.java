@@ -337,7 +337,8 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 			StringWriter writer = new StringWriter();
 			SloppyXMLOutputProcessor.sloppyPrint( mainDoc, writer, null );
-			mainArea.setText( writer.toString() );
+			String displayedText = writer.toString().replaceAll( "\r(?!\n)|(?<!\r)\n", "\r\n" );  // sloppyPrint needs normalizing!?
+			mainArea.setText( displayedText );
 			mainArea.setCaretPosition( 0 );
 			areasPane.setSelectedComponent( mainScroll );
 			resultArea.setText( "" );
@@ -376,7 +377,8 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 			StringWriter writer = new StringWriter();
 			SloppyXMLOutputProcessor.sloppyPrint( resultDoc, writer, null );
-			resultArea.setText( writer.toString() );
+			String displayedText = writer.toString().replaceAll( "\r(?!\n)|(?<!\r)\n", "\r\n" );  // sloppyPrint needs normalizing!?
+			resultArea.setText( displayedText );
 			resultArea.setCaretPosition( 0 );
 			areasPane.setSelectedComponent( resultScroll );
 		}
