@@ -226,6 +226,7 @@ public class ModUtilities {
 		StringWriter writer = new StringWriter();
 		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
 		String mergedString = writer.toString();
+		mergedString = mergedString.replaceAll( "\r(?!\n)|(?<!\r)\n", "\r\n" );  // sloppyPrint needs normalizing!?
 
 		InputStream result = encodeText( mergedString, encoding, mainDescription+"+"+appendDescription );
 		return result;
@@ -259,6 +260,7 @@ public class ModUtilities {
 		StringWriter writer = new StringWriter();
 		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
 		String resultString = writer.toString();
+		resultString = resultString.replaceAll( "\r(?!\n)|(?<!\r)\n", "\r\n" );  // sloppyPrint needs normalizing!?
 
 		InputStream result = encodeText( resultString, encoding, srcDescription+" (cleaned)" );
 		return result;

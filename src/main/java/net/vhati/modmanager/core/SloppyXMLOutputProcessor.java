@@ -150,12 +150,13 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 * is encoding bytes to match. If encoding is null, the default
 	 * is "UTF-8".
 	 *
-	 * LineEndings will be CR-LF.
+	 * LineEndings will be CR-LF. Except for comments!?
 	 */
 	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
 		Format format = Format.getPrettyFormat();
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );
+		format.setIndent( "\t" );
 		format.setLineSeparator( LineSeparator.CRNL );
 
 		if ( encoding != null ) format.setEncoding( encoding );
