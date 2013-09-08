@@ -253,6 +253,21 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing( WindowEvent e ) {
+				// The close button was clicked.
+
+				// This is where an "Are you sure?" popup could go.
+				ManagerFrame.this.setVisible( false );
+				ManagerFrame.this.dispose();
+
+				// The following would also trigger this callback.
+				//Window w = ...;
+				//w.getToolkit().getSystemEventQueue().postEvent( new WindowEvent(w, WindowEvent.WINDOW_CLOSING) );
+			}
+
+			@Override
+			public void windowClosed( WindowEvent e ) {
+				// dispose() was called.
+
 				List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
 
 				for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
