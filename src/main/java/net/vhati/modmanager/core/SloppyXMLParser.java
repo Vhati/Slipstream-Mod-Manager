@@ -57,7 +57,9 @@ import org.jdom2.input.JDOMParseException;
 public class SloppyXMLParser {
 
 	private Pattern declPtn = Pattern.compile( "(\\s*)<[?]xml [^?]*[?]>" );
+	private Pattern emptyCommentPtn = Pattern.compile( "(\\s*)<!---->" );
 	private Pattern commentPtn = Pattern.compile( "(?s)(\\s*)<!--((?:.(?!-->))*.)-->" );
+	private Pattern emptyCDATAPtn = Pattern.compile( "(\\s*)<!\\[CDATA\\[\\]\\]>" );
 	private Pattern cdataPtn = Pattern.compile( "(?s)(\\s*)<!\\[CDATA\\[((?:.(?!\\]\\]>))*.)\\]\\]>" );
 	private Pattern sTagPtn = Pattern.compile( "(\\s*)<(?:([\\w.-]+):)?([\\w.-]+)((?: [^>]+?)??)\\s*(/?)>" );
 	private Pattern eTagPtn = Pattern.compile( "([^<]*)</\\s*([^>]+)>" );
@@ -84,7 +86,9 @@ public class SloppyXMLParser {
 		this.factory = factory;
 
 		chunkPtns.add( declPtn );
+		chunkPtns.add( emptyCommentPtn );
 		chunkPtns.add( commentPtn );
+		chunkPtns.add( emptyCDATAPtn );
 		chunkPtns.add( cdataPtn );
 		chunkPtns.add( sTagPtn );
 		chunkPtns.add( eTagPtn );
@@ -123,6 +127,13 @@ public class SloppyXMLParser {
 					// Don't care.
 					addLineAndCol( lastLineAndCol, m.group(0) );
 				}
+				else if ( chunkPtn == emptyCommentPtn ) {
+					String whitespace = m.group( 1 );
+					if ( whitespace.length() > 0 )
+						factory.addContent( parentNode, factory.text( whitespace ) );
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+				}
 				else if ( chunkPtn == commentPtn ) {
 					String whitespace = m.group( 1 );
 					if ( whitespace.length() > 0 )
@@ -156,6 +167,13 @@ public class SloppyXMLParser {
 							factory.addContent( parentNode, commentNode );
 						}
 					}
+
+					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+				}
+				else if ( chunkPtn == emptyCDATAPtn ) {
+					String whitespace = m.group( 1 );
+					if ( whitespace.length() > 0 )
+						factory.addContent( parentNode, factory.text( whitespace ) );
 
 					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 				}
