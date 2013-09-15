@@ -56,6 +56,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -117,6 +118,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private ModDB modDB = new ModDB();
 
 	private AutoUpdateInfo appUpdateInfo = null;
+	private Color updateBtnDisabledColor = UIManager.getColor( "Button.foreground" );
+	private Color updateBtnEnabledColor = new Color(0, 124, 0);
 
 	private NerfListener nerfListener = new NerfListener( this );
 
@@ -209,9 +212,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 		updateBtn = new JButton("Update");
 		updateBtn.setMargin( actionInsets );
-		updateBtn.setForeground( new Color(0, 124, 0) );
 		updateBtn.addMouseListener( new StatusbarMouseListener( this, String.format( "Show info about the latest version of %s.", appName ) ) );
 		updateBtn.addActionListener(this);
+		updateBtn.setForeground( updateBtnDisabledColor );
 		updateBtn.setEnabled( false );
 		modActionsPanel.add( updateBtn );
 
@@ -484,7 +487,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
 			if ( aui != null ) {
 				appUpdateInfo = aui;
-				updateBtn.setEnabled( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+				boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+				updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
+				updateBtn.setEnabled( isUpdateAvailable );
 			}
 
 			if ( appUpdateInterval > 0 ) {
@@ -549,7 +554,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
 					if ( aui != null ) {
 						appUpdateInfo = aui;
-						updateBtn.setEnabled( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+						boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+						updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
+						updateBtn.setEnabled( isUpdateAvailable );
 					}
 				}
 			}

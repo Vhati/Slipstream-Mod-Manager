@@ -2,6 +2,7 @@ Changelog
 
 ???:
 - Added "Return FTL to an unmodded state before switching to a new version"
+- Fixed perpetually green "Update" button
 
 1.2:
 - Added a commandline interface
