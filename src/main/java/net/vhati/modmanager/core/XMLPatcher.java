@@ -160,7 +160,7 @@ public class XMLPatcher {
 						}
 					}
 					searchValue = selectorNode.getTextTrim();  // Never null, but often "".
-					if ( searchValue.length() > 0 ) searchValue = null;
+					if ( searchValue.length() == 0 ) searchValue = null;
 				}
 	
 				LikeFilter searchFilter = new LikeFilter( searchType, attrMap, searchValue );
@@ -210,7 +210,7 @@ public class XMLPatcher {
 						}
 					}
 					searchValue = selectorNode.getTextTrim();  // Never null, but often "".
-					if ( searchValue.length() > 0 ) searchValue = null;
+					if ( searchValue.length() == 0 ) searchValue = null;
 				}
 	
 				LikeFilter searchChildFilter = new LikeFilter( searchChildType, attrMap, searchValue );

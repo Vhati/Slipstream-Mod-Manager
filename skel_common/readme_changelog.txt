@@ -3,6 +3,7 @@ Changelog
 ???:
 - Added "Return FTL to an unmodded state before switching to a new version"
 - Fixed advanced find tags' panic arg (was "true" all the time)
+- Fixed advanced selector tag not narrowing results when it had a value
 - Fixed perpetually green "Update" button
 
 1.2:
