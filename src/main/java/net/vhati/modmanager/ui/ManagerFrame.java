@@ -679,20 +679,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	public void showAppUpdateInfo() {
 		StringBuilder buf = new StringBuilder();
 
-		for ( Map.Entry<ComparableVersion,List<String>> entry : appUpdateInfo.getChangelog().entrySet() ) {
-			if ( appVersion.compareTo( entry.getKey() ) >= 0 ) break;
-
-			if ( buf.length() > 0 ) buf.append( "\n" );
-			buf.append( entry.getKey() ).append( ":\n" );
-
-			for ( String change : entry.getValue() ) {
-				buf.append( "  - " ).append( change ).append( "\n" );
-			}
-		}
-
 		try {
 			infoArea.clear();
 			infoArea.appendTitleText( "What's New\n" );
+
+			// Links.
 			infoArea.appendRegularText( String.format( "Version %s: ", appUpdateInfo.getLatestVersion().toString() ) );
 			boolean first = true;
 			for ( Map.Entry<String,String> entry : appUpdateInfo.getLatestURLs().entrySet() ) {
@@ -704,7 +695,27 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			}
 			infoArea.appendRegularText( "\n" );
 			infoArea.appendRegularText( "\n" );
+
+			// Notice.
+			if ( appUpdateInfo.getNotice() != null && appUpdateInfo.getNotice().length() > 0 ) {
+				infoArea.appendRegularText( appUpdateInfo.getNotice() );
+				infoArea.appendRegularText( "\n" );
+				infoArea.appendRegularText( "\n" );
+			}
+
+			// Changelog.
+			for ( Map.Entry<ComparableVersion,List<String>> entry : appUpdateInfo.getChangelog().entrySet() ) {
+				if ( appVersion.compareTo( entry.getKey() ) >= 0 ) break;
+
+				if ( buf.length() > 0 ) buf.append( "\n" );
+				buf.append( entry.getKey() ).append( ":\n" );
+
+				for ( String change : entry.getValue() ) {
+					buf.append( "  - " ).append( change ).append( "\n" );
+				}
+			}
 			infoArea.appendRegularText( buf.toString() );
+
 			infoArea.setCaretPosition( 0 );
 		}
 		catch ( Exception e ) {

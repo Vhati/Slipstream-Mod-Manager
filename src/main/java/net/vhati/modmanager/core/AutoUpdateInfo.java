@@ -14,6 +14,7 @@ import net.vhati.modmanager.core.ComparableVersion;
 public class AutoUpdateInfo {
 	private ComparableVersion latestVersion = null;
 	private Map<String,String> latestURLs = new TreeMap<String,String>();
+	private String notice = null;
 	private Map<ComparableVersion,List<String>> changelog = new TreeMap<ComparableVersion,List<String>>( Collections.reverseOrder() );
 
 
@@ -26,6 +27,15 @@ public class AutoUpdateInfo {
 	}
 
 
+	public void setNotice( String s ) {
+		notice = s;
+	}
+
+	public String getNotice() {
+		return notice;
+	}
+
+
 	public void putLatestURL( String os, String url ) {
 		latestURLs.put( os, url );
 	}
@@ -33,6 +43,7 @@ public class AutoUpdateInfo {
 	public void putChanges( ComparableVersion version, List<String> changeList ) {
 		changelog.put( version, changeList );
 	}
+
 
 
 	public Map<String,String> getLatestURLs() {

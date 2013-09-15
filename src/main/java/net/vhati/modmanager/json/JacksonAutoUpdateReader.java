@@ -49,6 +49,8 @@ public class JacksonAutoUpdateReader {
 				aui.putLatestURL( entry.getKey(), entry.getValue().textValue() );
 			}
 
+			aui.setNotice( latestNode.get( "notice" ).textValue() );
+
 			JsonNode changelogNode = historyNode.get( "changelog" );
 
 			for ( JsonNode releaseNode : changelogNode ) {

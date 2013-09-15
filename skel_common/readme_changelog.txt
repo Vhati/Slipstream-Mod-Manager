@@ -1,5 +1,8 @@
 Changelog
 
+???:
+- Added "Return FTL to an unmodded state before switching to a new version"
+
 1.2:
 - Added a commandline interface
 - Incorporated strict-then-sloppy XML parsing into the patch process
