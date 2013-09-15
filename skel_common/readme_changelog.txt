@@ -7,6 +7,7 @@ Changelog
 - Fixed perpetually green "Update" button
 - Added --global-panic commandline arg to show mod devs typoed find tags
 - Added commandline tips in readme_modders.txt
+- Fixed sloppy parser Validate error about things not allowed at root
 
 1.2:
 - Added a commandline interface

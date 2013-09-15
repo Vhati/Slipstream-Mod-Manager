@@ -824,7 +824,7 @@ public class ModUtilities {
 			xmlValid = false;
 		}
 		catch ( Exception e ) {
-			log.error( "Error while validating mod xml.", e );
+			log.error( "Error while validating mod xml with the strict parser.", e );
 			messages.add( new ReportMessage(
 				ReportMessage.EXCEPTION,
 				"An error occurred. See log for details."
@@ -845,6 +845,9 @@ public class ModUtilities {
 
 		List<ReportMessage> messages = new ArrayList<ReportMessage>();
 		boolean xmlValid = true;
+
+		// Meh, the parser's gonna make its own wrapper with declarations anyway.
+		//text = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ text +"</wrapper>";
 
 		try {
 			SloppyXMLParser parser = new SloppyXMLParser();
@@ -876,12 +879,20 @@ public class ModUtilities {
 				) );
 			}
 			else {
+				log.error( "Error while validating mod xml with the sloppy parser.", e );
 				messages.add( new ReportMessage(
 					ReportMessage.EXCEPTION,
 					"An error occurred. See log for details."
 				) );
 			}
 			xmlValid = false;
+		}
+		catch ( Exception e ) {
+			log.error( "Error while validating mod xml with the sloppy parser.", e );
+			messages.add( new ReportMessage(
+				ReportMessage.EXCEPTION,
+				"An error occurred. See log for details."
+			) );
 		}
 
 		return new Report( messages, xmlValid );

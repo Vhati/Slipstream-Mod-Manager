@@ -16,6 +16,7 @@ import org.jdom2.Content;
 import org.jdom2.DefaultJDOMFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.IllegalAddException;
 import org.jdom2.JDOMFactory;
 import org.jdom2.Namespace;
 import org.jdom2.Parent;
@@ -115,198 +116,216 @@ public class SloppyXMLParser {
 		String tmp = null;
 		Matcher m = declPtn.matcher( s );
 
-		while ( pos > lastPos && pos < sLen ) {
-			m.region( pos, sLen );
-			boolean matchedChunk = false;
-
-			for ( Pattern chunkPtn : chunkPtns ) {
-				m.usePattern( chunkPtn );
-				if ( !m.lookingAt() ) continue;
-
-				if ( chunkPtn == declPtn ) {
-					// Don't care.
-					addLineAndCol( lastLineAndCol, m.group(0) );
-				}
-				else if ( chunkPtn == emptyCommentPtn ) {
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-				}
-				else if ( chunkPtn == commentPtn ) {
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					tmp = m.group( 2 );
-					if ( tmp.length() == 0 ) {
-						factory.addContent( parentNode, factory.comment( "" ) );
+		try {
+			while ( pos > lastPos && pos < sLen ) {
+				m.region( pos, sLen );
+				boolean matchedChunk = false;
+	
+				for ( Pattern chunkPtn : chunkPtns ) {
+					m.usePattern( chunkPtn );
+					if ( !m.lookingAt() ) continue;
+	
+					if ( chunkPtn == declPtn ) {
+						// Don't care.
+						addLineAndCol( lastLineAndCol, m.group(0) );
 					}
-					else {
-						Matcher splicedMatcher = Pattern.compile( "(\\s*)<!--" ).matcher( tmp );
-						int commentStart = 0;
-						while ( splicedMatcher.find() ) {
-							if ( splicedMatcher.start() - commentStart > 0 ) {
-								String splicedChunk = tmp.substring( commentStart, splicedMatcher.start() );
-								splicedChunk = splicedChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
-								if ( splicedChunk.startsWith( " " ) ) splicedChunk += " ";
-								Comment commentNode = factory.comment( splicedChunk );
+					else if ( chunkPtn == emptyCommentPtn ) {
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+					else if ( chunkPtn == commentPtn ) {
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						tmp = m.group( 2 );
+						if ( tmp.length() == 0 ) {
+							factory.addContent( parentNode, factory.comment( "" ) );
+						}
+						else {
+							Matcher splicedMatcher = Pattern.compile( "(\\s*)<!--" ).matcher( tmp );
+							int commentStart = 0;
+							while ( splicedMatcher.find() ) {
+								if ( splicedMatcher.start() - commentStart > 0 ) {
+									String splicedChunk = tmp.substring( commentStart, splicedMatcher.start() );
+									splicedChunk = splicedChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
+									if ( splicedChunk.startsWith( " " ) ) splicedChunk += " ";
+									Comment commentNode = factory.comment( splicedChunk );
+									factory.addContent( parentNode, commentNode );
+								}
+								if ( splicedMatcher.group(1).length() > 0 ) {
+									// Whitespace between comments.
+									factory.addContent( parentNode, factory.text( splicedMatcher.group(1) ) );
+								}
+								commentStart = splicedMatcher.end();
+							}
+							if ( commentStart < tmp.length() ) {
+								String finalChunk = tmp.substring( commentStart );
+								finalChunk = finalChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
+								Comment commentNode = factory.comment( finalChunk );
 								factory.addContent( parentNode, commentNode );
 							}
-							if ( splicedMatcher.group(1).length() > 0 ) {
-								// Whitespace between comments.
-								factory.addContent( parentNode, factory.text( splicedMatcher.group(1) ) );
-							}
-							commentStart = splicedMatcher.end();
 						}
-						if ( commentStart < tmp.length() ) {
-							String finalChunk = tmp.substring( commentStart );
-							finalChunk = finalChunk.replaceAll( "^-+|(?<=-)-+|-+$", "" );
-							Comment commentNode = factory.comment( finalChunk );
-							factory.addContent( parentNode, commentNode );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+					else if ( chunkPtn == emptyCDATAPtn ) {
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+					else if ( chunkPtn == cdataPtn ) {
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						CDATA cdataNode = factory.cdata( m.group(2) );
+						factory.addContent( parentNode, cdataNode );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+					else if ( chunkPtn == sTagPtn ) {
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						String nodePrefix = m.group( 2 );  // Might be null.
+						String nodeName = m.group( 3 );
+						String attrString = m.group( 4 );
+						boolean selfClosing = ( m.group( 5 ).length() > 0 );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+	
+						Element tagNode;
+						if ( nodePrefix != null ) {
+							Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
+							factory.addNamespaceDeclaration( rootNode, nodeNS );
+							tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName, nodeNS );
+						} else {
+							tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName );
 						}
-					}
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-				}
-				else if ( chunkPtn == emptyCDATAPtn ) {
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-				}
-				else if ( chunkPtn == cdataPtn ) {
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					CDATA cdataNode = factory.cdata( m.group(2) );
-					factory.addContent( parentNode, cdataNode );
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-				}
-				else if ( chunkPtn == sTagPtn ) {
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					String nodePrefix = m.group( 2 );  // Might be null.
-					String nodeName = m.group( 3 );
-					String attrString = m.group( 4 );
-					boolean selfClosing = ( m.group( 5 ).length() > 0 );
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-
-					Element tagNode;
-					if ( nodePrefix != null ) {
-						Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
-						factory.addNamespaceDeclaration( rootNode, nodeNS );
-						tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName, nodeNS );
-					} else {
-						tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName );
-					}
-
-					if ( attrString.length() > 0 ) {
-						Matcher am = attrPtn.matcher( attrString );
-						while ( am.lookingAt() ) {
-							String attrPrefix = am.group( 1 );  // Might be null.
-							String attrName = am.group( 2 );
-							String attrValue = am.group( 3 );
-							attrValue = attrValue.substring( 1, attrValue.length()-1 );
-							attrValue = unescape( attrValue );
-
-							if ( attrPrefix != null ) {
-								if ( attrPrefix.equals( "xmlns" ) ) {
-									// This is a pseudo attribute declaring a namespace prefix.
-									// Move it to the root node.
-									Namespace attrNS = Namespace.getNamespace( attrName, attrName );  // URI? *shrug*
-									factory.addNamespaceDeclaration( rootNode, attrNS );
-								}
-								else {
-									Namespace attrNS = Namespace.getNamespace( attrPrefix, attrPrefix );  // URI? *shrug*
-									factory.addNamespaceDeclaration( rootNode, attrNS );
-									Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, attrNS );
+	
+						if ( attrString.length() > 0 ) {
+							Matcher am = attrPtn.matcher( attrString );
+							while ( am.lookingAt() ) {
+								String attrPrefix = am.group( 1 );  // Might be null.
+								String attrName = am.group( 2 );
+								String attrValue = am.group( 3 );
+								attrValue = attrValue.substring( 1, attrValue.length()-1 );
+								attrValue = unescape( attrValue );
+	
+								if ( attrPrefix != null ) {
+									if ( attrPrefix.equals( "xmlns" ) ) {
+										// This is a pseudo attribute declaring a namespace prefix.
+										// Move it to the root node.
+										Namespace attrNS = Namespace.getNamespace( attrName, attrName );  // URI? *shrug*
+										factory.addNamespaceDeclaration( rootNode, attrNS );
+									}
+									else {
+										Namespace attrNS = Namespace.getNamespace( attrPrefix, attrPrefix );  // URI? *shrug*
+										factory.addNamespaceDeclaration( rootNode, attrNS );
+										Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, attrNS );
+										factory.setAttribute( tagNode, attrObj );
+									}
+								} else if ( attrName.equals("xmlns") ) {
+										// New default namespace URI within this node.
+										Namespace attrNS = Namespace.getNamespace( attrValue );
+										factory.addNamespaceDeclaration( tagNode, attrNS );
+								} else {
+									// Normal attribute.
+									Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, Namespace.NO_NAMESPACE );
 									factory.setAttribute( tagNode, attrObj );
 								}
-							} else if ( attrName.equals("xmlns") ) {
-									// New default namespace URI within this node.
-									Namespace attrNS = Namespace.getNamespace( attrValue );
-									factory.addNamespaceDeclaration( tagNode, attrNS );
-							} else {
-								// Normal attribute.
-								Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, Namespace.NO_NAMESPACE );
-								factory.setAttribute( tagNode, attrObj );
+								am.region( am.end(), am.regionEnd() );
 							}
-							am.region( am.end(), am.regionEnd() );
+							if ( am.regionStart() < attrString.length() ) {
+								int nonspacePos = findNextNonspace( s, pos );
+								int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
+	
+								int[] lineAndCol = getLineAndCol( s, errorPos );
+								int lineNum = lineAndCol[0];
+								int colNum = lineAndCol[1];
+	
+								SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Strange attributes.", lineNum, colNum ), null, null, lineNum, colNum);
+								throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
+							}
 						}
-						if ( am.regionStart() < attrString.length() ) {
-							int nonspacePos = findNextNonspace( s, pos );
-							int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
-
-							int[] lineAndCol = getLineAndCol( s, errorPos );
-							int lineNum = lineAndCol[0];
-							int colNum = lineAndCol[1];
-
-							SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Strange attributes.", lineNum, colNum ), null, null, lineNum, colNum);
-							throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
-						}
+	
+						factory.addContent( parentNode, tagNode );
+						if ( !selfClosing ) parentNode = tagNode;
 					}
-
-					factory.addContent( parentNode, tagNode );
-					if ( !selfClosing ) parentNode = tagNode;
+					else if ( chunkPtn == eTagPtn ) {
+						String interimText = m.group( 1 );
+						interimText = unescape( interimText );
+	
+						factory.addContent( parentNode, factory.text( interimText ) );
+						parentNode = parentNode.getParent();
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+					else if ( chunkPtn == endSpacePtn ) {
+						// This is the end of the document.
+					}
+					else if ( chunkPtn == strayCharsPtn ) {
+						// Non-space junk between an end tag and a start tag.
+	
+						String whitespace = m.group( 1 );
+						if ( whitespace.length() > 0 )
+							factory.addContent( parentNode, factory.text( whitespace ) );
+	
+						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+					}
+	
+					matchedChunk = true;
+					lastPos = pos;
+					pos = m.end();
+					break;
 				}
-				else if ( chunkPtn == eTagPtn ) {
-					String interimText = m.group( 1 );
-					interimText = unescape( interimText );
-
-					factory.addContent( parentNode, factory.text( interimText ) );
-					parentNode = parentNode.getParent();
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
+	
+				if ( !matchedChunk ) {
+					int nonspacePos = findNextNonspace( s, pos );
+					int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
+	
+					int[] lineAndCol = getLineAndCol( s, errorPos );
+					int lineNum = lineAndCol[0];
+					int colNum = lineAndCol[1];
+	
+					SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Unexpected characters.", lineNum, colNum ), null, null, lineNum, colNum);
+					throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 				}
-				else if ( chunkPtn == endSpacePtn ) {
-					// This is the end of the document.
+			}
+	
+			if ( rootNode.getChildren().size() == 1 ) {
+				// No need for the wrapper, promote its only child to root.
+	
+				Element newRoot = rootNode.getChildren().get( 0 );
+				newRoot.detach();
+				for ( Namespace ns : rootNode.getAdditionalNamespaces() ) {
+					factory.addNamespaceDeclaration( newRoot, ns );
 				}
-				else if ( chunkPtn == strayCharsPtn ) {
-					// Non-space junk between an end tag and a start tag.
-
-					String whitespace = m.group( 1 );
-					if ( whitespace.length() > 0 )
-						factory.addContent( parentNode, factory.text( whitespace ) );
-
-					addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-				}
-
-				matchedChunk = true;
-				lastPos = pos;
-				pos = m.end();
-				break;
+				factory.setRoot( doc, newRoot );
 			}
 
-			if ( !matchedChunk ) {
-				int nonspacePos = findNextNonspace( s, pos );
-				int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
-
-				int[] lineAndCol = getLineAndCol( s, errorPos );
-				int lineNum = lineAndCol[0];
-				int colNum = lineAndCol[1];
-
-				SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Unexpected characters.", lineNum, colNum ), null, null, lineNum, colNum);
-				throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
-			}
 		}
+		catch( IllegalAddException e ) {
+			int nonspacePos = findNextNonspace( s, pos );
+			int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
 
-		if ( rootNode.getChildren().size() == 1 ) {
-			// No need for the wrapper, promote its only child to root.
+			int[] lineAndCol = getLineAndCol( s, errorPos );
+			int lineNum = lineAndCol[0];
+			int colNum = lineAndCol[1];
 
-			Element newRoot = rootNode.getChildren().get( 0 );
-			newRoot.detach();
-			for ( Namespace ns : rootNode.getAdditionalNamespaces() ) {
-				factory.addNamespaceDeclaration( newRoot, ns );
+			String hint = "";
+			if ( e.getMessage() != null && e.getMessage().indexOf( "not allowed at the document root" ) != -1 ) {
+				hint = " (There's likely an extraneous closing tag before this point.)";
 			}
-			factory.setRoot( doc, newRoot );
+			SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: %s%s", lineNum, colNum, e.getMessage(), hint ), null, null, lineNum, colNum, e);
+			throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 		}
 
 		return doc;
