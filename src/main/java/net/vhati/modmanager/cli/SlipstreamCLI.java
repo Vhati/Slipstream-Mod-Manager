@@ -56,11 +56,14 @@ public class SlipstreamCLI {
 		                                .hasArg()
 		                                .withArgName("DIR")
 		                                .create() );
+		options.addOption( OptionBuilder.withLongOpt( "global-panic" )
+		                                .withDescription( "patch as if advanced find tags had panic='true'" )
+		                                .create() );
 		options.addOption( OptionBuilder.withLongOpt( "list-mods" )
 		                                .withDescription( "list available mod names" )
 		                                .create() );
 		options.addOption( OptionBuilder.withLongOpt( "runftl" )
-		                                .withDescription( "run the game" )
+		                                .withDescription( "run the game (standalone or with 'patch')" )
 		                                .create() );
 		options.addOption( OptionBuilder.withLongOpt( "patch" )
 		                                .withDescription( "revert to vanilla and add named mods (if any)" )
@@ -259,8 +262,10 @@ public class SlipstreamCLI {
 			resDat.datFile = new File( datsDir, "resource.dat" );
 			resDat.bakFile = new File( backupDir, "resource.dat.bak" );
 
+			boolean globalPanic = cmdline.hasOption( "global-panic" );
+
 			SilentPatchObserver patchObserver = new SilentPatchObserver();
-			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, patchObserver );
+			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, globalPanic, patchObserver );
 			deleteHook.addWatchedThread( patchThread );
 
 			patchThread.start();

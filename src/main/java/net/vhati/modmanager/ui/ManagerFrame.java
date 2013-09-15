@@ -818,7 +818,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			log.info( "" );
 			log.info( "Patching..." );
 			log.info( "" );
-			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, patchDlg );
+			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, false, patchDlg );
 			patchThread.start();
 
 			patchDlg.setVisible( true );

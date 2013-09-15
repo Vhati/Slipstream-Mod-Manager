@@ -207,7 +207,7 @@ public class ModUtilities {
 	 * @see net.vhati.modmanager.core.XMLPatcher
 	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
 	 */
-	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String encoding, String mainDescription, String appendDescription ) throws IOException, JDOMException {
+	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String encoding, boolean globalPanic, String mainDescription, String appendDescription ) throws IOException, JDOMException {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
@@ -221,6 +221,7 @@ public class ModUtilities {
 		Document appendDoc = parseStrictOrSloppyXML( appendText, appendDescription+" (wrapped)" );
 
 		XMLPatcher patcher = new XMLPatcher();
+		patcher.setGlobalPanic( globalPanic );
 		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
 
 		StringWriter writer = new StringWriter();

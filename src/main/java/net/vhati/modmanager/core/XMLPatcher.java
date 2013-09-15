@@ -36,6 +36,7 @@ import org.jdom2.input.SAXBuilder;
  */
 public class XMLPatcher {
 
+	protected boolean globalPanic = false;
 	protected Namespace modNS;
 	protected Namespace modAppendNS;
 	protected Namespace modOverwriteNS;
@@ -45,6 +46,10 @@ public class XMLPatcher {
 		modNS = Namespace.getNamespace( "mod", "mod" );
 		modAppendNS = Namespace.getNamespace( "mod-append", "mod-append" );
 		modOverwriteNS = Namespace.getNamespace( "mod-overwrite", "mod-overwrite" );
+	}
+
+	public void setGlobalPanic( boolean b ) {
+		globalPanic = b;
 	}
 
 
@@ -100,7 +105,8 @@ public class XMLPatcher {
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", 1 );
 				boolean panic = getAttributeBooleanValue( node, "panic", false );
-	
+				if ( globalPanic ) panic = true;
+
 				if ( searchName == null || searchName.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> requires a name attribute (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchType != null && searchType.length() == 0 )
@@ -136,7 +142,8 @@ public class XMLPatcher {
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
 				boolean panic = getAttributeBooleanValue( node, "panic", false );
-	
+				if ( globalPanic ) panic = true;
+
 				if ( searchType != null && searchType.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> type attribute, when present, can't be empty (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchStart < 0 )
@@ -188,7 +195,8 @@ public class XMLPatcher {
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
 				boolean panic = getAttributeBooleanValue( node, "panic", false );
-	
+				if ( globalPanic ) panic = true;
+
 				if ( searchType != null && searchType.length() == 0 )
 					throw new IllegalArgumentException( String.format( "<%s> type attribute, when present, can't be empty (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchChildType != null && searchChildType.length() == 0 )
@@ -237,7 +245,8 @@ public class XMLPatcher {
 				int searchStart = getAttributeIntValue( node, "start", 0 );
 				int searchLimit = getAttributeIntValue( node, "limit", -1 );
 				boolean panic = getAttributeBooleanValue( node, "panic", false );
-	
+				if ( globalPanic ) panic = true;
+
 				if ( searchStart < 0 )
 					throw new IllegalArgumentException( String.format( "<%s> 'start' attribute is not >= 0 (%s).", node.getName(), getPathToRoot(node) ) );
 				if ( searchLimit < -1 )

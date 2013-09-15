@@ -191,6 +191,25 @@ Advanced XML
   edit in the wake of earlier ones.
 
 
+Commandline
+
+  Running Slipstream from a prompt can speed up development...
+
+  --patch Abc.ftl Def "Ghi 1.0.ftl"
+
+    Patches named mod files. Dirs can also be named, so you won't have to
+    re-zip for every test.
+
+  --global-panic
+
+    While patching, reveals typoed <find...> tags. Any find that yields no
+    matches will cause an error, as if it had panic='true'.
+
+  --runftl
+
+    Runs the game. If used with "--patch", runs afterward if successful.
+
+
 Pitfalls
 
   FTL Bug (fixed in 1.03.3): If a ship is modded to have level 5 shields,

@@ -373,6 +373,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			Document appendDoc = ModUtilities.parseStrictOrSloppyXML( appendText, "Sandbox Append XML" );
 
 			XMLPatcher patcher = new XMLPatcher();
+			patcher.setGlobalPanic( false );
 			Document resultDoc = patcher.patch( mainDoc, appendDoc );
 
 			StringWriter writer = new StringWriter();

@@ -5,6 +5,8 @@ Changelog
 - Fixed advanced find tags' panic arg (was "true" all the time)
 - Fixed advanced selector tag not narrowing results when it had a value
 - Fixed perpetually green "Update" button
+- Added --global-panic commandline arg to show mod devs typoed find tags
+- Added commandline tips in readme_modders.txt
 
 1.2:
 - Added a commandline interface

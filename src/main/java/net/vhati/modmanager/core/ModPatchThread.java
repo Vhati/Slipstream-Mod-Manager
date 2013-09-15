@@ -37,6 +37,7 @@ public class ModPatchThread extends Thread {
 	private List<File> modFiles = new ArrayList<File>();
 	private BackedUpDat dataDat = null;
 	private BackedUpDat resDat = null;
+	private boolean globalPanic = false;
 	private ModPatchObserver observer = null;
 
 	private final int progMax = 100;
@@ -46,10 +47,11 @@ public class ModPatchThread extends Thread {
 	private final int progRepackMax = 5;
 	private int progMilestone = 0;
 
-	public ModPatchThread( List<File> modFiles, BackedUpDat dataDat, BackedUpDat resDat, ModPatchObserver observer ) {
+	public ModPatchThread( List<File> modFiles, BackedUpDat dataDat, BackedUpDat resDat, boolean globalPanic, ModPatchObserver observer ) {
 		this.modFiles.addAll( modFiles );
 		this.dataDat = dataDat;
 		this.resDat = resDat;
+		this.globalPanic = globalPanic;
 		this.observer = observer;
 	}
 
@@ -223,7 +225,7 @@ public class ModPatchThread extends Thread {
 								InputStream mainStream = null;
 								try {
 									mainStream = ftlP.getInputStream(innerPath);
-									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
 									ftlP.remove( innerPath );
 									ftlP.add( innerPath, mergedStream );
