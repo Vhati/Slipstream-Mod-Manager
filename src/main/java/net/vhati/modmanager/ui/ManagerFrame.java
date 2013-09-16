@@ -84,6 +84,7 @@ import net.vhati.modmanager.ui.InertPanel;
 import net.vhati.modmanager.ui.ModInfoArea;
 import net.vhati.modmanager.ui.ModPatchDialog;
 import net.vhati.modmanager.ui.ModXMLSandbox;
+import net.vhati.modmanager.ui.SlipstreamConfigDialog;
 import net.vhati.modmanager.ui.Statusbar;
 import net.vhati.modmanager.ui.StatusbarMouseListener;
 import net.vhati.modmanager.ui.TableRowTransferHandler;
@@ -131,6 +132,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private JMenuItem rescanMenuItem;
 	private JMenuItem extractDatsMenuItem;
 	private JMenuItem sandboxMenuItem;
+	private JMenuItem configMenuItem;
 	private JMenuItem exitMenuItem;
 	private JMenu helpMenu;
 	private JMenuItem aboutMenuItem;
@@ -296,6 +298,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					log.error( String.format( "Error writing config to \"%s\".", appConfig.getConfigFile() ), f );
 				}
 
+				System.gc();  // Ward off an intermittent InterruptedException from exit()?
 				System.exit( 0 );
 			}
 		});
@@ -367,6 +370,10 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		sandboxMenuItem.addMouseListener( new StatusbarMouseListener( this, "Experiment with advanced mod syntax." ) );
 		sandboxMenuItem.addActionListener(this);
 		fileMenu.add( sandboxMenuItem );
+		configMenuItem = new JMenuItem( "Preferences..." );
+		configMenuItem.addMouseListener( new StatusbarMouseListener( this, "Edit preferences." ) );
+		configMenuItem.addActionListener(this);
+		fileMenu.add( configMenuItem );
 		fileMenu.add( new JSeparator() );
 		exitMenuItem = new JMenuItem( "Exit" );
 		exitMenuItem.addMouseListener( new StatusbarMouseListener( this, "Exit this application." ) );
@@ -915,6 +922,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			extractDlg.setVisible( true );
 		}
 		else if ( source == sandboxMenuItem ) {
+			setStatusText( "" );
 			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 			File dataDatFile = new File( datsDir, "data.dat" );
 
@@ -923,6 +931,15 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			sandboxFrame.setSize( 800, 600 );
 			sandboxFrame.setLocationRelativeTo( null );
 			sandboxFrame.setVisible( true );
+		}
+		else if ( source == configMenuItem ) {
+			setStatusText( "" );
+
+			SlipstreamConfigDialog configFrame = new SlipstreamConfigDialog( appConfig );
+			configFrame.addWindowListener( nerfListener );
+			//configFrame.setSize( 300, 400 );
+			configFrame.setLocationRelativeTo( null );
+			configFrame.setVisible( true );
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );
@@ -995,6 +1012,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 
 
+	/**
+	 * Toggles a main window's nerfed state as popups are opened/disposed.
+	 *
+	 * Requires: setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE ).
+	 */
 	private static class NerfListener extends WindowAdapter {
 		private Nerfable nerfObj;
 
@@ -1007,7 +1029,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			nerfObj.setNerfed( true );
 		}
 		@Override
-		public void windowClosing( WindowEvent e ) {
+		public void windowClosed( WindowEvent e ) {
 			nerfObj.setNerfed( false );
 		}
 	}

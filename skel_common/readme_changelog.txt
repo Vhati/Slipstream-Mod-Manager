@@ -8,6 +8,7 @@ Changelog
 - Added --global-panic commandline arg to show mod devs typoed find tags
 - Added commandline tips in readme_modders.txt
 - Fixed sloppy parser Validate error about things not allowed at root
+- Added a Preferences dialog as an alternative to editing modman.cfg
 
 1.2:
 - Added a commandline interface

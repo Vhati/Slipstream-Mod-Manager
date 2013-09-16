@@ -93,6 +93,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 	public ModXMLSandbox( File dataDatFile ) {
 		super( "Mod XML Sandbox" );
+		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
 		this.dataDatFile = dataDatFile;
 
