@@ -77,6 +77,8 @@ public class SloppyXMLParser {
 
 	private JDOMFactory factory;
 
+	private int pos = -1;
+
 
 	public SloppyXMLParser() {
 		this( null );
@@ -111,7 +113,7 @@ public class SloppyXMLParser {
 		Parent parentNode = rootNode;
 		int sLen = s.length();
 		int lastPos = -1;
-		int pos = 0;
+		pos = 0;
 		int[] lastLineAndCol = new int[] {0, 0};  // Counts \n's and chars after the last \n.
 		String tmp = null;
 		Matcher m = declPtn.matcher( s );
@@ -427,7 +429,7 @@ public class SloppyXMLParser {
 	/**
 	 * Returns lineNum and colNum for a position in text.
 	 * The first line is line 1.
-	 * Line breaks start a new lins as col 0.
+	 * Line breaks start a new line as col 0.
 	 * The first char of each line, after the break is col 1.
 	 *
 	 * @param pos a 0-based offset
@@ -452,5 +454,19 @@ public class SloppyXMLParser {
 			colNum = pos - lastBreakPos;
 
 		return new int[] { breakCount+1, colNum };
+	}
+
+
+	/**
+	 * Returns the last character offset this parser was looking at.
+	 *
+	 * Usually this will be a patch of whitespace prior to unrecognized chars.
+	 * This method is a fallback when an unexpected exception doesn't provide
+	 * line info.
+	 *
+	 * @see findNextNonspace(CharSequence s, int pos)
+	 */
+	public int getLastPosition() {
+		return pos;
 	}
 }
