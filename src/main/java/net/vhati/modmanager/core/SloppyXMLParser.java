@@ -120,11 +120,11 @@ public class SloppyXMLParser {
 			while ( pos > lastPos && pos < sLen ) {
 				m.region( pos, sLen );
 				boolean matchedChunk = false;
-	
+
 				for ( Pattern chunkPtn : chunkPtns ) {
 					m.usePattern( chunkPtn );
 					if ( !m.lookingAt() ) continue;
-	
+
 					if ( chunkPtn == declPtn ) {
 						// Don't care.
 						addLineAndCol( lastLineAndCol, m.group(0) );
@@ -133,14 +133,14 @@ public class SloppyXMLParser {
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
 					else if ( chunkPtn == commentPtn ) {
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						tmp = m.group( 2 );
 						if ( tmp.length() == 0 ) {
 							factory.addContent( parentNode, factory.comment( "" ) );
@@ -169,38 +169,38 @@ public class SloppyXMLParser {
 								factory.addContent( parentNode, commentNode );
 							}
 						}
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
 					else if ( chunkPtn == emptyCDATAPtn ) {
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
 					else if ( chunkPtn == cdataPtn ) {
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						CDATA cdataNode = factory.cdata( m.group(2) );
 						factory.addContent( parentNode, cdataNode );
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
 					else if ( chunkPtn == sTagPtn ) {
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						String nodePrefix = m.group( 2 );  // Might be null.
 						String nodeName = m.group( 3 );
 						String attrString = m.group( 4 );
 						boolean selfClosing = ( m.group( 5 ).length() > 0 );
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
-	
+
 						Element tagNode;
 						if ( nodePrefix != null ) {
 							Namespace nodeNS = Namespace.getNamespace( nodePrefix, nodePrefix );  // URI? *shrug*
@@ -209,7 +209,7 @@ public class SloppyXMLParser {
 						} else {
 							tagNode = factory.element( lastLineAndCol[0]+1, lastLineAndCol[1]+1+1, nodeName );
 						}
-	
+
 						if ( attrString.length() > 0 ) {
 							Matcher am = attrPtn.matcher( attrString );
 							while ( am.lookingAt() ) {
@@ -218,7 +218,7 @@ public class SloppyXMLParser {
 								String attrValue = am.group( 3 );
 								attrValue = attrValue.substring( 1, attrValue.length()-1 );
 								attrValue = unescape( attrValue );
-	
+
 								if ( attrPrefix != null ) {
 									if ( attrPrefix.equals( "xmlns" ) ) {
 										// This is a pseudo attribute declaring a namespace prefix.
@@ -233,9 +233,9 @@ public class SloppyXMLParser {
 										factory.setAttribute( tagNode, attrObj );
 									}
 								} else if ( attrName.equals("xmlns") ) {
-										// New default namespace URI within this node.
-										Namespace attrNS = Namespace.getNamespace( attrValue );
-										factory.addNamespaceDeclaration( tagNode, attrNS );
+									// New default namespace URI within this node.
+									Namespace attrNS = Namespace.getNamespace( attrValue );
+									factory.addNamespaceDeclaration( tagNode, attrNS );
 								} else {
 									// Normal attribute.
 									Attribute attrObj = factory.attribute( attrName, attrValue, AttributeType.UNDECLARED, Namespace.NO_NAMESPACE );
@@ -246,26 +246,26 @@ public class SloppyXMLParser {
 							if ( am.regionStart() < attrString.length() ) {
 								int nonspacePos = findNextNonspace( s, pos );
 								int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
-	
+
 								int[] lineAndCol = getLineAndCol( s, errorPos );
 								int lineNum = lineAndCol[0];
 								int colNum = lineAndCol[1];
-	
-								SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Strange attributes.", lineNum, colNum ), null, null, lineNum, colNum);
+
+								SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Strange attributes.", lineNum, colNum ), null, null, lineNum, colNum );
 								throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 							}
 						}
-	
+
 						factory.addContent( parentNode, tagNode );
 						if ( !selfClosing ) parentNode = tagNode;
 					}
 					else if ( chunkPtn == eTagPtn ) {
 						String interimText = m.group( 1 );
 						interimText = unescape( interimText );
-	
+
 						factory.addContent( parentNode, factory.text( interimText ) );
 						parentNode = parentNode.getParent();
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
 					else if ( chunkPtn == endSpacePtn ) {
@@ -273,36 +273,36 @@ public class SloppyXMLParser {
 					}
 					else if ( chunkPtn == strayCharsPtn ) {
 						// Non-space junk between an end tag and a start tag.
-	
+
 						String whitespace = m.group( 1 );
 						if ( whitespace.length() > 0 )
 							factory.addContent( parentNode, factory.text( whitespace ) );
-	
+
 						addLineAndCol( lastLineAndCol, s, m.start(), m.end() );
 					}
-	
+
 					matchedChunk = true;
 					lastPos = pos;
 					pos = m.end();
 					break;
 				}
-	
+
 				if ( !matchedChunk ) {
 					int nonspacePos = findNextNonspace( s, pos );
 					int errorPos = ( (nonspacePos != -1) ? nonspacePos : pos );
-	
+
 					int[] lineAndCol = getLineAndCol( s, errorPos );
 					int lineNum = lineAndCol[0];
 					int colNum = lineAndCol[1];
-	
-					SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Unexpected characters.", lineNum, colNum ), null, null, lineNum, colNum);
+
+					SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: Unexpected characters.", lineNum, colNum ), null, null, lineNum, colNum );
 					throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 				}
 			}
-	
+
 			if ( rootNode.getChildren().size() == 1 ) {
 				// No need for the wrapper, promote its only child to root.
-	
+
 				Element newRoot = rootNode.getChildren().get( 0 );
 				newRoot.detach();
 				for ( Namespace ns : rootNode.getAdditionalNamespaces() ) {
@@ -324,7 +324,7 @@ public class SloppyXMLParser {
 			if ( e.getMessage() != null && e.getMessage().indexOf( "not allowed at the document root" ) != -1 ) {
 				hint = " (There's likely an extraneous closing tag before this point.)";
 			}
-			SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: %s%s", lineNum, colNum, e.getMessage(), hint ), null, null, lineNum, colNum, e);
+			SAXParseException cause = new SAXParseException( String.format( "At line %d, column %d: %s%s", lineNum, colNum, e.getMessage(), hint ), null, null, lineNum, colNum, e );
 			throw new JDOMParseException( String.format( "Error on line %d: %s", lineNum, cause.getMessage() ), cause );
 		}
 
