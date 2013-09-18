@@ -235,11 +235,11 @@ public class FieldEditorPanel extends JPanel {
 
 		JPanel panel = new JPanel();
 		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-		panel.add( Box.createVerticalStrut(10) );
+		panel.add( Box.createVerticalStrut(8) );
 		JSeparator sep = new JSeparator();
 		sep.setPreferredSize( new Dimension(1, sep.getPreferredSize().height) );
 		panel.add( sep );
-		panel.add( Box.createVerticalStrut(10) );
+		panel.add( Box.createVerticalStrut(8) );
 
 		this.add( panel, gridC );
 		gridC.gridy++;

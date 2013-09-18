@@ -83,6 +83,8 @@ public class ForumScraper {
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=16842" );
 		// Beginning Scrap Advantage is bundled in GMM.
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2464" );
+		// Engi Scrap Advantage is bundled in SMM.
+		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102" );
 
 
 		BasicParser parser = new BasicParser();
