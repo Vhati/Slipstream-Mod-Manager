@@ -19,7 +19,7 @@ import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.json.JacksonAutoUpdateReader;
-import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
+import net.vhati.modmanager.json.JacksonCatalogReader;
 import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ManagerFrame;
 
@@ -75,7 +75,7 @@ public class ManagerInitThread extends Thread {
 	private void init() throws InterruptedException {
 		if ( metadataFile.exists() ) {
 			// Load cached metadata first, before scanning for new info.
-			ModDB cachedDB = JacksonGrognakCatalogReader.parse( metadataFile );
+			ModDB cachedDB = JacksonCatalogReader.parse( metadataFile );
 			if ( cachedDB != null ) frame.setLocalModDB( cachedDB );
 		}
 
@@ -194,7 +194,7 @@ public class ManagerInitThread extends Thread {
 
 
 	private void reloadCatalog() {
-		ModDB currentDB = JacksonGrognakCatalogReader.parse( catalogFile );
+		ModDB currentDB = JacksonCatalogReader.parse( catalogFile );
 		if ( currentDB != null ) frame.setCatalogModDB( currentDB );
 	}
 

@@ -17,9 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class JacksonGrognakCatalogReader {
+public class JacksonCatalogReader {
 
-	private static final Logger log = LogManager.getLogger(JacksonGrognakCatalogReader.class);
+	private static final Logger log = LogManager.getLogger(JacksonCatalogReader.class);
 
 
 	public static ModDB parse( File jsonFile ) {

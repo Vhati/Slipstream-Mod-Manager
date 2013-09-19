@@ -38,7 +38,7 @@ import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModsInfo;
-import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
+import net.vhati.modmanager.json.JacksonCatalogReader;
 import net.vhati.modmanager.json.JacksonCatalogWriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -164,7 +164,7 @@ public class ForumScraper {
 				log.info( "Loading json catalog..." );
 
 				File srcFile = new File( cmdline.getOptionValue( "load-json" ) );
-				ModDB newDB = JacksonGrognakCatalogReader.parse( srcFile );
+				ModDB newDB = JacksonCatalogReader.parse( srcFile );
 				if ( newDB != null ) modDB = newDB;
 			}
 
