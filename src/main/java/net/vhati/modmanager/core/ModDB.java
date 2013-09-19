@@ -3,8 +3,10 @@ package net.vhati.modmanager.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.vhati.modmanager.core.ModInfo;
+import net.vhati.modmanager.core.ModsInfo;
 
 
 public class ModDB {
@@ -13,10 +15,23 @@ public class ModDB {
 	public static final String FUZZY = "fuzzy";
 
 
-	// Accociates Forum thread urls with hashes of their forst post's content.
 	private HashMap<String,String> threadHashMap = new HashMap<String,String>();
 
 	private List<ModInfo> catalog = new ArrayList<ModInfo>();
+
+
+	public ModDB() {
+	}
+
+	/**
+	 * Constructs a shallow copy of an existing ModDB.
+	 *
+	 * Different catalog list, same ModInfos.
+	 */
+	public ModDB( ModDB srcDB ) {
+		threadHashMap.putAll( srcDB.getThreadHashMap() );
+		catalog.addAll( srcDB.getCatalog() );
+	}
 
 
 	/**
@@ -58,8 +73,16 @@ public class ModDB {
 		catalog.clear();
 	}
 
+
 	/**
-	 * Returns the internal ArrayList of mod info.
+	 * Returns the internal Map of forum thread urls and hashes of their first posts' content.
+	 */
+	public Map<String,String> getThreadHashMap() {
+		return threadHashMap;
+	}
+
+	/**
+	 * Returns the internal List of mod info.
 	 */
 	public List<ModInfo> getCatalog() {
 		return catalog;
@@ -96,5 +119,42 @@ public class ModDB {
 		}
 
 		return resultsMap;
+	}
+
+
+	/**
+	 * Collects ModInfo objects that differ only in version, and creates ModsInfo objects.
+	 */
+	public List<ModsInfo> getCollatedModInfo() {
+		List<ModsInfo> results = new ArrayList<ModsInfo>();
+		List<ModInfo> seenList = new ArrayList<ModInfo>();
+
+		for ( ModInfo modInfo : catalog ) {
+			if ( seenList.contains( modInfo ) ) continue;
+			seenList.add( modInfo );
+
+			ModsInfo modsInfo = new ModsInfo();
+			modsInfo.setTitle( modInfo.getTitle() );
+			modsInfo.setAuthor( modInfo.getAuthor() );
+			modsInfo.setThreadURL( modInfo.getURL() );
+			modsInfo.setDescription( modInfo.getDescription() );
+
+			String threadHash = getThreadHash( modInfo.getURL() );
+			modsInfo.setThreadHash( ( threadHash != null ? threadHash : "???" ) );
+
+			modsInfo.putVersion( modInfo.getFileHash(), modInfo.getVersion() );
+
+			Map<String,List<ModInfo>> similarMods = getSimilarMods( modInfo );
+			for ( ModInfo altInfo : similarMods.get( ModDB.EXACT ) ) {
+				if ( seenList.contains( altInfo ) ) continue;
+				seenList.add( altInfo );
+
+				modsInfo.putVersion( altInfo.getFileHash(), altInfo.getVersion() );
+			}
+
+			results.add( modsInfo );
+		}
+
+		return results;
 	}
 }

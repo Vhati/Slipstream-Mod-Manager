@@ -2,8 +2,6 @@ package net.vhati.modmanager.json;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
@@ -63,7 +61,7 @@ public class JacksonGrognakCatalogReader {
 			exception = e;
 		}
 		if ( exception != null ) {
-			log.error( exception );
+			log.error( String.format( "While processing \"%s\", json parsing failed: %s", jsonFile.getName(), exception.getMessage() ), exception );
 			return null;
 		}
 

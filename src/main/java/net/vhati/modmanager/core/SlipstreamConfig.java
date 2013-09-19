@@ -19,6 +19,15 @@ public class SlipstreamConfig {
 		this.configFile = configFile;
 	}
 
+	/**
+	 * Returns a copy of an existing SlipstreamConfig object.
+	 */
+	public SlipstreamConfig( SlipstreamConfig srcConfig ) {
+		this.configFile = srcConfig.getConfigFile();
+		this.config = new Properties();
+		this.config.putAll( srcConfig.getConfig() );
+	}
+
 
 	public Properties getConfig() { return config; }
 

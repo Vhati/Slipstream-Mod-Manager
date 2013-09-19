@@ -10,6 +10,7 @@ Changelog
 - Fixed sloppy parser Validate error about things not allowed at root
 - Added a Preferences dialog as an alternative to editing modman.cfg
 - Added a troubleshooting note about Java 1.7.0_25 to readmes
+- Added support for embedded descriptions in *.ftl files
 
 1.2:
 - Added a commandline interface

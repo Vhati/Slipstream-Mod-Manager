@@ -1,5 +1,6 @@
 package net.vhati.modmanager.core;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -163,6 +164,7 @@ public class ModPatchThread extends Thread {
 			topFolderMap.put( "audio", resP );
 			topFolderMap.put( "fonts", resP );
 			topFolderMap.put( "img", resP );
+			topFolderMap.put( "mod-appendix", null );
 
 			// Track modified innerPaths in case they're clobbered.
 			List<String> moddedItems = new ArrayList<String>();
@@ -182,16 +184,21 @@ public class ModPatchThread extends Thread {
 			for ( File modFile : modFiles ) {
 				if ( !keepRunning ) return false;
 
+				FileInputStream fis = null;
 				ZipInputStream zis = null;
 				try {
 					log.info( "" );
 					log.info( String.format( "Installing mod: %s", modFile.getName() ) );
 					observer.patchingMod( modFile );
 
-					zis = new ZipInputStream( new FileInputStream( modFile ) );
+					fis = new FileInputStream( modFile );
+					zis = new ZipInputStream( new BufferedInputStream( fis ) );
 					ZipEntry item;
 					while ( (item = zis.getNextEntry()) != null ) {
-						if ( item.isDirectory() ) continue;
+						if ( item.isDirectory() ) {
+							zis.closeEntry();
+							continue;
+						}
 
 						String innerPath = item.getName();
 						innerPath = innerPath.replace( '\\', '/' );  // Non-standard zips.
@@ -209,7 +216,8 @@ public class ModPatchThread extends Thread {
 
 						AbstractPack ftlP = topFolderMap.get( topFolder );
 						if ( ftlP == null ) {
-							log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
+							if ( !topFolderMap.containsKey( topFolder ) )
+								log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
 							zis.closeEntry();
 							continue;
 						}
@@ -289,7 +297,10 @@ public class ModPatchThread extends Thread {
 					}
 				}
 				finally {
-					try {if (zis != null) zis.close();}
+					try {if ( zis != null ) zis.close();}
+					catch ( Exception e ) {}
+
+					try {if ( fis != null ) fis.close();}
 					catch ( Exception e ) {}
 
 					System.gc();
@@ -320,10 +331,10 @@ public class ModPatchThread extends Thread {
 			return true;
 		}
 		finally {
-			try {if (dataP != null) dataP.close();}
+			try {if ( dataP != null ) dataP.close();}
 			catch( Exception e ) {}
 
-			try {if (resP != null) resP.close();}
+			try {if ( resP != null ) resP.close();}
 			catch( Exception e ) {}
 		}
 	}

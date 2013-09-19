@@ -316,7 +316,7 @@ public class ModUtilities {
 
 		Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|^thumbs[.]db$" );
 
-		Pattern validRootDirPtn = Pattern.compile( "^(?:audio|data|fonts|img)/" );
+		Pattern validRootDirPtn = Pattern.compile( "^(?:audio|data|fonts|img|mod-appendix)/" );
 		List<String> seenJunkDirs = new ArrayList<String>();
 
 		CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();

@@ -3,23 +3,29 @@ Mod Developer Notes
 Creating an .ftl File
 
   An .ftl file is simply a renamed .zip with a specific file structure.
-  For an example, try renaming and unpacking the example .ftl file that
-  comes with the program.
+  For an example, try renaming and unpacking the example mods.
 
   The root of the ZIP file should contain one or more of these folders:
     data/
     audio/
     fonts/
     img/
+    mod-appendix/
 
   You should ONLY put in the files that you want to modify. This keeps
   mod sizes low and prevents major conflict between mods.
+
+  The "mod-appendix/" folder is for extra files that will not be inserted
+  into the game's resources. Slipstream will look for the following inside.
+
+    metadata.xml
+      Optional embedded description. (See the example mods.)
 
 
 The Append Extension
 
   Any file in your .ftl with the extension .xml.append will be appended to
-  its respective vanilla file. (See the example mod.)
+  its respective vanilla file. (See the example mods.)
 
   It is highly recommended that you take advantage of this as much as
   possible. As a rule of thumb, if you're editing an event xml file,

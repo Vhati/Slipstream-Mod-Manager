@@ -37,7 +37,9 @@ import java.util.regex.Pattern;
 import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
+import net.vhati.modmanager.core.ModsInfo;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
+import net.vhati.modmanager.json.JacksonCatalogWriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -186,15 +188,15 @@ public class ForumScraper {
 				log.info( "Dumping json..." );
 
 				File dstFile = new File( cmdline.getOptionValue( "dump-json" ) );
-				List<ModsInfo> data = getCollatedModInfo( modDB );
-				if ( data.size() > 0 ) writeJSON( data, dstFile );
+				List<ModsInfo> data = modDB.getCollatedModInfo();
+				if ( data.size() > 0 ) JacksonCatalogWriter.write( data, dstFile );
 			}
 
 			if ( cmdline.hasOption( "dump-xml" ) ) {
 				log.info( "Dumping xml..." );
 
 				File dstFile = new File( cmdline.getOptionValue( "dump-xml" ) );
-				List<ModsInfo> data = getCollatedModInfo( modDB );
+				List<ModsInfo> data = modDB.getCollatedModInfo();
 				if ( data.size() > 0 ) writeXML( data, dstFile );
 			}
 
@@ -219,43 +221,6 @@ public class ForumScraper {
 
 
 	/**
-	 * Collects ModInfo objects that differ only in version, and creates ModsInfo objects.
-	 */
-	private static List<ModsInfo> getCollatedModInfo( ModDB modDB ) {
-		List<ModsInfo> results = new ArrayList<ModsInfo>();
-		List<ModInfo> seenList = new ArrayList<ModInfo>();
-
-		for ( ModInfo modInfo : modDB.getCatalog() ) {
-			if ( seenList.contains( modInfo ) ) continue;
-			seenList.add( modInfo );
-
-			ModsInfo modsInfo = new ModsInfo();
-			modsInfo.title = modInfo.getTitle();
-			modsInfo.author = modInfo.getAuthor();
-			modsInfo.threadURL = modInfo.getURL();
-			modsInfo.description = modInfo.getDescription();
-
-			String threadHash = modDB.getThreadHash( modInfo.getURL() );
-			modsInfo.threadHash = ( threadHash != null ? threadHash : "???" );
-
-			modsInfo.putVersion( modInfo.getFileHash(), modInfo.getVersion() );
-
-			HashMap<String,List<ModInfo>> similarMods = modDB.getSimilarMods( modInfo );
-			for ( ModInfo altInfo : similarMods.get( ModDB.EXACT ) ) {
-				if ( seenList.contains( altInfo ) ) continue;
-				seenList.add( altInfo );
-
-				modsInfo.putVersion( altInfo.getFileHash(), altInfo.getVersion() );
-			}
-
-			results.add( modsInfo );
-		}
-
-		return results;
-	}
-
-
-	/**
 	 * Scrapes the forum for changed posts and returns info from updated mods.
 	 */
 	private static List<ModsInfo> scrape( ModDB knownDB, String masterListURL, List<String> ignoredURLs ) throws IOException, NoSuchAlgorithmException {
@@ -265,11 +230,11 @@ public class ForumScraper {
 
 		for ( ScrapeResult scrapedInfo : scrapeList ) {
 			ModsInfo modsInfo = new ModsInfo();
-			modsInfo.title = scrapedInfo.title;
-			modsInfo.author = scrapedInfo.author;
-			modsInfo.threadURL = scrapedInfo.threadURL;
-			modsInfo.threadHash = scrapedInfo.threadHash;
-			modsInfo.description = scrapedInfo.rawDesc;
+			modsInfo.setTitle( scrapedInfo.title );
+			modsInfo.setAuthor( scrapedInfo.author );
+			modsInfo.setThreadURL( scrapedInfo.threadURL );
+			modsInfo.setThreadHash( scrapedInfo.threadHash );
+			modsInfo.setDescription( scrapedInfo.rawDesc );
 			modsInfo.putVersion( "???", "???"+ (scrapedInfo.wip ? " WIP" : "") );
 			results.add( modsInfo );
 		}
@@ -562,23 +527,26 @@ public class ForumScraper {
 		XMLOutputter xmlOut = new XMLOutputter( xmlFormat );
 
 		writeIndent( dst, indent, depth++ ).append( "<modsinfo>\n" );
-		writeIndent( dst, indent, depth ); dst.append("<title>").append( xmlOut.escapeElementEntities( modsInfo.title ) ).append( "</title>\n" );
-		writeIndent( dst, indent, depth ); dst.append("<author>").append( xmlOut.escapeElementEntities( modsInfo.author ) ).append( "</author>\n" );
-		writeIndent( dst, indent, depth ); dst.append("<threadUrl><![CDATA[ ").append( modsInfo.threadURL ).append( " ]]></threadUrl>\n" );
+		writeIndent( dst, indent, depth ); dst.append("<title>").append( xmlOut.escapeElementEntities( modsInfo.getTitle() ) ).append( "</title>\n" );
+		writeIndent( dst, indent, depth ); dst.append("<author>").append( xmlOut.escapeElementEntities( modsInfo.getAuthor() ) ).append( "</author>\n" );
+		writeIndent( dst, indent, depth ); dst.append("<threadUrl><![CDATA[ ").append( modsInfo.getThreadURL() ).append( " ]]></threadUrl>\n" );
 
 		writeIndent( dst, indent, depth++ ).append( "<versions>\n" );
-		for ( String[] entry : modsInfo.versions ) {
+		for ( Map.Entry<String,String> entry : modsInfo.getVersionsMap().entrySet() ) {
+			String versionFileHash = entry.getKey();
+			String versionString = entry.getValue();
+
 			writeIndent( dst, indent, depth );
-			dst.append( "<version hash=\"" ).append( xmlOut.escapeAttributeEntities( entry[0] ) ).append( "\">" );
-			dst.append( xmlOut.escapeElementEntities( entry[1] ) );
+			dst.append( "<version hash=\"" ).append( xmlOut.escapeAttributeEntities( versionFileHash ) ).append( "\">" );
+			dst.append( xmlOut.escapeElementEntities( versionString ) );
 			dst.append( "</version>" ).append( "\n" );
 		}
 		writeIndent( dst, indent, --depth ).append( "</versions>\n" );
-		writeIndent( dst, indent, depth ); dst.append("<threadHash>").append( modsInfo.threadHash ).append( "</threadHash>\n" );
+		writeIndent( dst, indent, depth ); dst.append("<threadHash>").append( modsInfo.getThreadHash() ).append( "</threadHash>\n" );
 		dst.append( "\n" );
 
 		writeIndent( dst, indent, depth ); dst.append( "<description>" ).append( "<![CDATA[" );
-		dst.append( modsInfo.description );
+		dst.append( modsInfo.getDescription() );
 		dst.append( "]]>\n" );
 		writeIndent( dst, indent, depth ); dst.append( "</description>\n" );
 
@@ -641,55 +609,6 @@ public class ForumScraper {
 	}
 
 
-	/**
-	 * Writes collated catalog entries to a file, as condensed json.
-	 */
-	private static void writeJSON( List<ModsInfo> data, File dstFile ) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode rootNode = mapper.createObjectNode();
-
-		ObjectNode catalogsNode = rootNode.objectNode();
-		rootNode.put( "catalog_versions", catalogsNode );
-
-		ArrayNode catalogNode = rootNode.arrayNode();
-		catalogsNode.put( "1", catalogNode );
-
-		for ( ModsInfo modsInfo : data ) {
-			ObjectNode infoNode = rootNode.objectNode();
-			catalogNode.add( infoNode );
-
-			infoNode.put( "title", modsInfo.title );
-			infoNode.put( "author", modsInfo.author );
-			infoNode.put( "desc", modsInfo.description );
-			infoNode.put( "url", modsInfo.threadURL );
-
-			infoNode.put( "thread_hash", modsInfo.threadHash );
-
-			ArrayNode versionsNode = rootNode.arrayNode();
-			infoNode.put( "versions", versionsNode );
-
-			for ( String[] entry : modsInfo.versions ) {
-				ObjectNode versionNode = rootNode.objectNode();
-				versionNode.put( "hash", entry[0] );
-				versionNode.put( "version", entry[1] );
-				versionsNode.add( versionNode );
-			}
-		}
-
-		OutputStream os = null;
-		try {
-			os = new FileOutputStream( dstFile );
-			OutputStreamWriter writer = new OutputStreamWriter( os, Charset.forName("US-ASCII") );
-			mapper.writeValue( writer, rootNode );
-		}
-		finally {
-			try {if ( os != null ) os.close();}
-			catch ( IOException e ) {}
-		}
-	}
-
-
-
 	/** Information gleaned from scraping the forum. */
 	private static class ScrapeResult {
 		public String threadURL = null;
@@ -698,19 +617,5 @@ public class ForumScraper {
 		public boolean wip = false;
 		public String rawDesc = null;
 		public String threadHash = null;
-	}
-
-	/** Combined information from several similar ModInfo objects of varying versions. */
-	private static class ModsInfo {
-		public String threadURL = null;
-		public String title = null;
-		public String author = null;
-		public String description = null;
-		public String threadHash = null;
-		public ArrayList<String[]> versions = new ArrayList<String[]>();
-
-		public void putVersion( String fileHash, String fileVersion ) {
-			versions.add( new String[] {fileHash, fileVersion} );
-		}
 	}
 }

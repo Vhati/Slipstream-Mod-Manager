@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
@@ -65,22 +68,24 @@ import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
-import net.vhati.modmanager.core.HashObserver;
-import net.vhati.modmanager.core.HashThread;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModFileInfo;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModPatchThread;
 import net.vhati.modmanager.core.ModPatchThread.BackedUpDat;
+import net.vhati.modmanager.core.ModsScanObserver;
+import net.vhati.modmanager.core.ModsScanThread;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.json.JacksonAutoUpdateReader;
 import net.vhati.modmanager.json.JacksonGrognakCatalogReader;
+import net.vhati.modmanager.json.JacksonCatalogWriter;
 import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ChecklistTableModel;
 import net.vhati.modmanager.ui.InertPanel;
+import net.vhati.modmanager.ui.ManagerInitThread;
 import net.vhati.modmanager.ui.ModInfoArea;
 import net.vhati.modmanager.ui.ModPatchDialog;
 import net.vhati.modmanager.ui.ModXMLSandbox;
@@ -93,7 +98,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class ManagerFrame extends JFrame implements ActionListener, HashObserver, Nerfable, Statusbar {
+public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar {
 
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
 
@@ -103,11 +108,19 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private File backupDir = new File( "./backup/" );
 	private File modsDir = new File( "./mods/" );
 
+	private File modorderFile = new File( modsDir, "modorder.txt" );
+
+	private File metadataFile = new File( backupDir, "cached_metadata.json" );
+
 	private File catalogFile = new File( backupDir, "current_catalog.json" );
 	private File catalogETagFile = new File( backupDir, "current_catalog_etag.txt" );
 
 	private File appUpdateFile = new File( backupDir, "auto_update.json" );
 	private File appUpdateETagFile = new File( backupDir, "auto_update_etag.txt" );
+
+	private final Lock managerLock = new ReentrantLock();
+	private final Condition scanEndedCond = managerLock.newCondition();
+	private boolean scanning = false;
 
 	private SlipstreamConfig appConfig;
 	private String appName;
@@ -116,7 +129,8 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	private String appAuthor;
 
 	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
-	private ModDB modDB = new ModDB();
+	private ModDB catalogModDB = new ModDB();
+	private ModDB localModDB = new ModDB();
 
 	private AutoUpdateInfo appUpdateInfo = null;
 	private Color updateBtnDisabledColor = UIManager.getColor( "Button.foreground" );
@@ -295,7 +309,14 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					appConfig.writeConfig();
 				}
 				catch ( IOException f ) {
-					log.error( String.format( "Error writing config to \"%s\".", appConfig.getConfigFile() ), f );
+					log.error( String.format( "Error writing config to \"%s\".", appConfig.getConfigFile().getName() ), f );
+				}
+
+				try {
+					JacksonCatalogWriter.write( localModDB.getCollatedModInfo(), metadataFile );
+				}
+				catch ( IOException f ) {
+					log.error( String.format( "Error writing metadata from local mods to \"%s\".", metadataFile.getName() ), f );
 				}
 
 				System.gc();  // Ward off an intermittent InterruptedException from exit()?
@@ -441,133 +462,17 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 	 */
 	public void init() {
 
-		List<String> preferredOrder = loadModOrder();
-		rescanMods( preferredOrder );
-
-		int catalogUpdateInterval = appConfig.getPropertyAsInt( "update_catalog", 0 );
-		boolean needNewCatalog = false;
-
-		if ( catalogFile.exists() ) {
-			// Load the catalog first, before updating.
-			ModDB currentDB = JacksonGrognakCatalogReader.parse( catalogFile );
-			if ( currentDB != null ) modDB = currentDB;
-
-			if ( catalogUpdateInterval > 0 ) {
-				// Check if the downloaded catalog is stale.
-				Date catalogDate = new Date( catalogFile.lastModified() );
-				Calendar cal = Calendar.getInstance();
-				cal.add( Calendar.DATE, catalogUpdateInterval * -1 );
-				if ( catalogDate.before( cal.getTime() ) ) {
-					log.debug( String.format( "Catalog is older than %d days.", catalogUpdateInterval ) );
-					needNewCatalog = true;
-				} else {
-					log.debug( "Catalog isn't stale yet." );
-				}
-			}
-		}
-		else {
-			// Catalog file doesn't exist.
-			needNewCatalog = true;
-		}
-
-		// Don't update if the user doesn't want to.
-		if ( catalogUpdateInterval <= 0 ) needNewCatalog = false;
-
-		if ( needNewCatalog ) {
-			Runnable fetchTask = new Runnable() {
-				@Override
-				public void run() {
-					boolean fetched = URLFetcher.refetchURL( CATALOG_URL, catalogFile, catalogETagFile );
-
-					if ( fetched ) reloadCatalog();
-				}
-			};
-			Thread fetchThread = new Thread( fetchTask );
-			fetchThread.start();
-		}
-
-		int appUpdateInterval = appConfig.getPropertyAsInt( "update_app", 0 );
-		boolean needAppUpdate = false;
-
-		if ( appUpdateFile.exists() ) {
-			// Load the info first, before downloading.
-			AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
-			if ( aui != null ) {
-				appUpdateInfo = aui;
-				boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
-				updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
-				updateBtn.setEnabled( isUpdateAvailable );
-			}
-
-			if ( appUpdateInterval > 0 ) {
-				// Check if the app update info is stale.
-				Date catalogDate = new Date( appUpdateFile.lastModified() );
-				Calendar cal = Calendar.getInstance();
-				cal.add( Calendar.DATE, catalogUpdateInterval * -1 );
-				if ( catalogDate.before( cal.getTime() ) ) {
-					log.debug( String.format( "App update info is older than %d days.", appUpdateInterval ) );
-					needAppUpdate = true;
-				} else {
-					log.debug( "App update info isn't stale yet." );
-				}
-			}
-		}
-		else {
-			// App update file doesn't exist.
-			needAppUpdate = true;
-		}
-
-		// Don't update if the user doesn't want to.
-		if ( appUpdateInterval <= 0 ) needAppUpdate = false;
-
-		if ( needAppUpdate ) {
-			Runnable fetchTask = new Runnable() {
-				@Override
-				public void run() {
-					boolean fetched = URLFetcher.refetchURL( APP_UPDATE_URL, appUpdateFile, appUpdateETagFile );
-
-					if ( fetched ) reloadAppUpdateInfo();
-				}
-			};
-			Thread fetchThread = new Thread( fetchTask );
-			fetchThread.start();
-		}
-	}
-
-
-	/**
-	 * Reparses and replaces the downloaded ModDB catalog. (thread-safe)
-	 */
-	public void reloadCatalog() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if ( catalogFile.exists() ) {
-					ModDB currentDB = JacksonGrognakCatalogReader.parse( catalogFile );
-					if ( currentDB != null ) modDB = currentDB;
-				}
-			}
-		});
-	}
-
-	/**
-	 * Reparses info about available app updates. (thread-safe)
-	 */
-	public void reloadAppUpdateInfo() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if ( appUpdateFile.exists() ) {
-					AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
-					if ( aui != null ) {
-						appUpdateInfo = aui;
-						boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
-						updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
-						updateBtn.setEnabled( isUpdateAvailable );
-					}
-				}
-			}
-		});
+		ManagerInitThread initThread = new ManagerInitThread( this,
+		                                                      new SlipstreamConfig( appConfig ),
+		                                                      modorderFile,
+		                                                      metadataFile,
+		                                                      catalogFile,
+		                                                      catalogETagFile,
+		                                                      appUpdateFile,
+		                                                      appUpdateETagFile
+		                                                    );
+		initThread.setDaemon( true );
+		initThread.start();
 	}
 
 
@@ -599,38 +504,11 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		return sortedMods;
 	}
 
-	/**
-	 * Reads modorder.txt and returns a list of mod names in preferred order.
-	 */
-	private List<String> loadModOrder() {
-		List<String> result = new ArrayList<String>();
-
-		FileInputStream is = null;
-		try {
-			is = new FileInputStream( new File( modsDir, "modorder.txt" ) );
-			BufferedReader br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
-			String line;
-			while ( (line = br.readLine()) != null ) {
-				result.add( line );
-			}
-		}
-		catch ( FileNotFoundException e ) {
-		}
-		catch ( IOException e ) {
-			log.error( "Error reading modorder.txt.", e );
-		}
-		finally {
-			try {if (is != null) is.close();}
-			catch (Exception e) {}
-		}
-
-		return result;
-	}
 
 	private void saveModOrder( List<ModFileInfo> sortedMods ) {
 		FileOutputStream os = null;
 		try {
-			os = new FileOutputStream( new File( modsDir, "modorder.txt" ) );
+			os = new FileOutputStream( modorderFile );
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
 
 			for ( ModFileInfo modFileInfo : sortedMods ) {
@@ -640,7 +518,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			bw.flush();
 		}
 		catch ( IOException e ) {
-			log.error( "Error writing modorder.txt.", e );
+			log.error( String.format( "Error writing \"%s\".", modorderFile.getName() ), e );
 		}
 		finally {
 			try {if (os != null) os.close();}
@@ -648,12 +526,20 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 		}
 	}
 
+
 	/**
 	 * Clears and syncs the mods list with mods/ dir, then starts a new hash thread.
 	 */
-	private void rescanMods( List<String> preferredOrder ) {
-		if ( rescanMenuItem.isEnabled() == false ) return;
-		rescanMenuItem.setEnabled( false );
+	public void rescanMods( List<String> preferredOrder ) {
+		managerLock.lock();
+		try {
+			scanning = true;
+			if ( rescanMenuItem.isEnabled() == false ) return;
+			rescanMenuItem.setEnabled( false );
+		}
+		finally {
+			managerLock.unlock();
+		}
 
 		modFileHashes.clear();
 		localModsTableModel.removeAllItems();
@@ -672,9 +558,9 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 			localModsTableModel.addItem( modFileInfo );
 		}
 
-		HashThread hashThread = new HashThread( modFiles, this );
-		hashThread.setDaemon( true );
-		hashThread.start();
+		ModsScanThread scanThread = new ModsScanThread( modFiles, localModDB, this );
+		scanThread.setDaemon( true );
+		scanThread.start();
 	}
 
 
@@ -739,11 +625,19 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 	/**
 	 * Shows info about a local mod in the text area.
+	 *
+	 * Priority is given to embedded metadata.xml, but when that's absent,
+	 * the gatalog's info is used. If the catalog doesn't have the info,
+	 * an 'info missing' notice is shown instead.
 	 */
 	public void showLocalModInfo( ModFileInfo modFileInfo ) {
 		String modHash = modFileHashes.get( modFileInfo.getFile() );
 
-		ModInfo modInfo = modDB.getModInfo( modHash );
+		ModInfo modInfo = localModDB.getModInfo( modHash );
+		if ( modInfo == null || modInfo.isBlank() ) {
+			modInfo = catalogModDB.getModInfo( modHash );
+		}
+
 		if ( modInfo != null ) {
 			infoArea.setDescription( modInfo.getTitle(), modInfo.getAuthor(), modInfo.getVersion(), modInfo.getURL(), modInfo.getDescription() );
 		}
@@ -768,7 +662,7 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 			body += "If it is stable and has been out for over a month,\n";
 			body += "please let the Slipstream devs know where you ";
-			body += "found it.\n";
+			body += "found it.\n\n";
 			body += "Include the mod's version, and this hash.\n";
 			body += "MD5: "+ modHash +"\n";
 			infoArea.setDescription( modFileInfo.getName(), body );
@@ -954,22 +848,123 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 
 	@Override
 	public void hashCalculated( final File f, final String hash ) {
-		SwingUtilities.invokeLater( new Runnable() {
+		Runnable r = new Runnable() {
 			@Override
-			public void run() {
-				modFileHashes.put( f, hash );
-			}
-		});
+			public void run() { modFileHashes.put( f, hash ); }
+		};
+		if ( SwingUtilities.isEventDispatchThread() ) r.run();
+		else SwingUtilities.invokeLater( r );
 	}
 
 	@Override
-	public void hashingEnded() {
-		SwingUtilities.invokeLater( new Runnable() {
+	public void localModDBUpdated( ModDB newDB ) {
+		setLocalModDB( newDB );
+	}
+
+	@Override
+	public void modsScanEnded() {
+		Runnable r = new Runnable() {
 			@Override
 			public void run() {
-				rescanMenuItem.setEnabled( true );
+				managerLock.lock();
+				try {
+					rescanMenuItem.setEnabled( true );
+					scanning = false;
+					scanEndedCond.signalAll();
+				}
+				finally {
+					managerLock.unlock();
+				}
 			}
-		});
+		};
+		if ( SwingUtilities.isEventDispatchThread() ) r.run();
+		else SwingUtilities.invokeLater( r );
+	}
+
+
+	/**
+	 * Returns a lock for synchronizing thread operations.
+	 */
+	public Lock getLock() {
+		return managerLock;
+	}
+
+	/**
+	 * Returns a condition that will signal when the "mods/" dir has been scanned.
+	 *
+	 * Call getLock().lock() first.
+	 * Loop while isScanning() is true, calling this condition's await().
+	 * Finally, call getLock().unlock().
+	 */
+	public Condition getScanEndedCondition() {
+		return scanEndedCond;
+	}
+
+	/**
+	 * Returns true if the "mods/" folder is currently being scanned. (thread-safe)
+	 */
+	public boolean isScanning() {
+		managerLock.lock();
+		try {
+			return scanning;
+		}
+		finally {
+			managerLock.unlock();
+		}
+	}
+
+
+	@Override
+	public void setNerfed( boolean b ) {
+		Component glassPane = this.getGlassPane();
+		if (b) {
+			glassPane.setVisible(true);
+			glassPane.requestFocusInWindow();
+		} else {
+			glassPane.setVisible(false);
+		}
+	}
+
+
+	/**
+	 * Sets the ModDB for local metadata. (thread-safe)
+	 */
+	public void setLocalModDB( final ModDB newDB ) {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() { localModDB = newDB; }
+		};
+		if ( SwingUtilities.isEventDispatchThread() ) r.run();
+		else SwingUtilities.invokeLater( r );
+	}
+
+	/**
+	 * Sets the ModDB for the catalog. (thread-safe)
+	 */
+	public void setCatalogModDB( final ModDB newDB ) {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() { catalogModDB = newDB; }
+		};
+		if ( SwingUtilities.isEventDispatchThread() ) r.run();
+		else SwingUtilities.invokeLater( r );
+	}
+
+	/**
+	 * Sets info about available app updates. (thread-safe)
+	 */
+	public void setAppUpdateInfo( final AutoUpdateInfo aui ) {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				appUpdateInfo = aui;
+				boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+				updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
+				updateBtn.setEnabled( isUpdateAvailable );
+			}
+		};
+		if ( SwingUtilities.isEventDispatchThread() ) r.run();
+		else SwingUtilities.invokeLater( r );
 	}
 
 
@@ -995,18 +990,6 @@ public class ManagerFrame extends JFrame implements ActionListener, HashObserver
 					exitApp();
 				}
 			}
-		}
-	}
-
-
-	@Override
-	public void setNerfed( boolean b ) {
-		Component glassPane = this.getGlassPane();
-		if (b) {
-			glassPane.setVisible(true);
-			glassPane.requestFocusInWindow();
-		} else {
-			glassPane.setVisible(false);
 		}
 	}
 

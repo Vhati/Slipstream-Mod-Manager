@@ -5,7 +5,7 @@ public class ModInfo {
 	private String title = "???";
 	private String author = "???";
 	private String url = "???";
-	private String description = "";
+	private String description = "???";
 	private String fileHash = "???";
 	private String version = "???";
 
@@ -23,6 +23,19 @@ public class ModInfo {
 	public String getDescription() { return this.description; }
 	public String getFileHash() { return this.fileHash; }
 	public String getVersion() { return this.version; }
+
+
+	/**
+	 * Returns true if all fields, aside from fileHash, are "???".
+	 */
+	public boolean isBlank() {
+		if ( !getTitle().equals( "???" ) ) return false;
+		if ( !getAuthor().equals( "???" ) ) return false;
+		if ( !getURL().equals( "???" ) ) return false;
+		if ( !getDescription().equals( "???" ) ) return false;
+		if ( !getVersion().equals( "???" ) ) return false;
+		return true;
+	}
 
 
 	@Override
