@@ -1,5 +1,8 @@
 Changelog
 
+1.4:
+- Cleaned up some dodgy code when initially prompting for FTL's location
+
 1.3:
 - Added "Return FTL to an unmodded state before switching to a new version"
 - Fixed advanced find tags' panic arg (was "true" all the time)

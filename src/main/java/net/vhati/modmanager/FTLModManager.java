@@ -25,13 +25,27 @@ public class FTLModManager {
 	private static final Logger log = LogManager.getLogger(FTLModManager.class);
 
 	public static final String APP_NAME = "Slipstream Mod Manager";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.3" );
+	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.4" );
 	public static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
 	public static final String APP_AUTHOR = "Vhati";
 
 
 	public static void main( String[] args ) {
 		if ( args.length > 0 ) SlipstreamCLI.main( args );
+
+
+		// Ensure all popups are triggered from the event dispatch thread.
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				guiInit();
+			}
+		});
+	}
+
+
+	private static void guiInit() {
 
 		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
 		log.debug( String.format( "%s %s", System.getProperty("os.name"), System.getProperty("os.version") ) );
@@ -156,7 +170,7 @@ public class FTLModManager {
 		}
 
 
-		final SlipstreamConfig appConfig = new SlipstreamConfig( config, configFile );
+		SlipstreamConfig appConfig = new SlipstreamConfig( config, configFile );
 		if ( writeConfig ) {
 			try {
 				appConfig.writeConfig();
@@ -168,20 +182,15 @@ public class FTLModManager {
 			}
 		}
 
-		// Create the GUI.
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
-					frame.init();
-					frame.setVisible(true);
-				} catch ( Exception e ) {
-					log.error( "Exception while creating ManagerFrame.", e );
-					System.exit(1);
-				}
-			}
-		});
+		// Create the main window.
+		try {
+			ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
+			frame.init();
+			frame.setVisible(true);
+		} catch ( Exception e ) {
+			log.error( "Exception while creating ManagerFrame.", e );
+			System.exit(1);
+		}
 	}
 
 
