@@ -2,15 +2,22 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.3",
+				"version" : "1.4",
 				"urls" : {
 					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.3/Slipstream%20Mod%20Manager%20v1.3-Unix.tar.gz/download",
-					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.3/Slipstream%20Mod%20Manager%20v1.3-Win.zip/download"
+					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.4/Slipstream%20Mod%20Manager%20v1.4-Unix.tar.gz/download",
+					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.4/Slipstream%20Mod%20Manager%20v1.4-Win.zip/download"
 				},
 				"notice" : "Important: Return FTL to an unmodded state before switching to a new version."
 			},
 			"changelog" : [
+				{
+					"version" : "1.4",
+					"changes" : [
+						"Cleaned up some dodgy code when initially prompting for FTL's location",
+						"Added another common game location: \"C:\\Program Files (x86)\\FTL\""
+					]
+				},
 				{
 					"version" : "1.3",
 					"changes" : [
