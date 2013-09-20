@@ -26,6 +26,7 @@ public class FTLUtilities {
 	public static File findDatsDir() {
 		String steamPath = "Steam/steamapps/common/FTL Faster Than Light/resources";
 		String gogPath = "GOG.com/Faster Than Light/resources";
+		String humblePath = "FTL/resources";
 
 		String xdgDataHome = System.getenv("XDG_DATA_HOME");
 		if (xdgDataHome == null)
@@ -38,6 +39,9 @@ public class FTLUtilities {
 			// Windows - GOG
 			new File( new File(""+System.getenv("ProgramFiles(x86)")), gogPath ),
 			new File( new File(""+System.getenv("ProgramFiles")), gogPath ),
+			// Windows - Humble Bundle
+			new File( new File(""+System.getenv("ProgramFiles(x86)")), humblePath ),
+			new File( new File(""+System.getenv("ProgramFiles")), humblePath ),
 			// Linux - Steam
 			new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
 			// OSX - Steam
@@ -60,6 +64,8 @@ public class FTLUtilities {
 
 	/**
 	 * Modally prompts the user for the FTL resources dir.
+	 *
+	 * Reminder: GUI dialogs need to be in the event dispatch thread.
 	 *
 	 * @param parentComponent a parent for Swing dialogs, or null
 	 */

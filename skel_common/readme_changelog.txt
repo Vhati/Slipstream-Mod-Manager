@@ -2,6 +2,7 @@ Changelog
 
 1.4:
 - Cleaned up some dodgy code when initially prompting for FTL's location
+- Added another common game location: "C:\Program Files (x86)\FTL"
 
 1.3:
 - Added "Return FTL to an unmodded state before switching to a new version"
