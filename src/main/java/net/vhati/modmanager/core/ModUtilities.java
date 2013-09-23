@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportMessage;
 import net.vhati.modmanager.core.SloppyXMLParser;
