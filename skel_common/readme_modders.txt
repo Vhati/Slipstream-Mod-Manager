@@ -215,6 +215,11 @@ Commandline
 
     Runs the game. If used with "--patch", runs afterward if successful.
 
+  --validate Abc
+
+    Prints a "Validate" report for named mod files/dirs. Handy when
+    you're checking repeatedly as you correct typos.
+
 
 Pitfalls
 
