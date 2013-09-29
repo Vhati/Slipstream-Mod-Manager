@@ -201,7 +201,7 @@ public class SlipstreamCLI {
 				dstP = new FTLDat.FolderPack( extractDir );
 
 				for ( File datFile : datFiles ) {
-					srcP = new FTLDat.FTLPack( datFile, false );
+					srcP = new FTLDat.FTLPack( datFile, "r" );
 					List<String> innerPaths = srcP.list();
 
 					for ( String innerPath : innerPaths ) {

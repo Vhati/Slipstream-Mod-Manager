@@ -84,7 +84,7 @@ public class DatExtractDialog extends ProgressDialog {
 				dstP = new FTLDat.FolderPack( extractDir );
 
 				for ( File datFile : datFiles ) {
-					srcP = new FTLDat.FTLPack( datFile, false );
+					srcP = new FTLDat.FTLPack( datFile, "r" );
 					progress = 0;
 					List<String> innerPaths = srcP.list();
 					setProgressLater( progress, innerPaths.size() );

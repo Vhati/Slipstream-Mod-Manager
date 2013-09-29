@@ -156,8 +156,8 @@ public class ModPatchThread extends Thread {
 				return true;
 			}
 
-			dataP = new FTLPack( dataDat.datFile, false );
-			resP = new FTLPack( resDat.datFile, false );
+			dataP = new FTLPack( dataDat.datFile, "r+" );
+			resP = new FTLPack( resDat.datFile, "r+" );
 
 			Map<String,AbstractPack> topFolderMap = new HashMap<String,AbstractPack>();
 			topFolderMap.put( "data", dataP );

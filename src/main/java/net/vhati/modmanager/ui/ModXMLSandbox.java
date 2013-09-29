@@ -322,7 +322,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		FTLDat.FTLPack dataP = null;
 		InputStream is = null;
 		try {
-			dataP = new FTLDat.FTLPack( dataDatFile, false );
+			dataP = new FTLDat.FTLPack( dataDatFile, "r" );
 			List<String> innerPaths = dataP.list();
 
 			String innerPath = promptForInnerPath( innerPaths );

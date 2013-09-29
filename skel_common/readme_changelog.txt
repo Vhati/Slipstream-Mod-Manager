@@ -1,5 +1,8 @@
 Changelog
 
+???:
+- Changed FTLDat to allow opening dats in read-only mode
+
 1.4:
 - Cleaned up some dodgy code when initially prompting for FTL's location
 - Added another common game location: "C:\Program Files (x86)\FTL"
