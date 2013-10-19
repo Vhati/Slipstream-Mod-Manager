@@ -1,6 +1,7 @@
 Changelog
 
 ???:
+- Added 'no info... yet' message when mods/ scan is still in-progress
 - Changed FTLDat to allow opening dats in read-only mode
 
 1.4:

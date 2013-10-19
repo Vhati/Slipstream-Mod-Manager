@@ -81,6 +81,8 @@ public class ForumScraper {
 		ignoredURLs.add( "http://www.moddb.com/mods/better-planets-and-backgrounds/downloads/better-asteroids" );
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2947" );
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11604" );
+		// Hissatsu's post on "Advanced Battle Systems".
+		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=11469&start=60#p55171" );
 		// SpaceDock is an app.
 		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=16842" );
 		// Beginning Scrap Advantage is bundled in GMM.

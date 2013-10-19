@@ -91,7 +91,7 @@ public class FTLModManager {
 		if ( !useDefaultUI.equals("true") ) {
 			try {
 				log.trace( "Using system Look and Feel" );
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 			}
 			catch (Exception e) {
 				log.error( "Error setting system Look and Feel.", e );
@@ -120,7 +120,7 @@ public class FTLModManager {
 		if ( datsDir == null ) {
 			datsDir = FTLUtilities.findDatsDir();
 			if ( datsDir != null ) {
-				int response = JOptionPane.showConfirmDialog(null, "FTL resources were found in:\n"+ datsDir.getPath() +"\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				int response = JOptionPane.showConfirmDialog( null, "FTL resources were found in:\n"+ datsDir.getPath() +"\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 				if ( response == JOptionPane.NO_OPTION ) datsDir = null;
 			}
 
@@ -196,6 +196,6 @@ public class FTLModManager {
 
 
 	private static void showErrorDialog( String message ) {
-		JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
 	}
 }

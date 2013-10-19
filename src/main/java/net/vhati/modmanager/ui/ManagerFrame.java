@@ -122,6 +122,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private String appAuthor;
 
 	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
+	private HashMap<String,Date> modFileDates = new HashMap<String,Date>();
 	private ModDB catalogModDB = new ModDB();
 	private ModDB localModDB = new ModDB();
 
@@ -635,30 +636,55 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			infoArea.setDescription( modInfo.getTitle(), modInfo.getAuthor(), modInfo.getVersion(), modInfo.getURL(), modInfo.getDescription() );
 		}
 		else {
-			long epochTime = -1;
+			boolean notYetReady = false;
+			managerLock.lock();
 			try {
-				epochTime = ModUtilities.getModFileTime( modFileInfo.getFile() );
-			} catch ( IOException e ) {
-				log.error( String.format( "Error while getting modified time of mod file contents for \"%s\".", modFileInfo.getFile() ), e );
+				notYetReady = scanning;
 			}
-
-			String body = "";
-			body += "No info is available for the selected mod.\n\n";
-
-			if ( epochTime != -1 ) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
-				String dateString = dateFormat.format( new Date( epochTime ) );
-				body += "It was released sometime after "+ dateString +".\n\n";
-			} else {
-				body += "The date of its release could not be determined.\n\n";
+			finally {
+				managerLock.unlock();
 			}
+			if ( notYetReady ) {
+				String body = "";
+				body += "No info is currently available for the selected mod.\n\n";
+				body += "But Slipstream has not yet finished scanning the mods/ folder. ";
+				body += "Try clicking this mod again after waiting a few seconds.";
 
-			body += "If it is stable and has been out for over a month,\n";
-			body += "please let the Slipstream devs know where you ";
-			body += "found it.\n\n";
-			body += "Include the mod's version, and this hash.\n";
-			body += "MD5: "+ modHash +"\n";
-			infoArea.setDescription( modFileInfo.getName(), body );
+				infoArea.setDescription( modFileInfo.getName(), body );
+			}
+			else {
+				Date modDate = modFileDates.get( modHash );
+				if ( modDate == null ) {
+					long epochTime = -1;
+					try {
+						epochTime = ModUtilities.getModFileTime( modFileInfo.getFile() );
+					} catch ( IOException e ) {
+						log.error( String.format( "Error while getting modified time of mod file contents for \"%s\".", modFileInfo.getFile() ), e );
+					}
+					if ( epochTime != -1 ) {
+						modDate = new Date( epochTime );
+						modFileDates.put( modHash, modDate );
+					}
+				}
+
+				String body = "";
+				body += "No info is available for the selected mod.\n\n";
+
+				if ( modDate != null ) {
+					SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
+					String dateString = dateFormat.format( modDate );
+					body += "It was released sometime after "+ dateString +".\n\n";
+				} else {
+					body += "The date of its release could not be determined.\n\n";
+				}
+
+				body += "If it is stable and has been out for over a month,\n";
+				body += "please let the Slipstream devs know where you ";
+				body += "found it.\n\n";
+				body += "Include the mod's version, and this hash.\n";
+				body += "MD5: "+ modHash +"\n";
+				infoArea.setDescription( modFileInfo.getName(), body );
+			}
 		}
 	}
 
