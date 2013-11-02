@@ -1,7 +1,8 @@
 Changelog
 
-???:
+1.5:
 - Added 'no info... yet' message when mods/ scan is still in-progress
+- Fixed advanced find tags not honoring start= when greater than match count
 - Changed FTLDat to allow opening dats in read-only mode
 
 1.4:

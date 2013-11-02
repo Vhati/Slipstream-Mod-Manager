@@ -130,6 +130,9 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
+				else {
+					matchedNodes.clear();
+				}
 				if ( panic && matchedNodes.isEmpty() )
 					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
 
@@ -181,6 +184,9 @@ public class XMLPatcher {
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
+				}
+				else {
+					matchedNodes.clear();
 				}
 				if ( panic && matchedNodes.isEmpty() )
 					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
@@ -234,6 +240,9 @@ public class XMLPatcher {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
 				}
+				else {
+					matchedNodes.clear();
+				}
 				if ( panic && matchedNodes.isEmpty() )
 					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
 	
@@ -265,6 +274,9 @@ public class XMLPatcher {
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
+				}
+				else {
+					matchedNodes.clear();
 				}
 				if ( panic && matchedNodes.isEmpty() )
 					throw new NoSuchElementException( String.format( "<%s> was set to require results but found none (%s).", node.getName(), getPathToRoot(node) ) );
