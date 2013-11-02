@@ -466,6 +466,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		                                                      appUpdateETagFile
 		                                                    );
 		initThread.setDaemon( true );
+		initThread.setPriority( Thread.MIN_PRIORITY );
 		initThread.start();
 	}
 
@@ -554,6 +555,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		ModsScanThread scanThread = new ModsScanThread( modFiles, localModDB, this );
 		scanThread.setDaemon( true );
+		scanThread.setPriority( Thread.MIN_PRIORITY );
 		scanThread.start();
 	}
 
