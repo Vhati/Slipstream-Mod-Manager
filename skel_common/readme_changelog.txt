@@ -3,6 +3,7 @@ Changelog
 1.5:
 - Added 'no info... yet' message when mods/ scan is still in-progress
 - Fixed advanced find tags not honoring start= when greater than match count
+- Updated log4j2 to 2.0-beta9, fixing a hang when run with Java 1.7.0_25
 - Changed FTLDat to allow opening dats in read-only mode
 
 1.4:
