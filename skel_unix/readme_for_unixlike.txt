@@ -88,7 +88,3 @@ Troubleshooting
       Run FTL, which will cause steam to copy fresh resources from its cache.
     Standalone users:
       Reinstall FTL.
-
-* If Slipstream hangs on startup: nothing in the prompt and no log...
-    If running "java -version" says 1.7.0_25...
-      That version of Java was glitched. Switch to 1.6 or 1.7.0_40+.
