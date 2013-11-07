@@ -501,10 +501,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 
 	private void saveModOrder( List<ModFileInfo> sortedMods ) {
-		FileOutputStream os = null;
+		BufferedWriter bw = null;
 		try {
-			os = new FileOutputStream( modorderFile );
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
+			FileOutputStream os = new FileOutputStream( modorderFile );
+			bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
 
 			for ( ModFileInfo modFileInfo : sortedMods ) {
 				bw.write( modFileInfo.getName() );
@@ -516,7 +516,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			log.error( String.format( "Error writing \"%s\".", modorderFile.getName() ), e );
 		}
 		finally {
-			try {if (os != null) os.close();}
+			try {if (bw != null) bw.close();}
 			catch (Exception e) {}
 		}
 	}

@@ -170,10 +170,10 @@ public class ManagerInitThread extends Thread {
 	private List<String> loadModOrder() {
 		List<String> result = new ArrayList<String>();
 
-		FileInputStream is = null;
+		BufferedReader br = null;
 		try {
-			is = new FileInputStream( modorderFile );
-			BufferedReader br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
+			FileInputStream is = new FileInputStream( modorderFile );
+			br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
 			String line;
 			while ( (line = br.readLine()) != null ) {
 				result.add( line );
@@ -185,7 +185,7 @@ public class ManagerInitThread extends Thread {
 			log.error( String.format( "Error reading \"%s\".", modorderFile.getName() ), e );
 		}
 		finally {
-			try {if ( is != null ) is.close();}
+			try {if ( br != null ) br.close();}
 			catch ( Exception e ) {}
 		}
 
