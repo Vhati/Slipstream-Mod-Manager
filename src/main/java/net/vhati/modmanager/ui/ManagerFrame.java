@@ -330,24 +330,24 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 				// Reset on first click and when no longer on that row.
 				if ( e.getClickCount() == 1 ) prevRow = -1;
-				if ( thisRow != prevRow ) {
+				if ( thisRow != prevRow || thisRow == -1 ) {
 					streak = 1;
 					prevRow = thisRow;
 					return;
 				} else {
 					streak++;
 				}
-				if ( streak % 2 != 0 ) return;  // Respond to click pairs.
+				if ( streak % 2 != 0 ) return;  // Respond only to click pairs.
 
 				// Don't further toggle a multi-clicked checkbox.
 				int viewCol = localModsTable.columnAtPoint( e.getPoint() );
 				int modelCol = localModsTable.getColumnModel().getColumn(viewCol).getModelIndex();
 				if ( modelCol == 0 ) return;
 
-				int row = localModsTable.getSelectedRow();
-				if ( row != -1 ) {
-					boolean selected = localModsTableModel.isSelected( row );
-					localModsTableModel.setSelected( row, !selected );
+				int selRow = localModsTable.getSelectedRow();
+				if ( selRow != -1 ) {
+					boolean selected = localModsTableModel.isSelected( selRow );
+					localModsTableModel.setSelected( selRow, !selected );
 				}
 			}
 		});
