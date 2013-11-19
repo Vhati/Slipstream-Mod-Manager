@@ -1,4 +1,4 @@
-package net.vhati.modmanager.ui;
+package net.vhati.modmanager.ui.table;
 
 
 public interface Reorderable {

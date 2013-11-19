@@ -10,8 +10,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
@@ -37,7 +35,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -47,17 +44,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.AutoUpdateInfo;
@@ -76,7 +70,6 @@ import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.json.JacksonCatalogWriter;
 import net.vhati.modmanager.json.URLFetcher;
-import net.vhati.modmanager.ui.ChecklistTableModel;
 import net.vhati.modmanager.ui.InertPanel;
 import net.vhati.modmanager.ui.ManagerInitThread;
 import net.vhati.modmanager.ui.ModInfoArea;
@@ -85,7 +78,7 @@ import net.vhati.modmanager.ui.ModXMLSandbox;
 import net.vhati.modmanager.ui.SlipstreamConfigDialog;
 import net.vhati.modmanager.ui.Statusbar;
 import net.vhati.modmanager.ui.StatusbarMouseListener;
-import net.vhati.modmanager.ui.TableRowTransferHandler;
+import net.vhati.modmanager.ui.table.ChecklistTablePanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,8 +125,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 	private NerfListener nerfListener = new NerfListener( this );
 
-	private ChecklistTableModel<ModFileInfo> localModsTableModel;
-	private JTable localModsTable;
+	private ChecklistTablePanel<ModFileInfo> modsTablePanel;
 
 	private JMenuBar menubar;
 	private JMenu fileMenu;
@@ -174,21 +166,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		JPanel topPanel = new JPanel( new BorderLayout() );
 
-		localModsTableModel = new ChecklistTableModel<ModFileInfo>();
-
-		localModsTable = new JTable( localModsTableModel );
-		localModsTable.setFillsViewportHeight( true );
-		localModsTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
-		localModsTable.setTableHeader( null );
-		localModsTable.getColumnModel().getColumn(0).setMinWidth(30);
-		localModsTable.getColumnModel().getColumn(0).setMaxWidth(30);
-		localModsTable.getColumnModel().getColumn(0).setPreferredWidth(30);
-
-		JScrollPane localModsScroll = new JScrollPane( null, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-		localModsScroll.setViewportView( localModsTable );
-		//localModsScroll.setColumnHeaderView( null );  // Counterpart to setTableHeader().
-		localModsScroll.setPreferredSize( new Dimension(Integer.MIN_VALUE, Integer.MIN_VALUE) );
-		topPanel.add( localModsScroll, BorderLayout.CENTER );
+		modsTablePanel = new ChecklistTablePanel<ModFileInfo>();
+		topPanel.add( modsTablePanel, BorderLayout.CENTER );
 
 		JPanel modActionsPanel = new JPanel();
 		modActionsPanel.setLayout( new BoxLayout(modActionsPanel, BoxLayout.Y_AXIS) );
@@ -281,11 +260,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			public void windowClosed( WindowEvent e ) {
 				// dispose() was called.
 
-				List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
-
-				for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
-					sortedMods.add( localModsTableModel.getItem(i) );
-				}
+				List<ModFileInfo> sortedMods = modsTablePanel.getAllItems();
 				saveModOrder( sortedMods );
 
 				SlipstreamConfig appConfig = ManagerFrame.this.appConfig;
@@ -318,57 +293,19 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			}
 		});
 
-		// Double-click toggles checkboxes.
-		localModsTable.addMouseListener(new MouseAdapter() {
-			int prevRow = -1;
-			int streak = 0;
-
-			@Override
-			public void mouseClicked( MouseEvent e ) {
-				if ( e.getSource() != localModsTable ) return;
-				int thisRow = localModsTable.rowAtPoint( e.getPoint() );
-
-				// Reset on first click and when no longer on that row.
-				if ( e.getClickCount() == 1 ) prevRow = -1;
-				if ( thisRow != prevRow || thisRow == -1 ) {
-					streak = 1;
-					prevRow = thisRow;
-					return;
-				} else {
-					streak++;
-				}
-				if ( streak % 2 != 0 ) return;  // Respond only to click pairs.
-
-				// Don't further toggle a multi-clicked checkbox.
-				int viewCol = localModsTable.columnAtPoint( e.getPoint() );
-				int modelCol = localModsTable.getColumnModel().getColumn(viewCol).getModelIndex();
-				if ( modelCol == 0 ) return;
-
-				int selRow = localModsTable.getSelectedRow();
-				if ( selRow != -1 ) {
-					boolean selected = localModsTableModel.isSelected( selRow );
-					localModsTableModel.setSelected( selRow, !selected );
-				}
-			}
-		});
-
 		// Highlighted row shows mod info.
-		localModsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		modsTablePanel.getTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged( ListSelectionEvent e ) {
 				if ( e.getValueIsAdjusting() ) return;
 
-				int row = localModsTable.getSelectedRow();
+				int row = modsTablePanel.getTable().getSelectedRow();
 				if ( row == -1 ) return;
 
-				ModFileInfo modFileInfo = localModsTableModel.getItem( row );
+				ModFileInfo modFileInfo = modsTablePanel.getTableModel().getItem( row );
 				showLocalModInfo( modFileInfo );
 			}
 		});
-
-		localModsTable.setTransferHandler( new TableRowTransferHandler( localModsTable ) );
-		localModsTable.setDropMode( DropMode.INSERT );  // Drop between rows, not on them.
-		localModsTable.setDragEnabled( true );
 
 		menubar = new JMenuBar();
 		fileMenu = new JMenu( "File" );
@@ -537,7 +474,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		}
 
 		modFileHashes.clear();
-		localModsTableModel.removeAllItems();
+		modsTablePanel.clear();
 
 		boolean allowZip = appConfig.getProperty( "allow_zip", "false" ).equals( "true" );
 		File[] modFiles = modsDir.listFiles( new ModFileFilter( allowZip ) );
@@ -550,7 +487,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		List<ModFileInfo> sortedMods = reorderMods( unsortedMods, preferredOrder );
 		for ( ModFileInfo modFileInfo : sortedMods ) {
-			localModsTableModel.addItem( modFileInfo );
+			modsTablePanel.getTableModel().addItem( modFileInfo );
 		}
 
 		ModsScanThread scanThread = new ModsScanThread( modFiles, localModDB, this );
@@ -712,10 +649,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		if ( source == patchBtn ) {
 			List<File> modFiles = new ArrayList<File>();
 
-			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
-				if ( localModsTableModel.isSelected(i) ) {
-					modFiles.add( localModsTableModel.getItem(i).getFile() );
-				}
+			for ( ModFileInfo modFileInfo : modsTablePanel.getSelectedItems() ) {
+				modFiles.add( modFileInfo.getFile() );
 			}
 
 			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
@@ -746,24 +681,13 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			patchDlg.setVisible( true );
 		}
 		else if ( source == toggleAllBtn ) {
-			int selectedCount = 0;
-			for ( int i = localModsTableModel.getRowCount()-1; i >= 0; i-- ) {
-				if ( localModsTableModel.isSelected(i) ) selectedCount++;
-			}
-			boolean b = ( selectedCount != localModsTableModel.getRowCount() );
-
-			for ( int i = localModsTableModel.getRowCount()-1; i >= 0; i-- ) {
-				localModsTableModel.setSelected( i, b );
-			}
+			modsTablePanel.toggleAllItemSelection();
 		}
 		else if ( source == validateBtn ) {
 			StringBuilder resultBuf = new StringBuilder();
 			boolean anyInvalid = false;
 
-			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
-				if ( !localModsTableModel.isSelected(i) ) continue;
-
-				ModFileInfo modFileInfo = localModsTableModel.getItem( i );
+			for ( ModFileInfo modFileInfo : modsTablePanel.getSelectedItems() ) {
 				Report validateReport = ModUtilities.validateModFile( modFileInfo.getFile() );
 
 				ReportFormatter formatter = new ReportFormatter();
@@ -810,8 +734,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 			List<String> preferredOrder = new ArrayList<String>();
 
-			for ( int i=0; i < localModsTableModel.getRowCount(); i++ ) {
-				preferredOrder.add( localModsTableModel.getItem(i).getName() );
+			for ( ModFileInfo modFileInfo : modsTablePanel.getAllItems() ) {
+				preferredOrder.add( modFileInfo.getName() );
 			}
 			rescanMods( preferredOrder );
 		}

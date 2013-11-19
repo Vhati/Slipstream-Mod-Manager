@@ -1,4 +1,4 @@
-package net.vhati.modmanager.ui;
+package net.vhati.modmanager.ui.table;
 
 import java.awt.Cursor;
 import java.awt.datatransfer.DataFlavor;
@@ -7,6 +7,8 @@ import java.awt.dnd.DragSource;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
+
+import net.vhati.modmanager.ui.table.Reorderable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +29,7 @@ public class TableRowTransferHandler extends TransferHandler {
 
 
 	public TableRowTransferHandler( JTable table ) {
+		super();
 		if ( table.getModel() instanceof Reorderable == false ) {
 			throw new IllegalArgumentException( "The tableModel doesn't implement Reorderable." );
 		}
@@ -79,7 +82,8 @@ public class TableRowTransferHandler extends TransferHandler {
 				target.getSelectionModel().addSelectionInterval( dropRow, dropRow );
 				return true;
 			}
-		} catch (Exception e) {
+		}
+		catch ( Exception e ) {
 			log.error( e );
 		}
 		return false;
@@ -99,7 +103,7 @@ public class TableRowTransferHandler extends TransferHandler {
 	 * from a drag source, to be transformed into a flavor
 	 * suitable for the drop target.
 	 */
-	private class IntegerTransferrable implements Transferable{
+	private class IntegerTransferrable implements Transferable {
 		private Integer data;
 
 		public IntegerTransferrable( Integer data ) {

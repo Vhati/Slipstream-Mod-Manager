@@ -1,10 +1,11 @@
-package net.vhati.modmanager.ui;
+package net.vhati.modmanager.ui.table;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import net.vhati.modmanager.core.ModInfo;
+import net.vhati.modmanager.ui.table.Reorderable;
 
 
 public class ChecklistTableModel<T> extends AbstractTableModel implements Reorderable {

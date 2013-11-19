@@ -76,7 +76,7 @@ public class FTLUtilities {
 		message += "You will now be prompted to locate FTL manually.\n";
 		message += "Select '(FTL dir)/resources/data.dat'.\n";
 		message += "Or 'FTL.app', if you're on OSX.";
-		JOptionPane.showMessageDialog( parentComponent,  message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
+		JOptionPane.showMessageDialog( parentComponent, message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
 
 		final JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle( "Find data.dat or FTL.app" );
