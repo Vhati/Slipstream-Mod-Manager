@@ -11,13 +11,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import net.vhati.modmanager.ui.tree.ChecklistTreeManager;
 import net.vhati.modmanager.ui.tree.ChecklistTreeSelectionModel;
-import net.vhati.modmanager.ui.tree.GroupTreeCellRenderer;
 import net.vhati.modmanager.ui.tree.TreeTransferHandler;
 
 
@@ -32,9 +32,9 @@ public class ChecklistTreePanel extends JPanel {
 		super( new BorderLayout() );
 
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode( "Root", true );
-		treeModel = new DefaultTreeModel( rootNode );
+		treeModel = new DefaultTreeModel( rootNode, true );
 		tree = new JTree( treeModel );
-		tree.setCellRenderer( new GroupTreeCellRenderer() );
+		tree.setCellRenderer( new DefaultTreeCellRenderer() );
 		tree.setRootVisible( false );
 		tree.getSelectionModel().setSelectionMode( TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION );
 		checklistManager = new ChecklistTreeManager( tree, true, null );
@@ -103,7 +103,7 @@ public class ChecklistTreePanel extends JPanel {
 	 */
 	public void addGroup() {
 		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)treeModel.getRoot();
-		GroupAwareTreeNode groupNode = new GroupAwareTreeNode( "New Group", true );
+		DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode( "New Group", true );
 		rootNode.add( groupNode );
 		treeModel.nodesWereInserted( rootNode, new int[]{rootNode.getIndex( groupNode )} );
 	}

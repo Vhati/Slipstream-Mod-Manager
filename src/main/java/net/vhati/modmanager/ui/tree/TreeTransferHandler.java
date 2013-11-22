@@ -16,6 +16,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
@@ -30,7 +31,9 @@ import javax.swing.tree.TreePath;
  * Dragging onto a node that allows children will insert into it.
  * Dragging onto a node that doesn't allow children will insert after it.
  *
- * All nodes must be instances of DefaultMutableTreeNode (or subclasses).
+ * The TreeModel must be DefaultTreeModel (or a subclass).
+ * All nodes must be DefaultMutableTreeNode (or a subclass) and properly
+ * implement Cloneable.
  * Set the Jtree's DropMode to ON_OR_INSERT.
  * The root node must be hidden, to prevent it from being dragged.
  * The tree's selection model may be set to single or multiple.
@@ -122,13 +125,13 @@ public class TreeTransferHandler extends TransferHandler {
 
 		dstTree.setCursor( Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR) );
 		if ( dropPath == null ) return false;
-		DefaultMutableTreeNode dropParentNode = (DefaultMutableTreeNode)dropPath.getLastPathComponent();
+		MutableTreeNode dropParentNode = (MutableTreeNode)dropPath.getLastPathComponent();
 
 		// When dropping onto a non-group node, insert into the position after it instead.
 		if ( !dropParentNode.getAllowsChildren() ) {
-			DefaultMutableTreeNode prevParentNode = dropParentNode;
+			MutableTreeNode prevParentNode = dropParentNode;
 			dropPath = dropPath.getParentPath();
-			dropParentNode = (DefaultMutableTreeNode)dropPath.getLastPathComponent();
+			dropParentNode = (MutableTreeNode)dropPath.getLastPathComponent();
 			dropIndex = dropParentNode.getIndex( prevParentNode ) + 1;
 		}
 
@@ -148,7 +151,7 @@ public class TreeTransferHandler extends TransferHandler {
 				for ( TreePath path : draggedPaths ) {
 					// Copy the dragged node and any children.
 					DefaultMutableTreeNode srcNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-					DefaultMutableTreeNode newNode = (DefaultMutableTreeNode)cloneNodes( srcNode );
+					MutableTreeNode newNode = (MutableTreeNode)cloneNodes( srcNode );
 
 					if ( dropIndex != -1 ) {
 						// Insert.
@@ -158,8 +161,9 @@ public class TreeTransferHandler extends TransferHandler {
 					}
 					else {
 						// Add to the end.
-						dropParentNode.add( newNode );
-						dstTreeModel.nodesWereInserted( dropParentNode, new int[]{dropParentNode.getChildCount()-1} );
+						int addIndex = dropParentNode.getChildCount();
+						dropParentNode.insert( newNode, addIndex );
+						dstTreeModel.nodesWereInserted( dropParentNode, new int[]{addIndex} );
 						if ( !dstTree.isExpanded( dropPath ) ) dstTree.expandPath( dropPath );
 					}
 				}
@@ -186,12 +190,11 @@ public class TreeTransferHandler extends TransferHandler {
 
 		if ( action == TransferHandler.MOVE ) {
 			// Remove original dragged rows now that the move completed.
-			// Scan the tree checking equality is fine (DefaultMutableTreeNode's equals() does ==).
 
 			try {
 				TreePath[] draggedPaths = (TreePath[])data.getTransferData( localTreePathFlavor );
 				for ( TreePath path : draggedPaths ) {
-					DefaultMutableTreeNode doomedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+					MutableTreeNode doomedNode = (MutableTreeNode)path.getLastPathComponent();
 					TreeNode parentNode = doomedNode.getParent();
 					int doomedIndex = parentNode.getIndex( doomedNode );
 					doomedNode.removeFromParent();
@@ -208,16 +211,24 @@ public class TreeTransferHandler extends TransferHandler {
 	/**
 	 * Recursively clones a node and its descendants.
 	 *
-	 * The clone() methods will reuse userObjects, but the nodes themselves will be new.
+	 * The clone() methods will generally do a shallow copy, sharing
+	 * userObjects.
+	 *
+	 * Sidenote: The parameter couldn't just be MutableTreeNode, because that
+	 * doesn't offer the clone() method. And blindly using reflection to
+	 * invoke it wouldn't be pretty. Conceivably, a settable factory could be
+	 * designed to copy specific custom classes (using constructors instead
+	 * of clone(). But that'd be overkill.
 	 */
 	@SuppressWarnings("Unchecked")
-	private DefaultMutableTreeNode cloneNodes( DefaultMutableTreeNode srcNode ) {
-		DefaultMutableTreeNode resultNode = (DefaultMutableTreeNode)srcNode.clone();
+	protected MutableTreeNode cloneNodes( DefaultMutableTreeNode srcNode ) {
+		MutableTreeNode resultNode = (MutableTreeNode)srcNode.clone();
 
 		Enumeration enumer = srcNode.children();
 		while ( enumer.hasMoreElements() ) {
 			DefaultMutableTreeNode childNode = (DefaultMutableTreeNode)enumer.nextElement();
-			resultNode.add( cloneNodes( (DefaultMutableTreeNode)childNode ) );
+			int addIndex = resultNode.getChildCount();
+			resultNode.insert( cloneNodes( (DefaultMutableTreeNode)childNode ), addIndex );
 		}
 
 		return resultNode;
