@@ -79,6 +79,7 @@ import net.vhati.modmanager.ui.SlipstreamConfigDialog;
 import net.vhati.modmanager.ui.Statusbar;
 import net.vhati.modmanager.ui.StatusbarMouseListener;
 import net.vhati.modmanager.ui.table.ChecklistTablePanel;
+import net.vhati.modmanager.ui.table.ListState;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,7 +95,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private File backupDir = new File( "./backup/" );
 	private File modsDir = new File( "./mods/" );
 
-	private File modorderFile = new File( modsDir, "modorder.txt" );
+	private File modsTableStateFile = new File( modsDir, "modorder.txt" );
 
 	private File metadataFile = new File( backupDir, "cached_metadata.json" );
 
@@ -260,8 +261,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			public void windowClosed( WindowEvent e ) {
 				// dispose() was called.
 
-				List<ModFileInfo> sortedMods = modsTablePanel.getAllItems();
-				saveModOrder( sortedMods );
+				ListState<ModFileInfo> tableState = getCurrentModsTableState();
+				saveModsTableState( tableState );
 
 				SlipstreamConfig appConfig = ManagerFrame.this.appConfig;
 
@@ -395,7 +396,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		ManagerInitThread initThread = new ManagerInitThread( this,
 		                                                      new SlipstreamConfig( appConfig ),
-		                                                      modorderFile,
+		                                                      modsDir,
+		                                                      modsTableStateFile,
 		                                                      metadataFile,
 		                                                      catalogFile,
 		                                                      catalogETagFile,
@@ -409,48 +411,60 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 
 	/**
-	 * Returns a mod list with names sorted in a preferred order.
-	 *
-	 * Mods not mentioned in the name list appear at the end, alphabetically.
+	 * Returns a ListState describing content in the mods table.
 	 */
-	private List<ModFileInfo> reorderMods( List<ModFileInfo> unsortedMods, List<String> preferredOrder ) {
-		List<ModFileInfo> sortedMods = new ArrayList<ModFileInfo>();
+	public ListState<ModFileInfo> getCurrentModsTableState() {
+		ListState<ModFileInfo> tableState = new ListState<ModFileInfo>();
+
+		for ( ModFileInfo modFileInfo : modsTablePanel.getAllItems() ) {
+			tableState.addItem( modFileInfo );
+		}
+
+		return tableState;
+	}
+
+	/**
+	 * Synchronizes a mods table state with a pool of available items.
+	 *
+	 * Items in the table that also are in the pool are unchanged.
+	 * Items in the table that aren't in the pool are pruned.
+	 * Items in the pool that weren't in the table are appended in ascending
+	 * order.
+	 *
+	 * @param tableState  an existing state to amend
+	 * @param unsortedMods  the pool of currently available local mods
+	 */
+	public void amendModsTableState( ListState<ModFileInfo> tableState, List<ModFileInfo> unsortedMods ) {
 		List<ModFileInfo> availableMods = new ArrayList<ModFileInfo>( unsortedMods );
 		Collections.sort( availableMods );
 
-		if ( preferredOrder != null ) {
-			for ( String name : preferredOrder ) {
-				Iterator<ModFileInfo> it = availableMods.iterator();
-				while ( it.hasNext() ) {
-					ModFileInfo modFileInfo = it.next();
-					if ( modFileInfo.getName().equals( name ) ) {
-						it.remove();
-						sortedMods.add( modFileInfo );
-						break;
-					}
-				}
+		for ( ModFileInfo modFileInfo : availableMods ) {
+			if ( !tableState.containsItem( modFileInfo ) ) {
+				tableState.addItem( modFileInfo );
 			}
 		}
-		sortedMods.addAll( availableMods );
-
-		return sortedMods;
+		for ( ModFileInfo modFileInfo : tableState.getItems() ) {
+			if ( !availableMods.contains( modFileInfo ) ) {
+				tableState.removeItem( modFileInfo );
+			}
+		}
 	}
 
 
-	private void saveModOrder( List<ModFileInfo> sortedMods ) {
+	private void saveModsTableState( ListState<ModFileInfo> tableState ) {
 		BufferedWriter bw = null;
 		try {
-			FileOutputStream os = new FileOutputStream( modorderFile );
+			FileOutputStream os = new FileOutputStream( modsTableStateFile );
 			bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
 
-			for ( ModFileInfo modFileInfo : sortedMods ) {
+			for ( ModFileInfo modFileInfo : tableState.getItems() ) {
 				bw.write( modFileInfo.getName() );
 				bw.write( "\r\n" );
 			}
 			bw.flush();
 		}
 		catch ( IOException e ) {
-			log.error( String.format( "Error writing \"%s\".", modorderFile.getName() ), e );
+			log.error( String.format( "Error writing \"%s\".", modsTableStateFile.getName() ), e );
 		}
 		finally {
 			try {if (bw != null) bw.close();}
@@ -460,9 +474,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 
 	/**
-	 * Clears and syncs the mods list with mods/ dir, then starts a new hash thread.
+	 * Clears and syncs the mods list with mods/ dir, then starts a new hash
+	 * thread.
 	 */
-	public void rescanMods( List<String> preferredOrder ) {
+	public void rescanMods( ListState<ModFileInfo> tableState ) {
 		managerLock.lock();
 		try {
 			scanning = true;
@@ -484,9 +499,9 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			ModFileInfo modFileInfo = new ModFileInfo( f );
 			unsortedMods.add( modFileInfo );
 		}
+		amendModsTableState( tableState, unsortedMods );
 
-		List<ModFileInfo> sortedMods = reorderMods( unsortedMods, preferredOrder );
-		for ( ModFileInfo modFileInfo : sortedMods ) {
+		for ( ModFileInfo modFileInfo : tableState.getItems() ) {
 			modsTablePanel.getTableModel().addItem( modFileInfo );
 		}
 
@@ -732,12 +747,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			setStatusText( "" );
 			if ( rescanMenuItem.isEnabled() == false ) return;
 
-			List<String> preferredOrder = new ArrayList<String>();
-
-			for ( ModFileInfo modFileInfo : modsTablePanel.getAllItems() ) {
-				preferredOrder.add( modFileInfo.getName() );
-			}
-			rescanMods( preferredOrder );
+			ListState<ModFileInfo> tableState = getCurrentModsTableState();
+			rescanMods( tableState );
 		}
 		else if ( source == extractDatsMenuItem ) {
 			setStatusText( "" );

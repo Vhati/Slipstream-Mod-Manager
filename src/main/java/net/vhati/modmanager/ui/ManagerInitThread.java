@@ -17,11 +17,13 @@ import javax.swing.SwingUtilities;
 
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ModDB;
+import net.vhati.modmanager.core.ModFileInfo;
 import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.json.JacksonAutoUpdateReader;
 import net.vhati.modmanager.json.JacksonCatalogReader;
 import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ManagerFrame;
+import net.vhati.modmanager.ui.table.ListState;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +43,8 @@ public class ManagerInitThread extends Thread {
 
 	private final ManagerFrame frame;
 	private final SlipstreamConfig appConfig;
-	private final File modorderFile;
+	private final File modsDir;
+	private final File modsTableStateFile;
 	private final File metadataFile;
 	private final File catalogFile;
 	private final File catalogETagFile;
@@ -49,10 +52,11 @@ public class ManagerInitThread extends Thread {
 	private final File appUpdateETagFile;
 
 
-	public ManagerInitThread( ManagerFrame frame, SlipstreamConfig appConfig, File modorderFile, File metadataFile, File catalogFile, File catalogETagFile, File appUpdateFile, File appUpdateETagFile ) {
+	public ManagerInitThread( ManagerFrame frame, SlipstreamConfig appConfig, File modsDir, File modsTableStateFile, File metadataFile, File catalogFile, File catalogETagFile, File appUpdateFile, File appUpdateETagFile ) {
 		this.frame = frame;
 		this.appConfig = appConfig;
-		this.modorderFile = modorderFile;
+		this.modsDir = modsDir;
+		this.modsTableStateFile = modsTableStateFile;
 		this.metadataFile = metadataFile;
 		this.catalogFile = catalogFile;
 		this.catalogETagFile = catalogETagFile;
@@ -79,14 +83,14 @@ public class ManagerInitThread extends Thread {
 			if ( cachedDB != null ) frame.setLocalModDB( cachedDB );
 		}
 
-		final List<String> preferredOrder = loadModOrder();
+		final ListState<ModFileInfo> tableState = loadModsTableState();
 
 		Lock managerLock = frame.getLock();
 		managerLock.lock();
 		try {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
-				public void run() { frame.rescanMods( preferredOrder ); }
+				public void run() { frame.rescanMods( tableState ); }
 			});
 
 			// Wait until notified that "mods/" has been scanned.
@@ -167,26 +171,35 @@ public class ManagerInitThread extends Thread {
 	/**
 	 * Reads modorder.txt and returns a list of mod names in preferred order.
 	 */
-	private List<String> loadModOrder() {
-		List<String> result = new ArrayList<String>();
+	private ListState<ModFileInfo> loadModsTableState() {
+		List<String> fileNames = new ArrayList<String>();
 
 		BufferedReader br = null;
 		try {
-			FileInputStream is = new FileInputStream( modorderFile );
+			FileInputStream is = new FileInputStream( modsTableStateFile );
 			br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
 			String line;
 			while ( (line = br.readLine()) != null ) {
-				result.add( line );
+				fileNames.add( line );
 			}
 		}
 		catch ( FileNotFoundException e ) {
 		}
 		catch ( IOException e ) {
-			log.error( String.format( "Error reading \"%s\".", modorderFile.getName() ), e );
+			log.error( String.format( "Error reading \"%s\".", modsTableStateFile.getName() ), e );
+			fileNames.clear();
 		}
 		finally {
 			try {if ( br != null ) br.close();}
 			catch ( Exception e ) {}
+		}
+
+		ListState<ModFileInfo> result = new ListState<ModFileInfo>();
+
+		for ( String fileName : fileNames ) {
+			File modFile = new File( modsDir, fileName );
+			ModFileInfo modFileInfo = new ModFileInfo( modFile );
+			result.addItem( modFileInfo );
 		}
 
 		return result;
