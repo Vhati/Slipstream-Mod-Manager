@@ -29,7 +29,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 
-public class ChildrenEnumeration implements Enumeration {
+public class ChildrenEnumeration implements Enumeration<TreePath> {
 
 	private TreePath path;
 	private TreeModel model;
@@ -49,7 +49,7 @@ public class ChildrenEnumeration implements Enumeration {
 	}
 
 	@Override
-	public Object nextElement() {
+	public TreePath nextElement() {
 		if( !hasMoreElements() ) throw new NoSuchElementException();
 
 		return path.pathByAddingChild( model.getChild( path.getLastPathComponent(), position++ ) );

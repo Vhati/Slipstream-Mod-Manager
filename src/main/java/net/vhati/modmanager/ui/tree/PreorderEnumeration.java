@@ -25,22 +25,23 @@ package net.vhati.modmanager.ui.tree;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Stack;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 
-public class PreorderEnumeration implements Enumeration {
+public class PreorderEnumeration implements Enumeration<TreePath> {
 
 	private TreeModel model;
-	protected Stack<Enumeration> stack = new Stack<Enumeration>();
+	protected Stack<Enumeration<TreePath>> stack = new Stack<Enumeration<TreePath>>();
 
 
 	public PreorderEnumeration( TreePath path, TreeModel model ) {
 		this( Collections.enumeration( Collections.singletonList( path ) ), model );
 	}
 
-	public PreorderEnumeration( Enumeration enumer, TreeModel model ){
+	public PreorderEnumeration( Enumeration<TreePath> enumer, TreeModel model ){
 		this.model = model;
 		stack.push( enumer );
 	}
@@ -52,9 +53,9 @@ public class PreorderEnumeration implements Enumeration {
 	}
 
 	@Override
-	public Object nextElement() {
-		Enumeration	enumer = stack.peek();
-		TreePath path = (TreePath)enumer.nextElement();
+	public TreePath nextElement() {
+		Enumeration<TreePath>	enumer = stack.peek();
+		TreePath path = enumer.nextElement();
 
 		if ( !enumer.hasMoreElements() ) stack.pop();
 

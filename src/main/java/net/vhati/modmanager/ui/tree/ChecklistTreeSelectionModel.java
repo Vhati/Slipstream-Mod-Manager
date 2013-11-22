@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Stack;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreeModel;
@@ -122,7 +123,7 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 			TreePath[] selectionPaths = getSelectionPaths();
 			if ( selectionPaths == null ) break;
 
-			ArrayList toBeRemoved = new ArrayList();
+			List<TreePath> toBeRemoved = new ArrayList<TreePath>();
 			for ( int j=0; j < selectionPaths.length; j++ ) {
 				if ( isDescendant( selectionPaths[j], path ) ) {
 					toBeRemoved.add( selectionPaths[j] );
@@ -209,7 +210,7 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 	 * Otherwise, the given path will be unselected, and nothing else will change.
 	 */
 	private void toggleRemoveSelection( TreePath path ) {
-		Stack stack = new Stack();
+		Stack<TreePath> stack = new Stack<TreePath>();
 		TreePath parent = path.getParentPath();
 
 		while ( parent != null && !isPathSelected( parent ) ) {
@@ -226,8 +227,8 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 		}
 
 		while ( !stack.isEmpty() ) {
-			TreePath temp = (TreePath)stack.pop();
-			TreePath peekPath = ( stack.isEmpty() ? path : (TreePath)stack.peek() );
+			TreePath temp = stack.pop();
+			TreePath peekPath = ( stack.isEmpty() ? path : stack.peek() );
 			Object node = temp.getLastPathComponent();
 			Object peekNode = peekPath.getLastPathComponent();
 
@@ -243,16 +244,22 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 	}
 
 
-	public Enumeration getAllSelectedPaths() {
+	public Enumeration<TreePath> getAllSelectedPaths() {
+		Enumeration<TreePath> result = null;
+
 		TreePath[] treePaths = getSelectionPaths();
 		if ( treePaths == null ) {
-			return Collections.enumeration( Collections.EMPTY_LIST );
+			List<TreePath> pathsList = Collections.emptyList();
+			result = Collections.enumeration( pathsList );
+		}
+		else {
+			List<TreePath> pathsList = Arrays.asList( treePaths );
+			result = Collections.enumeration( pathsList );
+			if ( dig ) {
+				result = new PreorderEnumeration( result, model );
+			}
 		}
 
-		Enumeration enumer = Collections.enumeration( Arrays.asList( treePaths ) );
-		if ( dig ) {
-			enumer = new PreorderEnumeration( enumer, model );
-		}
-		return enumer;
+		return result;
 	}
 }

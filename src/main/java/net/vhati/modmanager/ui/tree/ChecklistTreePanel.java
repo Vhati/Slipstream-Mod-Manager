@@ -31,7 +31,7 @@ public class ChecklistTreePanel extends JPanel {
 	public ChecklistTreePanel() {
 		super( new BorderLayout() );
 
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode( "Root" );
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode( "Root", true );
 		treeModel = new DefaultTreeModel( rootNode );
 		tree = new JTree( treeModel );
 		tree.setCellRenderer( new GroupTreeCellRenderer() );

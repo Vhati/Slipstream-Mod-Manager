@@ -71,7 +71,7 @@ public class TreeTransferHandler extends TransferHandler {
 		// For each length (shortest-first), iterate its paths.
 		// For each of those paths, search longer lengths' lists,
 		// removing any paths that are descendants of those short ancestor nodes.
-		List<Integer> lengthsList = new ArrayList( pathsByLengthMap.keySet() );
+		List<Integer> lengthsList = new ArrayList<Integer>( pathsByLengthMap.keySet() );
 		for ( int i=0; i < lengthsList.size(); i++ ) {
 			for ( TreePath ancestorPath : pathsByLengthMap.get( lengthsList.get( i ) ) ) {
 				for ( int j=i+1; j < lengthsList.size(); j++ ) {
