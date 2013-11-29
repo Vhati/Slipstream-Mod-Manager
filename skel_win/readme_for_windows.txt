@@ -41,7 +41,11 @@ Usage
     Put it in the Slipstream\mods\ folder.
 
   To start the mod manager:
-    Double-click modman.exe or modman.jar.
+    On XP, double-click modman.exe.
+
+    On Windows 7 or Vista, Slipstream usually needs to be run as an administrator.
+      Right-click modman.exe and "Run as Administrator".
+      Or double-click modman_admin.exe.
 
   To install mods:
     Tick checkboxes to select the mods you want to install.
@@ -62,6 +66,9 @@ Usage
   Commandline:
     Run "modman.exe -h" for commandline usage.
 
+    On Windows 7 or Vista, the Command Prompt itself must be started as an
+    administrator (right-click it in the start menu).
+
 
 Troubleshooting
 
@@ -69,21 +76,41 @@ Troubleshooting
     You need a newer version of Java.
 
 * If some other program starts when you double-click modman.jar...
-    Try JarFix.
+    Running an exe is recommended, but if you insist, try JarFix.
       http://johann.loefflmann.net/en/software/jarfix/index.html
 
 * If you get permission errors...
-    Option 1:
-      Right-click modman.exe to run as an admin.
-
-    Option 2:
+    Option 1 (Windoes 7 or Vista):
       Start Menu -> Programs -> Accessories.
       Right-click "Command Prompt" to run as an admin.
       Type this, then hit enter: cd "c:\location\of\Slipstream"
       Type this, then hit enter: java -jar modman.jar
 
-    Option 3:
+    Option 2:
       Make sure resource.dat and data.dat aren't read-only.
+
+* If patching apparently succeeds, but no mods appear in-game...
+    Option 1:
+      Confirm you're modding the resources from the right FTL installation.
+      In the console, look for "Using FTL dats path from config: ...".
+      Or open modman-log.txt.
+
+      Or in SMM, under File-Preferences, check "ftl_dats_path".
+      Or open modman.cfg with a text editor.
+
+    Option 2 (Windoes 7 or Vista):
+      Look for a resources directory like this and delete it.
+      "C:\Users\[Username]\AppData\Local\VirtualStore\Program Files\FTL\resources"
+
+      This may be created when a non-admin app tries to write to a
+      protected location, like Program Files. The OS writes in VirtualStore
+      instead and lies to the app.
+
+      Weirdness happens when an admin-app modifies the real protected file.
+      A user-run app then continues to see the VirtualStore copy instead.
+
+      By deleting the copy and exclusively running SMM as admin, this can be
+      avoided.
 
 * If the game shows exclamation marks for everything...
     See the suggestion below for replacing corrupt resources.

@@ -5,6 +5,8 @@ Changelog
 - Fixed advanced find tags not honoring start= when greater than match count
 - Updated log4j2 to 2.0-beta9, fixing a hang when run with Java 1.7.0_25
 - Changed FTLDat to allow opening dats in read-only mode
+- Changed modman.exe to fail rather than use VirtualStore
+- Added modman_admin.exe, which always runs as administrator
 
 1.4:
 - Cleaned up some dodgy code when initially prompting for FTL's location

@@ -18,10 +18,13 @@ To build, run "mvn clean package" in this folder.
 "skel_exe/"
   Materials to create modman.exe (not part of Maven).
     - Get Launch4j: http://launch4j.sourceforge.net/index.html
-    - Drag "launch4j.xml" onto "launch4jc.exe".
+    - Drag "launch4j_*.xml" onto "launch4jc.exe".
     - "modman.exe" will appear alongside the xml.
     - Drag modman.exe into "skel_win/".
     - Run "mvn clean package".
+
+    - The manifest files will be embedded to prevent VirtualStore redirection.
+        http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware
 
 "auto_update.json"
   Info about the latest release, downloaded periodically by clients.

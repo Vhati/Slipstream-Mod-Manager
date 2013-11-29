@@ -12,6 +12,7 @@
   <supportUrl></supportUrl>
   <customProcName>false</customProcName>
   <stayAlive>false</stayAlive>
+  <manifest>normal.manifest</manifest>
   <icon></icon>
   <classPath>
     <mainClass>net.vhati.modmanager.FTLModManager</mainClass>
