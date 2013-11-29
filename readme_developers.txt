@@ -3,7 +3,7 @@ The build process for this project is automated by Maven.
   http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven
 
 
-To build, run "mvn clean" and "mvn package" in this folder.
+To build, run "mvn clean package" in this folder.
 
 
 "img/"
@@ -21,7 +21,7 @@ To build, run "mvn clean" and "mvn package" in this folder.
     - Drag "launch4j.xml" onto "launch4jc.exe".
     - "modman.exe" will appear alongside the xml.
     - Drag modman.exe into "skel_win/".
-    - Run "mvn clear" and "mvn package".
+    - Run "mvn clean package".
 
 "auto_update.json"
   Info about the latest release, downloaded periodically by clients.
@@ -65,7 +65,7 @@ SET M2=%M2_HOME%\bin
 SET PATH=%M2%;%PATH%
 
 CD /D "%~dp0"
-CALL mvn clean && CALL mvn package
+CALL mvn clean package
 
 PAUSE
 ENDLOCAL & EXIT /B
