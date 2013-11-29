@@ -7,5 +7,5 @@ else
   maindir=$PWD/$(dirname "$0");
 fi
 
-cd "${maindir}"
-java -jar modman.jar "$@"
+cd "${maindir}";
+java -jar modman.jar "$@";
