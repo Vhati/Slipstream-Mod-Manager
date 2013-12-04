@@ -315,7 +315,7 @@ public class ModUtilities {
 		boolean modValid = true;
 		boolean seenAppend = false;
 
-		Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|^thumbs[.]db$" );
+		Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|^thumbs[.]db$|~$" );
 
 		Pattern validRootDirPtn = Pattern.compile( "^(?:audio|data|fonts|img|mod-appendix)/" );
 		List<String> seenJunkDirs = new ArrayList<String>();

@@ -7,6 +7,7 @@ Changelog
 - Changed FTLDat to allow opening dats in read-only mode
 - Changed modman.exe to fail rather than use VirtualStore
 - Added modman_admin.exe, which always runs as administrator
+- Added a Validate warning for junk files whose names end with a tilde
 
 1.4:
 - Cleaned up some dodgy code when initially prompting for FTL's location
