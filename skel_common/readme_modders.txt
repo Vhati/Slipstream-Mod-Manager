@@ -166,7 +166,7 @@ Advanced XML
       tags will be ignored.
 
 
-  The following commands that can occur inside a <find...>.
+  The following commands can occur inside a <find...>.
 
     <mod:find...>
       Searches the context tag's children and acts on them with its own

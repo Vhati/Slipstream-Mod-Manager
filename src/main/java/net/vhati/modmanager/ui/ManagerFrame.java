@@ -480,9 +480,9 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	public void rescanMods( ListState<ModFileInfo> tableState ) {
 		managerLock.lock();
 		try {
+			if ( scanning ) return;
 			scanning = true;
-			if ( rescanMenuItem.isEnabled() == false ) return;
-			rescanMenuItem.setEnabled( false );
+			rescanMenuItem.setEnabled( !scanning );
 		}
 		finally {
 			managerLock.unlock();
@@ -590,14 +590,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			infoArea.setDescription( modInfo.getTitle(), modInfo.getAuthor(), modInfo.getVersion(), modInfo.getURL(), modInfo.getDescription() );
 		}
 		else {
-			boolean notYetReady = false;
-			managerLock.lock();
-			try {
-				notYetReady = scanning;
-			}
-			finally {
-				managerLock.unlock();
-			}
+			boolean notYetReady = isScanning();
+
 			if ( notYetReady ) {
 				String body = "";
 				body += "No info is currently available for the selected mod.\n\n";
@@ -754,6 +748,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			setStatusText( "" );
 			JFileChooser extractChooser = new JFileChooser();
 			extractChooser.setDialogTitle("Choose a dir to extract into");
+			extractChooser.setFileHidingEnabled( false );
 			extractChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			extractChooser.setMultiSelectionEnabled(false);
 
@@ -824,8 +819,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			public void run() {
 				managerLock.lock();
 				try {
-					rescanMenuItem.setEnabled( true );
 					scanning = false;
+					rescanMenuItem.setEnabled( !scanning );
 					scanEndedCond.signalAll();
 				}
 				finally {

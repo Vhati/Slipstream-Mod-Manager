@@ -80,6 +80,7 @@ public class FTLUtilities {
 
 		final JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle( "Find data.dat or FTL.app" );
+		fc.setFileHidingEnabled( false );
 		fc.addChoosableFileFilter(new FileFilter() {
 			@Override
 			public String getDescription() {

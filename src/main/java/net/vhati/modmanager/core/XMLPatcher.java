@@ -488,7 +488,7 @@ public class XMLPatcher {
 	 * Attribute values in the map must not be null.
 	 */
 	protected static class LikeFilter extends AbstractFilter<Element> {
-		private String type = null;;
+		private String type = null;
 		private Map<String,String> attrMap = null;
 		private String value = null;
 
