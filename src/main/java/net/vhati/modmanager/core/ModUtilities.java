@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -176,16 +176,20 @@ public class ModUtilities {
 		String dstText = decodeText( dstStream, dstDescription ).text;
 		dstText = xmlDeclPtn.matcher(dstText).replaceFirst( "" );
 
-		StringBuilder buf = new StringBuilder( srcText.length() +100+ dstText.length() );
-		buf.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
-		buf.append( dstText );
-		buf.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
-		buf.append( srcText );
-		buf.append( "\n" );
+		// Concatenate, filtering the stream to standardize newlines and encode.
+		//
+		CharsetEncoder encoder = Charset.forName( "UTF-8" ).newEncoder();
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
 
-		String mergedString = Pattern.compile("\n").matcher( buf ).replaceAll("\r\n");
+		writer.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
+		writer.append( dstText );
+		writer.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
+		writer.append( srcText );
+		writer.append( "\n" );
+		writer.flush();
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 
-		InputStream result = encodeText( mergedString, "UTF-8", srcDescription+"+"+dstDescription );
 		return result;
 	}
 
@@ -227,12 +231,17 @@ public class ModUtilities {
 		patcher.setGlobalPanic( globalPanic );
 		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
 
-		StringWriter writer = new StringWriter();
-		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
-		String mergedString = writer.toString();
-		mergedString = mergedString.replaceAll( "\r(?!\n)|(?<!\r)\n|\r\n", "\r\n" );  // sloppyPrint needs normalizing!?
+		// Bake XML into text, filtering the stream to standardize newlines and encode.
+		// TODO: sloppyPrint() needs EOL normalizing!?
+		//
+		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
 
-		InputStream result = encodeText( mergedString, encoding, mainDescription+"+"+appendDescription );
+		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
+		writer.flush();
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+
 		return result;
 	}
 
@@ -262,12 +271,17 @@ public class ModUtilities {
 		Document doc = parseStrictOrSloppyXML( srcText, srcDescription+" (wrapped)" );
 		srcText = null;
 
-		StringWriter writer = new StringWriter();
-		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
-		String resultString = writer.toString();
-		resultString = resultString.replaceAll( "\r(?!\n)|(?<!\r)\n|\r\n", "\r\n" );  // sloppyPrint needs normalizing!?
+		// Bake XML into text, filtering the stream to standardize newlines and encode.
+		// TODO: sloppyPrint() needs EOL normalizing!?
+		//
+		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
 
-		InputStream result = encodeText( resultString, encoding, srcDescription+" (cleaned)" );
+		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
+		writer.flush();
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+
 		return result;
 	}
 
