@@ -138,6 +138,7 @@ public class ModUtilities {
 				throw new IOException( msg );
 			}
 		}
+		allBytes = null;    // GC hint.
 
 		// Determine the original line endings.
 		int eol = DecodeResult.EOL_NONE;
