@@ -215,11 +215,13 @@ public class ModUtilities {
 		mainText = xmlDeclPtn.matcher(mainText).replaceFirst( "" );
 		mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
 		Document mainDoc = parseStrictOrSloppyXML( mainText, mainDescription+" (wrapped)" );
+		mainText = null;
 
 		String appendText = decodeText( appendStream, appendDescription ).text;
 		appendText = xmlDeclPtn.matcher(appendText).replaceFirst( "" );
 		appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
 		Document appendDoc = parseStrictOrSloppyXML( appendText, appendDescription+" (wrapped)" );
+		appendText = null;
 
 		XMLPatcher patcher = new XMLPatcher();
 		patcher.setGlobalPanic( globalPanic );
@@ -258,6 +260,7 @@ public class ModUtilities {
 		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
 		srcText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ srcText +"</wrapper>";
 		Document doc = parseStrictOrSloppyXML( srcText, srcDescription+" (wrapped)" );
+		srcText = null;
 
 		StringWriter writer = new StringWriter();
 		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
