@@ -230,6 +230,8 @@ public class ModUtilities {
 		XMLPatcher patcher = new XMLPatcher();
 		patcher.setGlobalPanic( globalPanic );
 		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
+		mainDoc = null;
+		appendDoc = null;
 
 		// Bake XML into text, filtering the stream to standardize newlines and encode.
 		// TODO: sloppyPrint() needs EOL normalizing!?
