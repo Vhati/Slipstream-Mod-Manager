@@ -51,6 +51,14 @@ public class FTLModManager {
 		log.debug( String.format( "%s %s", System.getProperty("os.name"), System.getProperty("os.version") ) );
 		log.debug( String.format( "%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch") ) );
 
+		// Nag if the jar was double-clicked.
+		if ( new File("./mods/").exists() == false ) {
+			String currentPath = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
+			showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
+			System.err.println( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting.", currentPath ) );
+			System.exit( 1 );
+		}
+
 
 		File configFile = new File( "modman.cfg" );
 

@@ -9,6 +9,7 @@ Changelog
 - Changed modman.exe to fail rather than use VirtualStore
 - Added modman_admin.exe, which always runs as administrator
 - Added a Validate warning for junk files whose names end with a tilde
+- Added an error popup when the jar is double-clicked
 - Minor optimizations to reduce memory usage
 
 1.4:
