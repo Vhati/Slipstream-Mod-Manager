@@ -28,6 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory;
+import net.vhati.modmanager.core.EOLWriter;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportMessage;
 import net.vhati.modmanager.core.SloppyXMLParser;
@@ -60,9 +61,9 @@ public class ModUtilities {
 		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) );
-		bw.write( text );
-		bw.flush();
+		Writer writer = new OutputStreamWriter( tmpData, encoder );
+		writer.write( text );
+		writer.flush();
 
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 		return result;
@@ -111,6 +112,7 @@ public class ModUtilities {
 			CharsetDecoder decoder = Charset.forName( encoding ).newDecoder();
 			ByteBuffer byteBuffer = ByteBuffer.wrap( allBytes, bom.length, allBytes.length-bom.length );
 			result = decoder.decode( byteBuffer ).toString();
+			allBytes = null;    // GC hint.
 		}
 		else {
 			ByteBuffer byteBuffer = ByteBuffer.wrap( allBytes );
@@ -137,8 +139,8 @@ public class ModUtilities {
 				}
 				throw new IOException( msg );
 			}
+			allBytes = null;    // GC hint.
 		}
-		allBytes = null;    // GC hint.
 
 		// Determine the original line endings.
 		int eol = DecodeResult.EOL_NONE;
@@ -181,7 +183,7 @@ public class ModUtilities {
 		//
 		CharsetEncoder encoder = Charset.forName( "UTF-8" ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
+		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
 		writer.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
 		writer.append( dstText );
@@ -239,7 +241,7 @@ public class ModUtilities {
 		//
 		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
+		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
 		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
 		writer.flush();
@@ -279,7 +281,7 @@ public class ModUtilities {
 		//
 		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		Writer writer = new EOLWriter( new BufferedWriter( new OutputStreamWriter( tmpData, encoder ) ), "\r\n" );
+		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
 		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
 		writer.flush();
