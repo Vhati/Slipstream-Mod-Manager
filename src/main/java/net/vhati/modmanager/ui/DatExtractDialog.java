@@ -49,7 +49,7 @@ public class DatExtractDialog extends ProgressDialog {
 	}
 
 	@Override
-	protected void setTaskOutcome( boolean outcome, Exception e ) {
+	protected void setTaskOutcome( boolean outcome, Throwable e ) {
 		super.setTaskOutcome( outcome, e );
 		if ( !this.isShowing() ) return;
 

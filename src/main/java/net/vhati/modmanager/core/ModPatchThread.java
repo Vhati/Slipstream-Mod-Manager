@@ -59,7 +59,7 @@ public class ModPatchThread extends Thread {
 
 	public void run() {
 		boolean result;
-		Exception exception = null;
+		Throwable exception = null;
 
 		// When JVM tries to exit, stall until this thread ends on its own.
 		shutdownHook = new Thread() {
@@ -87,7 +87,7 @@ public class ModPatchThread extends Thread {
 		try {
 			result = patch();
 		}
-		catch ( Exception e ) {
+		catch ( Throwable e ) {
 			log.error( "Patching failed.", e );
 			exception = e;
 			result = false;
@@ -222,7 +222,12 @@ public class ModPatchThread extends Thread {
 							continue;
 						}
 
-						if ( fileName.endsWith( ".xml.append" ) || fileName.endsWith( ".append.xml" ) ) {
+						if ( fileName.startsWith( "~" ) || fileName.endsWith( "~" ) ) {
+							// Temporary file that was mistakenly included in the mod, ignore it
+							// - created by Microsoft Word starts with ~ (editing XML in Word, oh the horror)
+							// - created on Linux (specific program as well?) ends with ~
+						}
+						else if ( fileName.endsWith( ".xml.append" ) || fileName.endsWith( ".append.xml" ) ) {
 							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]append|append[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
@@ -234,6 +239,31 @@ public class ModPatchThread extends Thread {
 								try {
 									mainStream = ftlP.getInputStream(innerPath);
 									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									mainStream.close();
+									ftlP.remove( innerPath );
+									ftlP.add( innerPath, mergedStream );
+								}
+								finally {
+									try {if ( mainStream != null ) mainStream.close();}
+									catch ( IOException e ) {}
+								}
+
+								if ( !moddedItems.contains(innerPath) )
+									moddedItems.add( innerPath );
+							}
+						}
+						else if ( fileName.endsWith( ".xml.rawappend" ) || fileName.endsWith( ".rawappend.xml" ) ) {
+							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]rawappend|rawappend[.]xml)$", ".xml" );
+							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
+							
+							if ( !ftlP.contains( innerPath ) ) {
+								log.warn( String.format( "Non-existent innerPath wasn't appended: %s", innerPath ) );
+							}
+							else {
+								InputStream mainStream = null;
+								try {
+									mainStream = ftlP.getInputStream(innerPath);
+									InputStream mergedStream = ModUtilities.appendXMLFile( zis, mainStream, "windows-1252", modFile.getName()+":"+parentPath+fileName, ftlP.getName()+":"+innerPath );
 									mainStream.close();
 									ftlP.remove( innerPath );
 									ftlP.add( innerPath, mergedStream );

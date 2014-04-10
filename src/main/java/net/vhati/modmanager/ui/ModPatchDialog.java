@@ -58,13 +58,13 @@ public class ModPatchDialog extends ProgressDialog implements ModPatchObserver {
 	 * If anything went wrong, e may be non-null.
 	 */
 	@Override
-	public void patchingEnded( boolean outcome, Exception e ) {
+	public void patchingEnded( boolean outcome, Throwable e ) {
 		setTaskOutcomeLater( outcome, e );
 	}
 
 
 	@Override
-	protected void setTaskOutcome( boolean outcome, Exception e ) {
+	protected void setTaskOutcome( boolean outcome, Throwable e ) {
 		super.setTaskOutcome( outcome, e );
 		if ( !this.isShowing() ) return;
 

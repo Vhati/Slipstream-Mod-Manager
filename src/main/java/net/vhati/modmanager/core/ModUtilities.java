@@ -196,6 +196,48 @@ public class ModUtilities {
 		return result;
 	}
 
+	/**
+	 * Semi-intelligently appends XML from one file (src) onto another (dst).
+	 * Note: This is how patching used to work prior to SMM 1.2.
+	 *
+	 * The two InputStreams are read, and the combined result
+	 * is returned as a new third InputStream.
+	 *
+	 * The returned stream is a ByteArrayInputStream
+	 * which doesn't need closing.
+	 *
+	 * The result will have CR-LF line endings and the desired encoding.
+	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
+	 * even on Linux.
+	 *
+	 * The description arguments identify the streams for log messages.
+	 */
+	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String encoding, String srcDescription, String dstDescription ) throws IOException {
+		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
+
+		String srcText = decodeText( srcStream, srcDescription ).text;
+		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
+
+		String dstText = decodeText( dstStream, dstDescription ).text;
+		dstText = xmlDeclPtn.matcher(dstText).replaceFirst( "" );
+
+		// Concatenate, filtering the stream to standardize newlines and encode.
+		//
+		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
+		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
+		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
+
+		writer.append( "<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n" );
+		writer.append( dstText );
+		writer.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
+		writer.append( srcText );
+		writer.append( "\n" );
+		writer.flush();
+		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
+
+		return result;
+	}
+
 
 	/**
 	 * Appends and modifies mainStream, using content from appendStream.

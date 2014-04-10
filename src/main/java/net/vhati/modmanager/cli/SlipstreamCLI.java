@@ -456,7 +456,7 @@ public class SlipstreamCLI {
 		}
 
 		@Override
-		public synchronized void patchingEnded( boolean outcome, Exception e ) {
+		public synchronized void patchingEnded( boolean outcome, Throwable e ) {
 			succeeded = outcome;
 			done = true;
 		}
