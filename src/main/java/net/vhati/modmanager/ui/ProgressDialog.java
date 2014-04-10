@@ -172,7 +172,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 	 *
 	 * If anything went wrong, e may be non-null.
 	 */
-	public void setTaskOutcomeLater( final boolean success, final Exception e ) {
+	public void setTaskOutcomeLater( final boolean success, final Throwable e ) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -181,7 +181,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		});
 	}
 
-	protected void setTaskOutcome( final boolean outcome, final Exception e ) {
+	protected void setTaskOutcome( final boolean outcome, final Throwable e ) {
 		done = true;
 		succeeded = outcome;
 
