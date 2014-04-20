@@ -168,11 +168,13 @@ public class ModUtilities {
 	 * The returned stream is a ByteArrayInputStream
 	 * which doesn't need closing.
 	 *
-	 * The result will be UTF-8 with CR-LF line endings.
+	 * The result will have CR-LF line endings and the desired encoding.
+	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
+	 * even on Linux.
 	 *
 	 * The description arguments identify the streams for log messages.
 	 */
-	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String srcDescription, String dstDescription ) throws IOException {
+	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String encoding, String srcDescription, String dstDescription ) throws IOException {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String srcText = decodeText( srcStream, srcDescription ).text;
@@ -183,11 +185,11 @@ public class ModUtilities {
 
 		// Concatenate, filtering the stream to standardize newlines and encode.
 		//
-		CharsetEncoder encoder = Charset.forName( "UTF-8" ).newEncoder();
+		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
-		writer.append( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" );
+		writer.append( "<?xml version=\"1.0\" encoding=\""+ encoding +"\"?>\n" );
 		writer.append( dstText );
 		writer.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
 		writer.append( srcText );
