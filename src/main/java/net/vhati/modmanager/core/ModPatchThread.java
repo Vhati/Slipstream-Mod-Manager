@@ -222,6 +222,12 @@ public class ModPatchThread extends Thread {
 							continue;
 						}
 
+						if ( ModUtilities.isJunkFile( innerPath ) ) {
+							log.warn( String.format( "Skipping junk file: %s", innerPath ) );
+							zis.closeEntry();
+							continue;
+						}
+
 						if ( fileName.endsWith( ".xml.append" ) || fileName.endsWith( ".append.xml" ) ) {
 							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]append|append[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );

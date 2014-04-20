@@ -48,6 +48,8 @@ public class ModUtilities {
 
 	private static final Logger log = LogManager.getLogger(ModUtilities.class);
 
+	private static Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|(?:^|/)thumbs[.]db$|(?:^|/)[.]dropbox$|(?:^|/)~|~$|(?:^|/)#.+#$" );
+
 
 	/**
 	 * Encodes a string (throwing an exception on bad chars) to bytes in a stream.
@@ -326,6 +328,24 @@ public class ModUtilities {
 
 
 	/**
+	 * Returns true if a path matches known junk files, false otherwise.
+	 *
+	 * This includes:
+	 *   *.DS_Store
+	 *   thumbs.db
+	 *   .dropbox
+	 *   #*#
+	 *   ~*
+	 *   *~
+	 *
+	 * @param innerPath a path with forward slashes
+	 */
+	public static boolean isJunkFile( String innerPath ) {
+		return junkFilePtn.matcher(innerPath).find();
+	}
+
+
+	/**
 	 * Checks a mod file for common problems.
 	 *
 	 * @param modFile an *.ftl file to check
@@ -336,8 +356,6 @@ public class ModUtilities {
 		List<ReportMessage> pendingMsgs = new ArrayList<ReportMessage>();
 		boolean modValid = true;
 		boolean seenAppend = false;
-
-		Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|^thumbs[.]db$|~$" );
 
 		Pattern validRootDirPtn = Pattern.compile( "^(?:audio|data|fonts|img|mod-appendix)/" );
 		List<String> seenJunkDirs = new ArrayList<String>();
@@ -389,7 +407,7 @@ public class ModUtilities {
 				}
 				else if ( item.isDirectory() ) {
 				}
-				else if ( junkFilePtn.matcher(innerPath).find() ) {
+				else if ( isJunkFile( innerPath ) ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.ERROR,
 						String.format( "Junk file" )
