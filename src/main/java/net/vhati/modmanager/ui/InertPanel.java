@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -27,7 +28,13 @@ public class InertPanel extends JPanel {
 		nullDispatcher = new KeyEventDispatcher() {
 			@Override
 			public boolean dispatchKeyEvent( KeyEvent e ) {
-				return InertPanel.this == ( (JFrame)SwingUtilities.getWindowAncestor( (Component)e.getSource() ) ).getGlassPane();
+				Object source = e.getSource();
+				if ( source instanceof Component == false ) return false;
+
+				Window ancestor = SwingUtilities.getWindowAncestor( (Component)source );
+				if ( ancestor instanceof JFrame == false ) return false;
+
+				return ( InertPanel.this == ((JFrame)ancestor).getGlassPane() );
 			}
 		};
 
