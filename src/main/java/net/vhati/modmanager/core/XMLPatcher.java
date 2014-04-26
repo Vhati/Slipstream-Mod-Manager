@@ -125,7 +125,7 @@ public class XMLPatcher {
 	
 				if ( searchStart < matchedNodes.size() ) {
 					if ( searchLimit > -1 ) {
-						matchedNodes = matchedNodes.subList( searchStart, Math.max( matchedNodes.size(), searchStart + searchLimit ) );
+						matchedNodes = matchedNodes.subList( searchStart, Math.min( matchedNodes.size(), searchStart + searchLimit ) );
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
@@ -180,7 +180,7 @@ public class XMLPatcher {
 	
 				if ( searchStart < matchedNodes.size() ) {
 					if ( searchLimit > -1 ) {
-						matchedNodes = matchedNodes.subList( searchStart, Math.max( matchedNodes.size(), searchStart + searchLimit ) );
+						matchedNodes = matchedNodes.subList( searchStart, Math.min( matchedNodes.size(), searchStart + searchLimit ) );
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
@@ -235,7 +235,7 @@ public class XMLPatcher {
 	
 				if ( searchStart < matchedNodes.size() ) {
 					if ( searchLimit > -1 ) {
-						matchedNodes = matchedNodes.subList( searchStart, Math.max( matchedNodes.size(), searchStart + searchLimit ) );
+						matchedNodes = matchedNodes.subList( searchStart, Math.min( matchedNodes.size(), searchStart + searchLimit ) );
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
@@ -270,7 +270,7 @@ public class XMLPatcher {
 	
 				if ( searchStart < matchedNodes.size() ) {
 					if ( searchLimit > -1 ) {
-						matchedNodes = matchedNodes.subList( searchStart, Math.max( matchedNodes.size(), searchStart + searchLimit ) );
+						matchedNodes = matchedNodes.subList( searchStart, Math.min( matchedNodes.size(), searchStart + searchLimit ) );
 					} else if ( searchStart > 0 ) {
 						matchedNodes = matchedNodes.subList( searchStart, matchedNodes.size() );
 					}
