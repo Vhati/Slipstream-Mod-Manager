@@ -619,9 +619,9 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				body += "No info is available for the selected mod.\n\n";
 
 				if ( modDate != null ) {
-					SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
+					SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 					String dateString = dateFormat.format( modDate );
-					body += "It was released sometime after "+ dateString +".\n\n";
+					body += "It was released some time after "+ dateString +".\n\n";
 				} else {
 					body += "The date of its release could not be determined.\n\n";
 				}
