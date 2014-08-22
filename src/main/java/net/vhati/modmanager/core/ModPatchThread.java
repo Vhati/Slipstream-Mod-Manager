@@ -249,8 +249,36 @@ public class ModPatchThread extends Thread {
 									catch ( IOException e ) {}
 								}
 
-								if ( !moddedItems.contains(innerPath) )
+								if ( !moddedItems.contains(innerPath) ) {
 									moddedItems.add( innerPath );
+								}
+							}
+						}
+						else if ( fileName.endsWith( ".xml.rawappend" ) || fileName.endsWith( ".rawappend.xml" ) ) {
+							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]rawappend|rawappend[.]xml)$", ".xml" );
+							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
+
+							if ( !ftlP.contains( innerPath ) ) {
+								log.warn( String.format( "Non-existent innerPath wasn't raw appended: %s", innerPath ) );
+							}
+							else {
+								log.warn( String.format( "Appending xml as raw text: %s", innerPath ) );
+								InputStream mainStream = null;
+								try {
+									mainStream = ftlP.getInputStream(innerPath);
+									InputStream mergedStream = ModUtilities.appendXMLFile( mainStream, zis, "windows-1252", ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									mainStream.close();
+									ftlP.remove( innerPath );
+									ftlP.add( innerPath, mergedStream );
+								}
+								finally {
+									try {if ( mainStream != null ) mainStream.close();}
+									catch ( IOException e ) {}
+								}
+
+								if ( !moddedItems.contains(innerPath) ) {
+									moddedItems.add( innerPath );
+								}
 							}
 						}
 						else if ( fileName.endsWith( ".xml" ) ) {
@@ -258,10 +286,11 @@ public class ModPatchThread extends Thread {
 
 							InputStream fixedStream = ModUtilities.rebuildXMLFile( zis, "windows-1252", modFile.getName()+":"+parentPath+fileName );
 
-							if ( !moddedItems.contains(innerPath) )
+							if ( !moddedItems.contains(innerPath) ) {
 								moddedItems.add( innerPath );
-							else
+							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
+							}
 
 							if ( ftlP.contains( innerPath ) )
 								ftlP.remove( innerPath );
@@ -277,10 +306,11 @@ public class ModPatchThread extends Thread {
 
 							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
-							if ( !moddedItems.contains(innerPath) )
+							if ( !moddedItems.contains(innerPath) ) {
 								moddedItems.add( innerPath );
-							else
+							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
+							}
 
 							if ( ftlP.contains( innerPath ) )
 								ftlP.remove( innerPath );
@@ -289,10 +319,11 @@ public class ModPatchThread extends Thread {
 						else {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
-							if ( !moddedItems.contains(innerPath) )
+							if ( !moddedItems.contains(innerPath) ) {
 								moddedItems.add( innerPath );
-							else
+							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
+							}
 
 							if ( ftlP.contains( innerPath ) )
 								ftlP.remove( innerPath );

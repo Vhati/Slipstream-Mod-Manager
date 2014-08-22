@@ -159,29 +159,36 @@ public class ModUtilities {
 
 
 	/**
-	 * Semi-intelligently appends XML from one file (src) onto another (dst).
-	 * Note: This is how patching used to work prior to SMM 1.2.
+	 * Semi-intelligently appends mainStream, with content from appendStream.
+	 * Note: This is similar to how patching used to work prior to SMM 1.2.
 	 *
-	 * The two InputStreams are read, and the combined result
-	 * is returned as a new third InputStream.
+	 * XML parsing/tidying does NOT take place. The new content is basically
+	 * tacked on as-is. Any xml declaration tags will be scrubbed from both
+	 * streams, and a new one will be prepended.
 	 *
-	 * The returned stream is a ByteArrayInputStream
-	 * which doesn't need closing.
+	 * The two InputStreams are read, and the combined result is returned as a
+	 * new third InputStream.
+	 *
+	 * The returned stream is a ByteArrayInputStream which doesn't need
+	 * closing.
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
-	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
-	 * even on Linux.
+	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding, even
+	 * on Linux.
 	 *
 	 * The description arguments identify the streams for log messages.
+	 *
+	 * Note: SMM 1.5 changed the order of arguments (previous releases took
+	 * the source of new content to append as the first argument).
 	 */
-	public static InputStream appendXMLFile( InputStream srcStream, InputStream dstStream, String encoding, String srcDescription, String dstDescription ) throws IOException {
+	public static InputStream appendXMLFile( InputStream mainStream, InputStream appendStream, String encoding, String mainDescription, String appendDescription ) throws IOException {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
-		String srcText = decodeText( srcStream, srcDescription ).text;
-		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
+		String mainText = decodeText( mainStream, mainDescription ).text;
+		mainText = xmlDeclPtn.matcher(mainText).replaceFirst( "" );
 
-		String dstText = decodeText( dstStream, dstDescription ).text;
-		dstText = xmlDeclPtn.matcher(dstText).replaceFirst( "" );
+		String appendText = decodeText( appendStream, appendDescription ).text;
+		appendText = xmlDeclPtn.matcher(appendText).replaceFirst( "" );
 
 		// Concatenate, filtering the stream to standardize newlines and encode.
 		//
@@ -190,9 +197,9 @@ public class ModUtilities {
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
 		writer.append( "<?xml version=\"1.0\" encoding=\""+ encoding +"\"?>\n" );
-		writer.append( dstText );
+		writer.append( mainText );
 		writer.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
-		writer.append( srcText );
+		writer.append( appendText );
 		writer.append( "\n" );
 		writer.flush();
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );

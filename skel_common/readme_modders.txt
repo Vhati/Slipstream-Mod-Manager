@@ -197,6 +197,22 @@ Advanced XML
   edit in the wake of earlier ones.
 
 
+Raw Appending
+
+  FTL is quirky. Occasionally you may need to include non-standard XML in a
+  mod without elaborate parsing. For instance, "misc.xml" defines phrases
+  for localization, which may begin/end with a space. Normally, this
+  whitespace would be trimmed away, leading to ugly results in-game.
+
+  If your mod has a file named "misc.xml.rawappend", the content of that
+  file will be tacked onto the end of "misc.xml". Line-endings and encoding
+  will be standardized, but Slipstream will make no attempt to
+  (mis)understand the tags of either file.
+
+  You can still override existing tags by adding your own with the same
+  name attribute.
+
+
 Commandline
 
   Running Slipstream from a prompt can speed up development...

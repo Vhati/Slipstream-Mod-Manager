@@ -14,6 +14,7 @@ Changelog
 - Added a Validate warning for junk files named '.dropbox'
 - Added a check during patching to skip junk files
 - Added an error popup when the jar is double-clicked
+- Added *.xml.rawappend suffix to preserve whitespace in 'misc.xml'
 - Minor optimizations to reduce memory usage
 
 1.4:
