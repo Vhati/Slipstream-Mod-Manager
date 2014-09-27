@@ -29,6 +29,7 @@ public interface ModPatchObserver {
 
 	/**
 	 * Patching ended.
+	 *
 	 * If anything went wrong, e may be non-null.
 	 */
 	public void patchingEnded( boolean outcome, Exception e );

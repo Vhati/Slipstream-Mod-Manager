@@ -461,6 +461,9 @@ public class ModUtilities {
 					boolean isTxt = innerPath.matches( "^.*(?:[.]txt)$" );
 					boolean isXML = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" );
 					boolean isXMLAppend = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" );
+					if ( innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ) {
+						isXML = false;  // Raw xml is exempt from normal processing.
+					}
 
 					DecodeResult decodeResult = ModUtilities.decodeText( zis, modFile.getName()+":"+innerPath );
 
