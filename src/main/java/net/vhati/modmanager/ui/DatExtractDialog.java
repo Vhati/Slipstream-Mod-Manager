@@ -23,6 +23,8 @@ public class DatExtractDialog extends ProgressDialog {
 	private File extractDir;
 	private File[] datFiles;
 
+	private DatExtractThread workerThread = null;
+
 
 	public DatExtractDialog( Frame owner, File extractDir, File[] datFiles ) {
 		super( owner, false );
@@ -34,6 +36,18 @@ public class DatExtractDialog extends ProgressDialog {
 		this.setSize( 400, 160 );
 		this.setMinimumSize( this.getPreferredSize() );
 		this.setLocationRelativeTo( owner );
+
+		workerThread = new DatExtractThread( extractDir, datFiles );
+	}
+
+	/**
+	 * Returns the worker thread that does the extracting.
+	 *
+	 * This method is provided so other classes can customize the thread
+	 * before calling extract().
+	 */
+	public Thread getWorkerThread() {
+		return workerThread;
 	}
 
 	/**
@@ -43,8 +57,7 @@ public class DatExtractDialog extends ProgressDialog {
 	public void extract() {
 		if ( started ) return;
 
-		DatExtractThread t = new DatExtractThread( extractDir, datFiles );
-		t.start();
+		workerThread.start();
 		started = true;
 	}
 
@@ -53,10 +66,11 @@ public class DatExtractDialog extends ProgressDialog {
 		super.setTaskOutcome( outcome, e );
 		if ( !this.isShowing() ) return;
 
-		if ( succeeded )
+		if ( succeeded ) {
 			setStatusText( "All resources extracted successfully." );
-		else
+		} else {
 			setStatusText( String.format( "Error extracting dats: %s", e ) );
+		}
 	}
 
 

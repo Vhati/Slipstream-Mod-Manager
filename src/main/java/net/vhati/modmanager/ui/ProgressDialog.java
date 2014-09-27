@@ -168,7 +168,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 
 
 	/**
-	 * Triggers a responce to the immediate task ending. (Thread-safe)
+	 * Triggers a response to the immediate task ending. (Thread-safe)
 	 *
 	 * If anything went wrong, e may be non-null.
 	 */

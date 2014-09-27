@@ -85,7 +85,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar {
+public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar, Thread.UncaughtExceptionHandler {
 
 	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
 
@@ -406,6 +406,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		                                                    );
 		initThread.setDaemon( true );
 		initThread.setPriority( Thread.MIN_PRIORITY );
+		initThread.setDefaultUncaughtExceptionHandler( this );
 		initThread.start();
 	}
 
@@ -508,6 +509,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		ModsScanThread scanThread = new ModsScanThread( modFiles, localModDB, this );
 		scanThread.setDaemon( true );
 		scanThread.setPriority( Thread.MIN_PRIORITY );
+		scanThread.setDefaultUncaughtExceptionHandler( this );
 		scanThread.start();
 	}
 
@@ -685,6 +687,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			log.info( "Patching..." );
 			log.info( "" );
 			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, false, patchDlg );
+			patchThread.setDefaultUncaughtExceptionHandler( this );
 			patchThread.start();
 
 			patchDlg.setVisible( true );
@@ -763,6 +766,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			File[] datFiles = new File[] {dataDatFile, resDatFile};
 
 			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datFiles );
+			extractDlg.getWorkerThread().setDefaultUncaughtExceptionHandler( this );
 			extractDlg.extract();
 			extractDlg.setVisible( true );
 		}
@@ -916,6 +920,31 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		};
 		if ( SwingUtilities.isEventDispatchThread() ) r.run();
 		else SwingUtilities.invokeLater( r );
+	}
+
+
+	@Override
+	public void uncaughtException( Thread t, Throwable e ) {
+		log.error( "Uncaught exception in thread: "+ t.toString(), e );
+
+		final String threadString = t.toString();
+		final String errString = e.toString();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				String message = "An unexpected error has occurred.\n";
+				message += "\n";
+				message += "Thread: "+ threadString +"\n";
+				message += "Error: "+ errString +"\n";
+				message += "\n";
+				message += "See the log for details.\n";
+				message += "\n";
+				message += "If this interrupted patching, FTL's resources were probably corrupted.\n";
+				message += "Restart Slipstream and patch without mods to restore vanilla backups.";
+
+				JOptionPane.showMessageDialog( ManagerFrame.this, message, "Error", JOptionPane.ERROR_MESSAGE );
+			}
+		});
 	}
 
 

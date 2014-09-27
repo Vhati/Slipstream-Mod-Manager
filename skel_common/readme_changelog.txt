@@ -16,6 +16,7 @@ Changelog
 - Added an error popup when the jar is double-clicked
 - Added *.xml.rawappend suffix to preserve whitespace in 'misc.xml'
 - Minor optimizations to reduce memory usage
+- Added uncaught exception handling for background threads
 
 1.4:
 - Cleaned up some dodgy code when initially prompting for FTL's location

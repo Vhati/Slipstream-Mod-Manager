@@ -45,8 +45,18 @@ public class SlipstreamCLI {
 	private static File backupDir = new File( "./backup/" );
 	private static File modsDir = new File( "./mods/" );
 
+	private static Thread.UncaughtExceptionHandler exceptionHandler = null;
+
 
 	public static void main( String[] args ) {
+
+		exceptionHandler = new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException( Thread t, Throwable e ) {
+				log.error( "Uncaught exception in thread: "+ t.toString(), e );
+				System.exit( 1 );
+			}
+		};
 
 		BasicParser parser = new BasicParser();
 
@@ -266,6 +276,7 @@ public class SlipstreamCLI {
 
 			SilentPatchObserver patchObserver = new SilentPatchObserver();
 			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, globalPanic, patchObserver );
+			patchThread.setDefaultUncaughtExceptionHandler( exceptionHandler );
 			deleteHook.addWatchedThread( patchThread );
 
 			patchThread.start();
@@ -325,7 +336,7 @@ public class SlipstreamCLI {
 				config.load( new InputStreamReader( in, "UTF-8" ) );
 			}
 		}
-		catch (IOException e) {
+		catch ( IOException e ) {
 			log.error( "Error loading config.", e );
 		}
 		finally {
@@ -420,7 +431,7 @@ public class SlipstreamCLI {
 	private static String getVersionMessage() {
 		StringBuilder buf = new StringBuilder();
 		buf.append( String.format( "%s %s\n", FTLModManager.APP_NAME, FTLModManager.APP_VERSION ) );
-		buf.append( "Copyright (C) 2013 David Millis\n" );
+		buf.append( "Copyright (C) 2014 David Millis\n" );
 		buf.append( "\n" );
 		buf.append( "This program is free software; you can redistribute it and/or modify\n" );
 		buf.append( "it under the terms of the GNU General Public License as published by\n" );
