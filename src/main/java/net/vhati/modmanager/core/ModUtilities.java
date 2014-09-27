@@ -457,7 +457,7 @@ public class ModUtilities {
 						modValid = false;
 					}
 				}
-				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml|[.]txt)$" ) ) {
+				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml[.]rawappend|[.]rawappend[.]xml|[.]xml|[.]txt)$" ) ) {
 					boolean isTxt = innerPath.matches( "^.*(?:[.]txt)$" );
 					boolean isXML = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" );
 					boolean isXMLAppend = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" );
