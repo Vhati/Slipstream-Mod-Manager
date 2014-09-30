@@ -143,7 +143,7 @@ public class ManagerInitThread extends Thread {
 
 			if ( appUpdateInterval > 0 ) {
 				// Check if the app update info is stale.
-				if ( isFileStale( appUpdateFile, catalogUpdateInterval ) ) {
+				if ( isFileStale( appUpdateFile, appUpdateInterval ) ) {
 					log.debug( String.format( "App update info is older than %d days.", appUpdateInterval ) );
 					needAppUpdate = true;
 				} else {
