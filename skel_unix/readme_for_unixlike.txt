@@ -63,6 +63,12 @@ Usage
 
 Troubleshooting
 
+* If double-clicking modman.command doesn't work on Linux...
+    Several terminals have bugs executing scripts whose paths contain spaces.
+    There's no universal way to create a relative *.desktop shortcut either.
+    For now, you'll need to open a terminal yourself.
+      Then drag modman-cli.sh onto that window (saves typing), and hit enter.
+
 * If you get "java.lang.UnsupportedClassVersionError" on startup...
     You need a newer version of Java.
 
