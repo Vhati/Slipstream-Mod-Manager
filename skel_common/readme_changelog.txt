@@ -2,6 +2,7 @@ Changelog
 
 1.5:
 - Added 'no info... yet' message when mods/ scan is still in-progress
+- Fixed modman.command double-clicking on linux?
 - Fixed advanced find tags not honoring start= when greater than match count
 - Fixed advanced find tags not honoring limit=
 - Fixed hidden files and directories not appearing when finding resources

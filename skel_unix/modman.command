@@ -25,7 +25,7 @@ if [ ! \( -t 0 -o -S /dev/stdin \) ]; then
 
   if command -v x-terminal-emulator >/dev/null; then
     # Linux.
-    x-terminal-emulator -e "cd \"${maindir}\";\"./${me}\"";
+    x-terminal-emulator -e "$0";
 
   elif command -v osascript >/dev/null; then
     # OSX.
