@@ -197,7 +197,7 @@ Advanced XML
   edit in the wake of earlier ones.
 
 
-Raw Appending
+Raw XML
 
   FTL is quirky. Occasionally you may need to include non-standard XML in a
   mod without elaborate parsing. For instance, "misc.xml" defines phrases
@@ -210,7 +210,13 @@ Raw Appending
   (mis)understand the tags of either file.
 
   You can still override existing tags by adding your own with the same
-  name attribute.
+  name attribute, since FTL honors the last it sees.
+
+  Similarly a file named "misc.xml.rawclobber" will entirely replace the
+  original "misc.xml".
+
+  Any other mods patched afterward must either avoid that file or also treat
+  it as raw themselves. Hence this should be used as a last resort.
 
 
 Commandline

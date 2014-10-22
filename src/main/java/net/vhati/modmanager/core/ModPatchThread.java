@@ -281,6 +281,28 @@ public class ModPatchThread extends Thread {
 								}
 							}
 						}
+						else if ( fileName.endsWith( ".xml.rawclobber" ) || fileName.endsWith( ".rawclobber.xml" ) ) {
+							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
+
+							log.warn( String.format( "Copying xml as raw text: %s", innerPath ) );
+
+							// Normalize line endings to CR-LF.
+							//   decodeText() reads anything and returns an LF string.
+							String fixedText = ModUtilities.decodeText( zis, modFile.getName()+":"+parentPath+fileName ).text;
+							fixedText = Pattern.compile("\n").matcher( fixedText ).replaceAll( "\r\n" );
+
+							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
+
+							if ( !moddedItems.contains(innerPath) ) {
+								moddedItems.add( innerPath );
+							} else {
+								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
+							}
+
+							if ( ftlP.contains( innerPath ) )
+								ftlP.remove( innerPath );
+							ftlP.add( innerPath, fixedStream );
+						}
 						else if ( fileName.endsWith( ".xml" ) ) {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 

@@ -457,11 +457,18 @@ public class ModUtilities {
 						modValid = false;
 					}
 				}
-				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml[.]rawappend|[.]rawappend[.]xml|[.]xml|[.]txt)$" ) ) {
+				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" ) ||
+				          innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ||
+				          innerPath.matches( "^.*(?:[.]xml[.]rawclobber|[.]rawclobber[.]xml)$" ) ||
+				          innerPath.matches( "^.*(?:[.]xml|[.]txt)$" ) ) {
+
 					boolean isTxt = innerPath.matches( "^.*(?:[.]txt)$" );
 					boolean isXML = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" );
 					boolean isXMLAppend = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" );
-					if ( innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ) {
+
+					if ( innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ||
+					     innerPath.matches( "^.*(?:[.]xml[.]rawclobber|[.]rawclobber[.]xml)$" ) ) {
+
 						isXML = false;  // Raw xml is exempt from normal processing.
 					}
 
