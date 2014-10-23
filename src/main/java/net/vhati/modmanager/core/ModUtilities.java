@@ -464,12 +464,16 @@ public class ModUtilities {
 
 					boolean isTxt = innerPath.matches( "^.*(?:[.]txt)$" );
 					boolean isXML = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml|[.]xml)$" );
-					boolean isXMLAppend = innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" );
 
-					if ( innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ||
-					     innerPath.matches( "^.*(?:[.]xml[.]rawclobber|[.]rawclobber[.]xml)$" ) ) {
-
-						isXML = false;  // Raw xml is exempt from normal processing.
+					if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" ) ) {
+						seenAppend = true;
+					}
+					else if ( innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ) {
+						isXML = false;  // Raw XML is exempt from normal processing.
+						seenAppend = true;
+					}
+					else if ( innerPath.matches( "^.*(?:[.]xml[.]rawclobber|[.]rawclobber[.]xml)$" ) ) {
+						isXML = false;
 					}
 
 					DecodeResult decodeResult = ModUtilities.decodeText( zis, modFile.getName()+":"+innerPath );
@@ -555,8 +559,6 @@ public class ModUtilities {
 					// TODO: Nag if there are chars FTL can't show.
 
 					if ( isXML ) {
-						if ( isXMLAppend ) seenAppend = true;
-
 						Report xmlReport = validateModXML( decodeResult.text );
 
 						if ( xmlReport.messages.size() > 0 ) {
