@@ -282,6 +282,7 @@ public class ModPatchThread extends Thread {
 							}
 						}
 						else if ( fileName.endsWith( ".xml.rawclobber" ) || fileName.endsWith( ".rawclobber.xml" ) ) {
+							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]rawclobber|rawclobber[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							log.warn( String.format( "Copying xml as raw text: %s", innerPath ) );
