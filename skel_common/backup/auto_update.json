@@ -2,17 +2,41 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.4",
+				"version" : "1.5",
 				"urls" : {
 					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.4/Slipstream%20Mod%20Manager%20v1.4-Unix.tar.gz/download",
-					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.4/Slipstream%20Mod%20Manager%20v1.4-Win.zip/download"
+					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.5/Slipstream%20Mod%20Manager%20v1.5-Unix.tar.gz/download",
+					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.5/Slipstream%20Mod%20Manager%20v1.5-Win.zip/download"
 				},
 				"notice" : "Important: Return FTL to an unmodded state before switching to a new version."
 			},
 			"changelog" : [
 				{
+					"version" : "1.5",
+					"hidden" : "false",
+					"changes" : [
+						"Added 'no info... yet' message when mods/ scan is still in-progress",
+						"Fixed modman.command double-clicking on linux?",
+						"Fixed advanced find tags not honoring start= when greater than match count",
+						"Fixed advanced find tags not honoring limit=",
+						"Fixed hidden files and directories not appearing when finding resources",
+						"Updated log4j2 to 2.0-beta9, fixing a hang when run with Java 1.7.0_25",
+						"Changed FTLDat to allow opening dats in read-only mode",
+						"Changed modman.exe to fail rather than use VirtualStore",
+						"Added modman_admin.exe, which always runs as administrator",
+						"Added a Validate warning for junk files whose names start/end with tilde",
+						"Added a Validate warning for junk files whose names start+end with hash",
+						"Added a Validate warning for junk files named '.dropbox'",
+						"Added a check during patching to skip junk files",
+						"Added an error popup when the jar is double-clicked",
+						"Added rawappend/rawclobber suffixes to preserve whitespace in 'misc.xml'",
+						"Minor optimizations to reduce memory usage",
+						"Added uncaught exception handling for background threads"
+					]
+				},
+				{
 					"version" : "1.4",
+					"hidden" : "false",
 					"changes" : [
 						"Cleaned up some dodgy code when initially prompting for FTL's location",
 						"Added another common game location: \"C:\\Program Files (x86)\\FTL\""
@@ -20,6 +44,7 @@
 				},
 				{
 					"version" : "1.3",
+					"hidden" : "false",
 					"changes" : [
 						"Added \"Return FTL to an unmodded state before switching to a new version\" reminder when checking for updates",
 						"Fixed advanced find tags' panic arg (was \"true\" all the time)",
@@ -35,6 +60,7 @@
 				},
 				{
 					"version" : "1.2",
+					"hidden" : "false",
 					"changes" : [
 						"Added a commandline interface",
 						"Incorporated strict-then-sloppy XML parsing into the patch process",
@@ -51,6 +77,7 @@
 				},
 				{
 					"version": "1.1",
+					"hidden" : "false",
 					"changes" : [
 						"Added a button to open the mods/ folder",
 						"Added FTL resource extraction",
