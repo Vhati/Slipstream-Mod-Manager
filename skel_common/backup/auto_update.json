@@ -2,18 +2,18 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.5",
+				"version" : "1.6",
 				"urls" : {
 					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.5/Slipstream%20Mod%20Manager%20v1.5-Unix.tar.gz/download",
-					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.5/Slipstream%20Mod%20Manager%20v1.5-Win.zip/download"
+					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.6/Slipstream%20Mod%20Manager%20v1.6-Unix.tar.gz/download",
+					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.6/Slipstream%20Mod%20Manager%20v1.6-Win.zip/download"
 				},
 				"notice" : "Important: Return FTL to an unmodded state before switching to a new version."
 			},
 			"changelog" : [
 				{
 					"version" : "1.6",
-					"hidden" : "true",
+					"hidden" : "false",
 					"changes" : [
 						"Fixed modorder not being saved properly"
 					]
