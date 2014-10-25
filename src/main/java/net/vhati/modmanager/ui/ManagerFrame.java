@@ -459,7 +459,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
 
 			for ( ModFileInfo modFileInfo : tableState.getItems() ) {
-				bw.write( modFileInfo.getName() );
+				bw.write( modFileInfo.getFile().getName() );
 				bw.write( "\r\n" );
 			}
 			bw.flush();

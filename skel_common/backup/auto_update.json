@@ -12,6 +12,13 @@
 			},
 			"changelog" : [
 				{
+					"version" : "1.6",
+					"hidden" : "true",
+					"changes" : [
+						"Fixed modorder not being saved properly"
+					]
+				},
+				{
 					"version" : "1.5",
 					"hidden" : "false",
 					"changes" : [

@@ -1,5 +1,8 @@
 Changelog
 
+1.6:
+- Fixed modorder not being saved properly
+
 1.5:
 - Added 'no info... yet' message when mods/ scan is still in-progress
 - Fixed modman.command double-clicking on linux?
