@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.vhati.modmanager</groupId>
 	<artifactId>ftl-mod-manager</artifactId>
-	<version>1.6</version>
+	<version>1.7</version>
 	<name>Slipstream Mod Manager</name>
 
 	<!-- Determined by mvn versions:display-plugin-updates -->
