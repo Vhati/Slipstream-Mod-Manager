@@ -16,7 +16,7 @@ Requirements
 ------------
 * Java (1.6 or higher).
     * http://www.java.com/en/download/
-* FTL (1.01-1.03.3, Windows/OSX/Linux, Steam/GOG/Standalone).
+* FTL (1.01-1.5.13, Windows/OSX/Linux, Steam/GOG/Standalone).
     * http://www.ftlgame.com/
 * WinXP SP1 can't run Java 1.7.
     * (1.7 was built with VisualStudio 2010, causing a DecodePointer error.)
