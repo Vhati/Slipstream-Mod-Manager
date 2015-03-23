@@ -11,6 +11,9 @@ To download compiled binaries, [click here](https://sourceforge.net/projects/sli
 
 Comments can be made in a forum thread [here](http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102).
 
+I can accept PayPal donations [here](http://vhati.github.io/donate.html).
+That would be fantastic.
+
 
 Requirements
 ------------
