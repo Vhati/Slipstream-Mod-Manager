@@ -66,6 +66,7 @@ public class FTLModManager {
 		Properties config = new Properties();
 		config.setProperty( "allow_zip", "false" );
 		config.setProperty( "ftl_dats_path", "" );
+		config.setProperty( "run_steam_ftl", "false" );
 		config.setProperty( "never_run_ftl", "false" );
 		config.setProperty( "use_default_ui", "false" );
 		config.setProperty( "remember_geometry", "true" );
@@ -84,7 +85,7 @@ public class FTLModManager {
 				writeConfig = true; // Create a new cfg, but only if necessary.
 			}
 		}
-		catch (IOException e) {
+		catch ( IOException e ) {
 			log.error( "Error loading config.", e );
 			showErrorDialog( "Error loading config from "+ configFile.getPath() );
 		}
@@ -101,7 +102,7 @@ public class FTLModManager {
 				log.trace( "Using system Look and Feel" );
 				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 			}
-			catch (Exception e) {
+			catch ( Exception e ) {
 				log.error( "Error setting system Look and Feel.", e );
 				log.info( "Setting 'useDefaultUI=true' in the config file will prevent this error." );
 			}
@@ -195,12 +196,12 @@ public class FTLModManager {
 			ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
 			frame.init();
 			frame.setVisible(true);
-		} catch ( Exception e ) {
+		}
+		catch ( Exception e ) {
 			log.error( "Exception while creating ManagerFrame.", e );
 			System.exit(1);
 		}
 	}
-
 
 
 	private static void showErrorDialog( String message ) {

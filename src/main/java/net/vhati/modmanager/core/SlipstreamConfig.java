@@ -64,6 +64,7 @@ public class SlipstreamConfig {
 			configComments += "\n";
 			configComments += " allow_zip         - Sets whether to treat .zip files as .ftl files. Default: false.\n";
 			configComments += " ftl_dats_path     - The path to FTL's resources folder. If invalid, you'll be prompted.\n";
+			configComments += " run_steam_ftl     - If true, SMM will use Steam to launch FTL, if possible. Default: false.\n";
 			configComments += " never_run_ftl     - If true, there will be no offer to run FTL after patching. Default: false.\n";
 			configComments += " update_catalog    - If a number greater than 0, check for new mod descriptions every N days.\n";
 			configComments += " update_app        - If a number greater than 0, check for newer app versions every N days.\n";

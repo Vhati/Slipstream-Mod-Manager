@@ -1,5 +1,8 @@
 Changelog
 
+1.7:
+- Added a config option to launch FTL via Steam, if possible
+
 1.6:
 - Fixed modorder not being saved properly
 

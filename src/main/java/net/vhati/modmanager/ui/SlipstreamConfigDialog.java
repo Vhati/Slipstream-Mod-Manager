@@ -28,6 +28,7 @@ import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
 
 public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 	protected static final String ALLOW_ZIP = "allow_zip";
+	protected static final String RUN_STEAM_FTL = "run_steam_ftl";
 	protected static final String NEVER_RUN_FTL = "never_run_ftl";
 	protected static final String USE_DEFAULT_UI = "use_default_ui";
 	protected static final String REMEMBER_GEOMETRY = "remember_geometry";
@@ -53,6 +54,9 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		editorPanel.addRow( ALLOW_ZIP, ContentType.BOOLEAN );
 		editorPanel.addTextRow( "Treat .zip files as .ftl files." );
 		editorPanel.addSeparatorRow();
+		editorPanel.addRow( RUN_STEAM_FTL, ContentType.BOOLEAN );
+		editorPanel.addTextRow( "Use Steam to run FTL, if possible." );
+		editorPanel.addSeparatorRow();
 		editorPanel.addRow( NEVER_RUN_FTL, ContentType.BOOLEAN );
 		editorPanel.addTextRow( "Don't offer to run FTL after patching." );
 		editorPanel.addSeparatorRow();
@@ -77,6 +81,7 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		editorPanel.addFillRow();
 
 		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( appConfig.getProperty( ALLOW_ZIP, "false" ).equals( "true" ) );
+		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( appConfig.getProperty( RUN_STEAM_FTL, "false" ).equals( "true" ) );
 		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( appConfig.getProperty( NEVER_RUN_FTL, "false" ).equals( "true" ) );
 		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( appConfig.getProperty( USE_DEFAULT_UI, "false" ).equals( "true" ) );
 		editorPanel.getBoolean( REMEMBER_GEOMETRY ).setSelected( appConfig.getProperty( REMEMBER_GEOMETRY, "true" ).equals( "true" ) );
@@ -133,6 +138,7 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		if ( source == applyBtn ) {
 			String tmp;
 			appConfig.setProperty( ALLOW_ZIP, editorPanel.getBoolean( ALLOW_ZIP ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( RUN_STEAM_FTL, editorPanel.getBoolean( RUN_STEAM_FTL ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( NEVER_RUN_FTL, editorPanel.getBoolean( NEVER_RUN_FTL ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( USE_DEFAULT_UI, editorPanel.getBoolean( USE_DEFAULT_UI ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( REMEMBER_GEOMETRY, editorPanel.getBoolean( REMEMBER_GEOMETRY ).isSelected() ? "true" : "false" );

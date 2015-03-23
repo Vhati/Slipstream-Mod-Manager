@@ -291,17 +291,36 @@ public class SlipstreamCLI {
 		if ( cmdline.hasOption( "runftl" ) ) {  // Exits (0/1).
 			log.info( "Running FTL..." );
 
-			File exeFile = FTLUtilities.findGameExe( datsDir );
+			File exeFile = null;
+			String[] exeArgs = null;
+
+			if ( config.getProperty( "run_steam_ftl", "false" ).equals( "true" ) ) {
+				exeFile = FTLUtilities.findSteamExe();
+				exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+
+				if ( exeFile == null ) {
+					log.warn( "Steam executable could not be found. FTL will be launched directly." );
+				}
+			}
+			if ( exeFile == null ) {
+				exeFile = FTLUtilities.findGameExe( datsDir );
+				exeArgs = new String[0];
+
+				if ( exeFile == null ) {
+					log.warn( "FTL executable could not be found." );
+				}
+			}
+
 			if ( exeFile != null ) {
 				try {
-					FTLUtilities.launchGame( exeFile );
+					FTLUtilities.launchExe( exeFile, exeArgs );
 				} catch ( Exception e ) {
 					log.error( "Error launching FTL.", e );
 					System.exit( 1 );
 				}
 			}
 			else {
-				log.error( "Could not find FTL's executable." );
+				log.error( "No executables were found to launch FTL." );
 				System.exit( 1 );
 			}
 

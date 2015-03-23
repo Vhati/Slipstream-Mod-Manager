@@ -677,9 +677,28 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
 			if ( !neverRunFtl.equals("true") ) {
-				File exeFile = FTLUtilities.findGameExe( datsDir );
+				File exeFile = null;
+				String[] exeArgs = null;
+
+				if ( appConfig.getProperty( "run_steam_ftl", "false" ).equals( "true" ) ) {
+					exeFile = FTLUtilities.findSteamExe();
+					exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+
+					if ( exeFile == null ) {
+						log.warn( "Steam executable could not be found. FTL will be launched directly." );
+					}
+				}
+				if ( exeFile == null ) {
+					exeFile = FTLUtilities.findGameExe( datsDir );
+					exeArgs = new String[0];
+
+					if ( exeFile == null ) {
+						log.warn( "FTL executable could not be found." );
+					}
+				}
+
 				if ( exeFile != null ) {
-					patchDlg.setSuccessTask( new SpawnGameTask( exeFile ) );
+					patchDlg.setSuccessTask( new SpawnGameTask( exeFile, exeArgs ) );
 				}
 			}
 
@@ -951,9 +970,13 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 	private class SpawnGameTask implements Runnable {
 		private final File exeFile;
+		private final String[] exeArgs;
 
-		public SpawnGameTask( File exeFile ) {
+		public SpawnGameTask( File exeFile, String... exeArgs ) {
+			if ( exeArgs == null ) exeArgs = new String[0];
 			this.exeFile = exeFile;
+			this.exeArgs = new String[exeArgs.length];
+			System.arraycopy( exeArgs, 0, this.exeArgs, 0, exeArgs.length );
 		}
 
 		@Override
@@ -963,7 +986,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				if ( response == JOptionPane.YES_OPTION ) {
 					log.info( "Running FTL..." );
 					try {
-						FTLUtilities.launchGame( exeFile );
+						FTLUtilities.launchExe( exeFile, exeArgs );
 					} catch ( Exception e ) {
 						log.error( "Error launching FTL.", e );
 					}
