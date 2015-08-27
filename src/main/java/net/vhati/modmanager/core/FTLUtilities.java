@@ -33,9 +33,13 @@ public class FTLUtilities {
 		String humblePath = "FTL/resources";
 
 		String xdgDataHome = System.getenv("XDG_DATA_HOME");
-		if ( xdgDataHome == null )
+		if ( xdgDataHome == null ) {
 			xdgDataHome = System.getProperty("user.home") +"/.local/share";
-
+		}
+		String xdgDataHomeUbuntu = System.getenv("HOME");
+		if (xdgDataHomeUbuntu == null) {
+			xdgDataHome = System.getProperty("user.home") +"/.local/share";
+		}
 		File[] candidates = new File[] {
 			// Windows - Steam
 			new File( new File(""+System.getenv("ProgramFiles(x86)")), steamPath ),
@@ -49,6 +53,11 @@ public class FTLUtilities {
 			// Linux - Steam
 			new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
 			new File( xdgDataHome +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
+			new File( xdgDataHome +"/.steam/steamapps/common/FTL Faster Than Light/data/resources" ),
+			// Ubuntu - Steam xdgfix
+			new File( xdgDataHomeUbuntu +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
+			new File( xdgDataHomeUbuntu +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
+			new File( xdgDataHomeUbuntu +"/.steam/steam/steamapps/common/FTL Faster Than Light/data/resources" ),
 			// OSX - Steam
 			new File( System.getProperty("user.home") +"/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ),
 			// OSX
