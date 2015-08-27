@@ -2,6 +2,7 @@ Changelog
 
 1.7:
 - Added a config option to launch FTL via Steam, if possible
+- Added an alternate location to automatically find SteamApps/ on linux
 
 1.6:
 - Fixed modorder not being saved properly

@@ -48,6 +48,7 @@ public class FTLUtilities {
 			new File( new File(""+System.getenv("ProgramFiles")), humblePath ),
 			// Linux - Steam
 			new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
+			new File( xdgDataHome +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
 			// OSX - Steam
 			new File( System.getProperty("user.home") +"/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ),
 			// OSX

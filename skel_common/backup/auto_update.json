@@ -16,6 +16,7 @@
 					"hidden" : "true",
 					"changes" : [
 						"Added a config option to launch FTL via Steam, if possible"
+						"Added an alternate location to automatically find SteamApps/ on linux"
 					]
 				},
 				{
