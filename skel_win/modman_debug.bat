@@ -42,6 +42,9 @@ IF EXIST "%SMM_LOG_PATH%" (
 
 ECHO.
 ECHO.
+ECHO Interesting logs can be pasted on the FTL forum between [code] [/code] tags.
+ECHO.
+ECHO.
 ECHO This script will now exit.
 ECHO.
 PAUSE
