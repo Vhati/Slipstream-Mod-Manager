@@ -11,7 +11,7 @@ import javax.swing.text.PlainDocument;
 /**
  * A Document thats restricts characters based on a regex.
  *
- * @see JTextField.setDocument(javax.swing.text.Ducument)
+ * @see javax.swing.JTextField.setDocument(javax.swing.text.Ducument)
  */
 public class RegexDocument extends PlainDocument {
 
