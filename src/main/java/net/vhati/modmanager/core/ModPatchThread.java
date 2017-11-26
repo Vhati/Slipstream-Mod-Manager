@@ -114,6 +114,11 @@ public class ModPatchThread extends Thread {
 			int modsInstalled = 0;
 			int datsRepacked = 0;
 
+			// Don't let dats be read-only.
+			for ( BackedUpDat dat : allDats ) {
+				if ( dat.datFile.exists() ) dat.datFile.setWritable( true );
+			}
+
 			// Create backup dats, if necessary.
 			for ( BackedUpDat dat : allDats ) {
 				if ( !dat.bakFile.exists() ) {
