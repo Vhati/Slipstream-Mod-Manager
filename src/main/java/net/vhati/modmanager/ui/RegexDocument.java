@@ -9,23 +9,29 @@ import javax.swing.text.PlainDocument;
 
 
 /**
- * When applied to a JTextField via setDocument(), you can only enter a limited set of characters.
+ * A Document thats restricts characters based on a regex.
+ *
+ * @see JTextField.setDocument(javax.swing.text.Ducument)
  */
 public class RegexDocument extends PlainDocument {
-	private boolean dontCheck = false;
-	private Pattern p = null;
 
+	private Pattern pattern = null;
+
+
+	public RegexDocument( Pattern p ) {
+		pattern = p;
+	}
 
 	public RegexDocument( String regex ) {
-		if ( regex == null || regex.length()==0 ) dontCheck = true;
-
 		try {
-			p = Pattern.compile(regex);
-		} catch (PatternSyntaxException e) {dontCheck = true;}
+			if ( regex != null && regex.length() > 0 ) {
+				pattern = Pattern.compile( regex );
+			}
+		}
+		catch ( PatternSyntaxException e ) {}
 	}
 
 	public RegexDocument() {
-		dontCheck = true;
 	}
 
 
@@ -35,9 +41,9 @@ public class RegexDocument extends PlainDocument {
 
 		boolean proceed = true;
 
-		if ( dontCheck == false ) {
-			String tmp = super.getText(0, offs) + str + (super.getLength()>offs ? super.getText(offs,super.getLength()-offs) : "");
-			Matcher m = p.matcher(tmp);
+		if ( pattern != null ) {
+			String tmp = super.getText( 0, offs ) + str + (super.getLength()>offs ? super.getText( offs, super.getLength()-offs ) : "");
+			Matcher m = pattern.matcher( tmp );
 			proceed = m.matches();
 		}
 
@@ -49,12 +55,13 @@ public class RegexDocument extends PlainDocument {
 	public void remove( int offs, int len ) throws BadLocationException {
 		boolean proceed = true;
 
-		if ( dontCheck == false ) {
+		if ( pattern != null ) {
 			try {
-				String tmp = super.getText(0, offs) + (super.getLength()>(offs+len) ? super.getText(offs+len, super.getLength()-(offs+len)) : "");
-				Matcher m = p.matcher(tmp);
+				String tmp = super.getText( 0, offs ) + (super.getLength()>(offs+len) ? super.getText( offs+len, super.getLength()-(offs+len) ) : "");
+				Matcher m = pattern.matcher( tmp );
 				proceed = m.matches();
-			} catch (BadLocationException f) {}
+			}
+			catch ( BadLocationException e ) {}
 		}
 
 		if ( proceed == true ) super.remove( offs, len );
