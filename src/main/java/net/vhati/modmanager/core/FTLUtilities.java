@@ -16,11 +16,13 @@ public class FTLUtilities {
 
 	/**
 	 * Confirms the FTL resources dir exists and contains the dat files.
+	 *
+	 * Note: Do d.getCanonicalFile() to resolve any symlinks first!
 	 */
 	public static boolean isDatsDirValid( File d ) {
 		if ( !d.exists() || !d.isDirectory() ) return false;
-		if ( !new File(d, "data.dat").exists() ) return false;
-		if ( !new File(d, "resource.dat").exists() ) return false;
+		if ( !new File( d, "data.dat" ).exists() ) return false;
+		if ( !new File( d, "resource.dat" ).exists() ) return false;
 		return true;
 	}
 
@@ -59,6 +61,10 @@ public class FTLUtilities {
 		File result = null;
 
 		for ( File candidate : candidates ) {
+			// Resolve symlinks.
+			try {candidate = candidate.getCanonicalFile();}
+			catch ( IOException e ) {continue;}
+
 			if ( isDatsDirValid( candidate ) ) {
 				result = candidate;
 				break;
