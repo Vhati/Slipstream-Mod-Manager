@@ -12,7 +12,7 @@ ECHO.
 ECHO.
 ECHO This script will try to run Slipstream Mod Manager (as Admin).
 ECHO.
-ECHO Then logs will be presented in multiple notepad windows.
+ECHO When it exits, logs will be presented in multiple notepad windows.
 ECHO.
 ECHO.
 PAUSE
