@@ -38,6 +38,10 @@ public class FTLUtilities {
 		if ( xdgDataHome == null )
 			xdgDataHome = System.getProperty("user.home") +"/.local/share";
 
+		String winePrefix = System.getProperty("WINEPREFIX");
+		if ( winePrefix == null )
+			winePrefix = System.getProperty("user.home") +"/.wine";
+
 		File[] candidates = new File[] {
 			// Windows - Steam
 			new File( new File(""+System.getenv("ProgramFiles(x86)")), steamPath ),
@@ -50,12 +54,18 @@ public class FTLUtilities {
 			new File( new File(""+System.getenv("ProgramFiles")), humblePath ),
 			// Linux - Steam
 			new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
-			new File( xdgDataHome +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
+			new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data/resources" ),
+			new File( System.getProperty("user.home") +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
 			new File( System.getProperty("user.home") +"/.steam/steam/steamapps/common/FTL Faster Than Light/data/resources" ),
 			// OSX - Steam
 			new File( System.getProperty("user.home") +"/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ),
 			// OSX
-			new File( "/Applications/FTL.app/Contents/Resources" )
+			new File( "/Applications/FTL.app/Contents/Resources" ),
+			// Linux Wine
+			new File( winePrefix +"/drive_c/Program Files (x86)/"+ gogPath ),
+			new File( winePrefix +"/drive_c/Program Files/"+ gogPath ),
+			new File( winePrefix +"/drive_c/Program Files (x86)/"+ humblePath ),
+			new File( winePrefix +"/drive_c/Program Files/"+ humblePath )
 		};
 
 		File result = null;
