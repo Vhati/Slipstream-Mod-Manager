@@ -91,6 +91,7 @@
 						</archive>
 						<finalName>modman</finalName>
 						<appendAssemblyId>false</appendAssemblyId>
+						<attach>false</attach>
 					</configuration>
 				</execution>
 				<execution>  <!-- Build zip archive. -->
