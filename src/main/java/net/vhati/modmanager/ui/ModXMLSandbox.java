@@ -126,7 +126,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		messageArea.setFont( sandboxFont );
 		messageArea.setEditable( false );
 		messageArea.addMouseListener( new ClipboardMenuMouseListener() );
-		messageArea.setText( "This is a scratchpad to tinker with advanced mod syntax.\n1) Open XML from data.dat to fill the 'main' tab. (ctrl-o)\n2) Write some <mod:command> tags in the 'append' tab. (alt-1,2,3)\n3) Click Patch to see what would happen. (ctrl-p)\nUndo is available. (ctrl-z/ctrl-y)" );
+		messageArea.setText( "This is a sandbox to tinker with advanced mod syntax.\n1) Open XML from data.dat to fill the 'main' tab. (ctrl-o)\n2) Write some <mod:command> tags in the 'append' tab. (alt-1,2,3)\n3) Click Patch to see what would happen. (ctrl-p)\nUndo/redo is available. (ctrl-z/ctrl-y)" );
 		messageScroll = new JScrollPane( messageArea );
 
 		JPanel ctrlPanel = new JPanel();
@@ -162,10 +162,10 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		splitPane.setBottomComponent( messageScroll );
 
 		JPanel statusPanel = new JPanel();
-		statusPanel.setLayout( new BoxLayout(statusPanel, BoxLayout.Y_AXIS) );
+		statusPanel.setLayout( new BoxLayout( statusPanel, BoxLayout.Y_AXIS ) );
 		statusPanel.setBorder( BorderFactory.createLoweredBevelBorder() );
-		statusLbl = new JLabel(" ");
-		statusLbl.setBorder( BorderFactory.createEmptyBorder(2, 4, 2, 4) );
+		statusLbl = new JLabel( " " );
+		statusLbl.setBorder( BorderFactory.createEmptyBorder( 2, 4, 2, 4 ) );
 		statusLbl.setAlignmentX( Component.LEFT_ALIGNMENT );
 		statusPanel.add( statusLbl );
 
@@ -200,7 +200,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 		appendArea.getDocument().addUndoableEditListener(new UndoableEditListener() {
 			@Override
-			public void undoableEditHappened(UndoableEditEvent e) {
+			public void undoableEditHappened( UndoableEditEvent e ) {
 				undoManager.addEdit( e.getEdit() );
 			}
 		});
@@ -401,7 +401,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		Caret caret = currentArea.getCaret();
 		int from = Math.max( caret.getDot(), caret.getMark() );
 
-		Pattern ptn = Pattern.compile( "(?i)"+ Pattern.quote(query) );
+		Pattern ptn = Pattern.compile( "(?i)"+ Pattern.quote( query ) );
 		Matcher m = ptn.matcher( currentArea.getText() );
 		if ( m.find(from) ) {
 			caret.setDot( m.start() );

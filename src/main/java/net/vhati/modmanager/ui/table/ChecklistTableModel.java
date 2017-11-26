@@ -49,7 +49,7 @@ public class ChecklistTableModel<T> extends AbstractTableModel implements Reorde
 
 	@SuppressWarnings("unchecked")
 	public T getItem( int row ) {
-		return (T)rowsList.get(row).get(DATA_PAYLOAD);
+		return (T)rowsList.get(row).get( DATA_PAYLOAD );
 	}
 
 	@Override
@@ -63,13 +63,13 @@ public class ChecklistTableModel<T> extends AbstractTableModel implements Reorde
 	}
 
 	public void setSelected( int row, boolean b ) {
-		rowsList.get(row).set( DATA_CHECK, new Boolean(b) );
+		rowsList.get(row).set( DATA_CHECK, new Boolean( b ) );
 		fireTableRowsUpdated( row, row );
 	}
 
 	@SuppressWarnings("unchecked")
 	public boolean isSelected( int row ) {
-		return ((Boolean)rowsList.get(row).get(DATA_CHECK)).booleanValue();
+		return ((Boolean)rowsList.get( row ).get( DATA_CHECK )).booleanValue();
 	}
 
 	@Override
@@ -85,10 +85,10 @@ public class ChecklistTableModel<T> extends AbstractTableModel implements Reorde
 	@Override
 	public Object getValueAt( int row, int column ) {
 		if ( column == COLUMN_CHECK ) {
-			return rowsList.get(row).get(DATA_CHECK);
+			return rowsList.get( row ).get( DATA_CHECK );
 		}
 		else if ( column == COLUMN_PAYLOAD ) {
-			Object o = rowsList.get(row).get(DATA_PAYLOAD);
+			Object o = rowsList.get( row ).get( DATA_PAYLOAD );
 			return o.toString();
 		}
 		throw new ArrayIndexOutOfBoundsException();

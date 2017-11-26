@@ -87,7 +87,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar, Thread.UncaughtExceptionHandler {
 
-	private static final Logger log = LogManager.getLogger(ManagerFrame.class);
+	private static final Logger log = LogManager.getLogger( ManagerFrame.class );
 
 	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
 	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/auto_update.json";
@@ -122,7 +122,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 	private AutoUpdateInfo appUpdateInfo = null;
 	private Color updateBtnDisabledColor = UIManager.getColor( "Button.foreground" );
-	private Color updateBtnEnabledColor = new Color(0, 124, 0);
+	private Color updateBtnEnabledColor = new Color( 0, 124, 0 );
 
 	private NerfListener nerfListener = new NerfListener( this );
 
@@ -171,39 +171,39 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		topPanel.add( modsTablePanel, BorderLayout.CENTER );
 
 		JPanel modActionsPanel = new JPanel();
-		modActionsPanel.setLayout( new BoxLayout(modActionsPanel, BoxLayout.Y_AXIS) );
-		modActionsPanel.setBorder( BorderFactory.createEmptyBorder(5,5,5,5) );
-		Insets actionInsets = new Insets(5,10,5,10);
+		modActionsPanel.setLayout( new BoxLayout( modActionsPanel, BoxLayout.Y_AXIS ) );
+		modActionsPanel.setBorder( BorderFactory.createEmptyBorder( 5,5,5,5 ) );
+		Insets actionInsets = new Insets( 5,10,5,10 );
 
-		patchBtn = new JButton("Patch");
+		patchBtn = new JButton( "Patch" );
 		patchBtn.setMargin( actionInsets );
 		patchBtn.addMouseListener( new StatusbarMouseListener( this, "Incorporate all selected mods into the game." ) );
-		patchBtn.addActionListener(this);
+		patchBtn.addActionListener( this );
 		modActionsPanel.add( patchBtn );
 
-		toggleAllBtn = new JButton("Toggle All");
+		toggleAllBtn = new JButton( "Toggle All" );
 		toggleAllBtn.setMargin( actionInsets );
 		toggleAllBtn.addMouseListener( new StatusbarMouseListener( this, "Select all mods, or none." ) );
-		toggleAllBtn.addActionListener(this);
+		toggleAllBtn.addActionListener( this );
 		modActionsPanel.add( toggleAllBtn );
 
-		validateBtn = new JButton("Validate");
+		validateBtn = new JButton( "Validate" );
 		validateBtn.setMargin( actionInsets );
 		validateBtn.addMouseListener( new StatusbarMouseListener( this, "Check selected mods for problems." ) );
-		validateBtn.addActionListener(this);
+		validateBtn.addActionListener( this );
 		modActionsPanel.add( validateBtn );
 
-		modsFolderBtn = new JButton("Open mods/");
+		modsFolderBtn = new JButton( "Open mods/" );
 		modsFolderBtn.setMargin( actionInsets );
 		modsFolderBtn.addMouseListener( new StatusbarMouseListener( this, "Open the mods/ folder." ) );
-		modsFolderBtn.addActionListener(this);
+		modsFolderBtn.addActionListener( this );
 		modsFolderBtn.setEnabled( Desktop.isDesktopSupported() );
 		modActionsPanel.add( modsFolderBtn );
 
-		updateBtn = new JButton("Update");
+		updateBtn = new JButton( "Update" );
 		updateBtn.setMargin( actionInsets );
 		updateBtn.addMouseListener( new StatusbarMouseListener( this, String.format( "Show info about the latest version of %s.", appName ) ) );
-		updateBtn.addActionListener(this);
+		updateBtn.addActionListener( this );
 		updateBtn.setForeground( updateBtnDisabledColor );
 		updateBtn.setEnabled( false );
 		modActionsPanel.add( updateBtn );
@@ -225,7 +225,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		}
 
 		infoArea = new ModInfoArea();
-		infoArea.setPreferredSize( new Dimension(504, 220) );
+		infoArea.setPreferredSize( new Dimension( 504, 220 ) );
 		infoArea.setStatusbar( this );
 
 		splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
@@ -234,10 +234,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		mainPane.add( splitPane, BorderLayout.CENTER );
 
 		JPanel statusPanel = new JPanel();
-		statusPanel.setLayout( new BoxLayout(statusPanel, BoxLayout.Y_AXIS) );
+		statusPanel.setLayout( new BoxLayout( statusPanel, BoxLayout.Y_AXIS ) );
 		statusPanel.setBorder( BorderFactory.createLoweredBevelBorder() );
 		statusLbl = new JLabel(" ");
-		statusLbl.setBorder( BorderFactory.createEmptyBorder(2, 4, 2, 4) );
+		statusLbl.setBorder( BorderFactory.createEmptyBorder( 2, 4, 2, 4 ) );
 		statusLbl.setAlignmentX( Component.LEFT_ALIGNMENT );
 		statusPanel.add( statusLbl );
 		contentPane.add( statusPanel, BorderLayout.SOUTH );
@@ -313,31 +313,31 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		fileMenu.setMnemonic( KeyEvent.VK_F );
 		rescanMenuItem = new JMenuItem( "Re-Scan mods/" );
 		rescanMenuItem.addMouseListener( new StatusbarMouseListener( this, "Check the mods/ folder for new files." ) );
-		rescanMenuItem.addActionListener(this);
+		rescanMenuItem.addActionListener( this );
 		fileMenu.add( rescanMenuItem );
 		extractDatsMenuItem = new JMenuItem( "Extract Dats..." );
 		extractDatsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Extract FTL resources into a folder." ) );
-		extractDatsMenuItem.addActionListener(this);
+		extractDatsMenuItem.addActionListener( this );
 		fileMenu.add( extractDatsMenuItem );
 		sandboxMenuItem = new JMenuItem( "XML Sandbox..." );
 		sandboxMenuItem.addMouseListener( new StatusbarMouseListener( this, "Experiment with advanced mod syntax." ) );
-		sandboxMenuItem.addActionListener(this);
+		sandboxMenuItem.addActionListener( this );
 		fileMenu.add( sandboxMenuItem );
 		configMenuItem = new JMenuItem( "Preferences..." );
 		configMenuItem.addMouseListener( new StatusbarMouseListener( this, "Edit preferences." ) );
-		configMenuItem.addActionListener(this);
+		configMenuItem.addActionListener( this );
 		fileMenu.add( configMenuItem );
 		fileMenu.add( new JSeparator() );
 		exitMenuItem = new JMenuItem( "Exit" );
 		exitMenuItem.addMouseListener( new StatusbarMouseListener( this, "Exit this application." ) );
-		exitMenuItem.addActionListener(this);
+		exitMenuItem.addActionListener( this );
 		fileMenu.add( exitMenuItem );
 		menubar.add( fileMenu );
 		helpMenu = new JMenu( "Help" );
 		helpMenu.setMnemonic( KeyEvent.VK_H );
 		aboutMenuItem = new JMenuItem( "About" );
 		aboutMenuItem.addMouseListener( new StatusbarMouseListener( this, "Show info about this application." ) );
-		aboutMenuItem.addActionListener(this);
+		aboutMenuItem.addActionListener( this );
 		helpMenu.add( aboutMenuItem );
 		menubar.add( helpMenu );
 		this.setJMenuBar( menubar );
@@ -347,7 +347,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		this.setContentPane( contentPane );
 		this.pack();
 		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
-		this.setLocationRelativeTo(null);
+		this.setLocationRelativeTo( null );
 
 		if ( appConfig.getProperty( "remember_geometry" ).equals( "true" ) )
 			setGeometryFromConfig();
@@ -362,16 +362,16 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			int dividerLoc = -1;
 			Matcher m = Pattern.compile( "([^;,]+),(\\d+)" ).matcher( geometry );
 			while ( m.find() ) {
-				if ( m.group(1).equals( "x" ) )
-					xywh[0] = Integer.parseInt( m.group(2) );
-				else if ( m.group(1).equals( "y" ) )
-					xywh[1] = Integer.parseInt( m.group(2) );
-				else if ( m.group(1).equals( "w" ) )
-					xywh[2] = Integer.parseInt( m.group(2) );
-				else if ( m.group(1).equals( "h" ) )
-					xywh[3] = Integer.parseInt( m.group(2) );
-				else if ( m.group(1).equals( "divider" ) )
-					dividerLoc = Integer.parseInt( m.group(2) );
+				if ( m.group( 1 ).equals( "x" ) )
+					xywh[0] = Integer.parseInt( m.group( 2 ) );
+				else if ( m.group( 1 ).equals( "y" ) )
+					xywh[1] = Integer.parseInt( m.group( 2 ) );
+				else if ( m.group( 1 ).equals( "w" ) )
+					xywh[2] = Integer.parseInt( m.group( 2 ) );
+				else if ( m.group( 1 ).equals( "h" ) )
+					xywh[3] = Integer.parseInt( m.group( 2 ) );
+				else if ( m.group( 1 ).equals( "divider" ) )
+					dividerLoc = Integer.parseInt( m.group( 2 ) );
 			}
 			boolean badGeometry = false;
 			for ( int n : xywh ) {
@@ -456,7 +456,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		BufferedWriter bw = null;
 		try {
 			FileOutputStream os = new FileOutputStream( modsTableStateFile );
-			bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName("UTF-8") ));
+			bw = new BufferedWriter(new OutputStreamWriter( os, Charset.forName( "UTF-8" ) ));
 
 			for ( ModFileInfo modFileInfo : tableState.getItems() ) {
 				bw.write( modFileInfo.getFile().getName() );
@@ -468,7 +468,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			log.error( String.format( "Error writing \"%s\".", modsTableStateFile.getName() ), e );
 		}
 		finally {
-			try {if (bw != null) bw.close();}
+			try {if ( bw != null ) bw.close();}
 			catch (Exception e) {}
 		}
 	}
@@ -608,7 +608,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					long epochTime = -1;
 					try {
 						epochTime = ModUtilities.getModFileTime( modFileInfo.getFile() );
-					} catch ( IOException e ) {
+					}
+					catch ( IOException e ) {
 						log.error( String.format( "Error while getting modified time of mod file contents for \"%s\".", modFileInfo.getFile() ), e );
 					}
 					if ( epochTime != -1 ) {
@@ -646,10 +647,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 	@Override
 	public void setStatusText( String text ) {
-		if (text.length() > 0)
-			statusLbl.setText(text);
+		if ( text.length() > 0 )
+			statusLbl.setText( text );
 		else
-			statusLbl.setText(" ");
+			statusLbl.setText( " " );
 	}
 
 
@@ -676,7 +677,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
 
 			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
-			if ( !neverRunFtl.equals("true") ) {
+			if ( !neverRunFtl.equals( "true" ) ) {
 				File exeFile = null;
 				String[] exeArgs = null;
 
@@ -769,12 +770,12 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		else if ( source == extractDatsMenuItem ) {
 			setStatusText( "" );
 			JFileChooser extractChooser = new JFileChooser();
-			extractChooser.setDialogTitle("Choose a dir to extract into");
+			extractChooser.setDialogTitle( "Choose a dir to extract into" );
 			extractChooser.setFileHidingEnabled( false );
-			extractChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			extractChooser.setMultiSelectionEnabled(false);
+			extractChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+			extractChooser.setMultiSelectionEnabled( false );
 
-			if ( extractChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION )
+			if ( extractChooser.showSaveDialog( this ) != JFileChooser.APPROVE_OPTION )
 				return;
 
 			File extractDir = extractChooser.getSelectedFile();
@@ -892,10 +893,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	public void setNerfed( boolean b ) {
 		Component glassPane = this.getGlassPane();
 		if (b) {
-			glassPane.setVisible(true);
+			glassPane.setVisible( true );
 			glassPane.requestFocusInWindow();
 		} else {
-			glassPane.setVisible(false);
+			glassPane.setVisible( false );
 		}
 	}
 
@@ -987,7 +988,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					log.info( "Running FTL..." );
 					try {
 						FTLUtilities.launchExe( exeFile, exeArgs );
-					} catch ( Exception e ) {
+					}
+					catch ( Exception e ) {
 						log.error( "Error launching FTL.", e );
 					}
 					exitApp();
@@ -1032,10 +1034,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		@Override
 		public boolean accept( File f ) {
 			if ( f.isFile() ) {
-				if ( f.getName().endsWith(".ftl") ) return true;
+				if ( f.getName().endsWith( ".ftl" ) ) return true;
 
 				if ( allowZip ) {
-					if ( f.getName().endsWith(".zip") ) return true;
+					if ( f.getName().endsWith( ".zip" ) ) return true;
 				}
 			}
 			return false;

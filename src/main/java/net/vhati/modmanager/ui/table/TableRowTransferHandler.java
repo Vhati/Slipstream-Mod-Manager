@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class TableRowTransferHandler extends TransferHandler {
 
-	private static final Logger log = LogManager.getLogger(TableRowTransferHandler.class);
+	private static final Logger log = LogManager.getLogger( TableRowTransferHandler.class );
 
 	private DataFlavor localIntegerFlavor = null;
 
@@ -47,12 +47,12 @@ public class TableRowTransferHandler extends TransferHandler {
 	protected Transferable createTransferable( JComponent c ) {
 		assert ( c == table );
 		int row = table.getSelectedRow();
-		return new IntegerTransferrable( new Integer(row) );
+		return new IntegerTransferrable( new Integer( row ) );
 	}
 
 	@Override
 	public boolean canImport( TransferHandler.TransferSupport ts ) {
-		boolean b = ( ts.getComponent() == table && ts.isDrop() && ts.isDataFlavorSupported(localIntegerFlavor) );
+		boolean b = ( ts.getComponent() == table && ts.isDrop() && ts.isDataFlavorSupported( localIntegerFlavor ) );
 		table.setCursor( b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop );
 		return b;
 	}
@@ -65,7 +65,7 @@ public class TableRowTransferHandler extends TransferHandler {
 	@Override
 	@SuppressWarnings("Unchecked")
 	public boolean importData( TransferHandler.TransferSupport ts ) {
-		if ( !canImport(ts) ) return false;
+		if ( !canImport( ts ) ) return false;
 
 		JTable target = (JTable)ts.getComponent();
 		JTable.DropLocation dl = (JTable.DropLocation)ts.getDropLocation();
@@ -73,9 +73,9 @@ public class TableRowTransferHandler extends TransferHandler {
 		int rowCount = table.getModel().getRowCount();
 		if ( dropRow < 0 || dropRow > rowCount ) dropRow = rowCount;
 
-		target.setCursor( Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR) );
+		target.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
 		try {
-			Integer draggedRow = (Integer)ts.getTransferable().getTransferData(localIntegerFlavor);
+			Integer draggedRow = (Integer)ts.getTransferable().getTransferData( localIntegerFlavor );
 			if ( draggedRow != -1 && draggedRow != dropRow ) {
 				((Reorderable)table.getModel()).reorder( draggedRow, dropRow );
 				if ( dropRow > draggedRow ) dropRow--;
@@ -92,7 +92,7 @@ public class TableRowTransferHandler extends TransferHandler {
 	@Override
 	protected void exportDone( JComponent source, Transferable data, int action ) {
 		if ( action == TransferHandler.MOVE || action == TransferHandler.NONE ) {
-			table.setCursor( Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR) );
+			table.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
 		}
 	}
 

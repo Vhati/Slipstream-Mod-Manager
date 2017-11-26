@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 public class DatExtractDialog extends ProgressDialog {
 
-	private static final Logger log = LogManager.getLogger(DatExtractDialog.class);
+	private static final Logger log = LogManager.getLogger( DatExtractDialog.class );
 
 	private boolean started = false;
 
@@ -87,11 +87,11 @@ public class DatExtractDialog extends ProgressDialog {
 
 		@Override
 		public void run() {
-
 			FTLDat.AbstractPack srcP = null;
 			FTLDat.AbstractPack dstP = null;
 			InputStream is = null;
 			int progress = 0;
+
 			try {
 				if ( !extractDir.exists() ) extractDir.mkdirs();
 
@@ -117,19 +117,19 @@ public class DatExtractDialog extends ProgressDialog {
 				}
 				setTaskOutcomeLater( true, null );
 			}
-			catch ( Exception ex ) {
-				log.error( "Error extracting dats.", ex );
-				setTaskOutcomeLater( false, ex );
+			catch ( Exception e ) {
+				log.error( "Error extracting dats.", e );
+				setTaskOutcomeLater( false, e );
 			}
 			finally {
 				try {if ( is != null ) is.close();}
-				catch ( IOException ex ) {}
+				catch ( IOException e ) {}
 
 				try {if ( srcP != null ) srcP.close();}
-				catch ( IOException ex ) {}
+				catch ( IOException e ) {}
 
 				try {if ( dstP != null ) dstP.close();}
-				catch ( IOException ex ) {}
+				catch ( IOException e ) {}
 			}
 		}
 	}

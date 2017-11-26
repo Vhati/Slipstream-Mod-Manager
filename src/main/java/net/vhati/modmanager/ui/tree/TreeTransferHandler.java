@@ -101,7 +101,7 @@ public class TreeTransferHandler extends TransferHandler {
 
 	@Override
 	public boolean canImport( TransferHandler.TransferSupport ts ) {
-		boolean b = ( ts.getComponent() == tree && ts.isDrop() && ts.isDataFlavorSupported(localTreePathFlavor) );
+		boolean b = ( ts.getComponent() == tree && ts.isDrop() && ts.isDataFlavorSupported( localTreePathFlavor ) );
 		tree.setCursor( b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop );
 		return b;
 	}
@@ -182,7 +182,7 @@ public class TreeTransferHandler extends TransferHandler {
 	@Override
 	protected void exportDone( JComponent source, Transferable data, int action ) {
 		if ( action == TransferHandler.MOVE || action == TransferHandler.NONE ) {
-			tree.setCursor( Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR) );
+			tree.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
 		}
 
 		JTree srcTree = (JTree)source;

@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ModInfoArea extends JScrollPane {
 
-	private static final Logger log = LogManager.getLogger(ModInfoArea.class);
+	private static final Logger log = LogManager.getLogger( ModInfoArea.class );
 
 	private static final String STYLE_REGULAR = "regular";
 	private static final String STYLE_HYPERLINK = "hyperlink";
@@ -52,29 +52,29 @@ public class ModInfoArea extends JScrollPane {
 		textPane = new JTextPane();
 		textPane.setEditable( false );
 
-		doc = new DefaultStyledDocument(styleContext);
-		textPane.setStyledDocument(doc);
+		doc = new DefaultStyledDocument( styleContext );
+		textPane.setStyledDocument( doc );
 
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-		if ( desktop != null && desktop.isSupported(Desktop.Action.BROWSE) ) {
+		if ( desktop != null && desktop.isSupported( Desktop.Action.BROWSE ) ) {
 			browseWorks = true;
 		}
 
 
 		MouseInputAdapter hyperlinkListener = new MouseInputAdapter() {
-			private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
-			private Cursor linkCursor = new Cursor(Cursor.HAND_CURSOR);
+			private Cursor defaultCursor = new Cursor( Cursor.DEFAULT_CURSOR );
+			private Cursor linkCursor = new Cursor( Cursor.HAND_CURSOR );
 			private boolean wasOverLink = false;
 
 			@Override
 			public void mouseClicked( MouseEvent e ) {
-				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel(e.getPoint()) ).getAttributes();
+				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel( e.getPoint() ) ).getAttributes();
 				Object targetObj = tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET );
 				if ( targetObj != null ) {
 					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if ( desktop != null && desktop.isSupported(Desktop.Action.BROWSE) ) {
+					if ( desktop != null && desktop.isSupported( Desktop.Action.BROWSE ) ) {
 						try {
-							desktop.browse( new URI(targetObj.toString()) );
+							desktop.browse( new URI( targetObj.toString() ) );
 						}
 						catch ( Exception f ) {
 							log.error( "Error browsing clicked url: "+ targetObj.toString(), f );
@@ -85,7 +85,7 @@ public class ModInfoArea extends JScrollPane {
 
 			@Override
 			public void mouseMoved( MouseEvent e ) {
-				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel(e.getPoint()) ).getAttributes();
+				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel( e.getPoint() ) ).getAttributes();
 				Object targetObj = tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET );
 				if ( targetObj != null ) {
 					textPane.setCursor( linkCursor );
@@ -138,7 +138,7 @@ public class ModInfoArea extends JScrollPane {
 			if ( url != null ) {
 				doc.insertString( doc.getLength(), "Website: ", regularStyle );
 
-				if ( browseWorks && url.matches("^(?:https?|ftp)://.*") ) {
+				if ( browseWorks && url.matches( "^(?:https?|ftp)://.*" ) ) {
 					SimpleAttributeSet tmpAttr = new SimpleAttributeSet( doc.getStyle( STYLE_HYPERLINK ) );
 					tmpAttr.addAttribute( ATTR_HYPERLINK_TARGET, url );
 					doc.insertString( doc.getLength(), "Link", tmpAttr );
@@ -155,11 +155,11 @@ public class ModInfoArea extends JScrollPane {
 				doc.insertString( doc.getLength(), body, regularStyle );
 			}
 		}
-		catch ( BadLocationException e) {
+		catch ( BadLocationException e ) {
 			log.error( "Error filling info text area.", e );
 		}
 
-		textPane.setCaretPosition(0);
+		textPane.setCaretPosition( 0 );
 	}
 
 
@@ -185,7 +185,7 @@ public class ModInfoArea extends JScrollPane {
 	}
 
 	public void appendLinkText( String linkURL, String linkTitle ) throws BadLocationException {
-		if ( browseWorks && linkURL.matches("^(?:https?|ftp)://.*") ) {
+		if ( browseWorks && linkURL.matches( "^(?:https?|ftp)://.*" ) ) {
 			SimpleAttributeSet tmpAttr = new SimpleAttributeSet( doc.getStyle( STYLE_HYPERLINK ) );
 			tmpAttr.addAttribute( ATTR_HYPERLINK_TARGET, linkURL );
 			doc.insertString( doc.getLength(), linkTitle, tmpAttr );

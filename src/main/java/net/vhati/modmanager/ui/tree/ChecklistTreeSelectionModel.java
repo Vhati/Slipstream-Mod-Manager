@@ -148,7 +148,7 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 				}
 				else {
 					if ( !isSelectionEmpty() ) {
-						removeSelectionPaths(getSelectionPaths());
+						removeSelectionPaths( getSelectionPaths() );
 					}
 					super.addSelectionPaths( new TreePath[]{temp} );
 				}
@@ -171,7 +171,7 @@ public class ChecklistTreeSelectionModel extends DefaultTreeSelectionModel {
 			if ( path.getPathCount() == 1 ) {
 				super.removeSelectionPaths( new TreePath[]{path} );
 			} else {
-				toggleRemoveSelection(path);
+				toggleRemoveSelection( path );
 			}
 		}
 	}

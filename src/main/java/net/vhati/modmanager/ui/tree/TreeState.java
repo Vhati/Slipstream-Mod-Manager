@@ -109,7 +109,9 @@ public class TreeState {
 		public boolean accept( TreeNodeState nodeState ) {
 			Object nodeObject = nodeState.getUserObject();
 			if ( objectClass != null && nodeObject != null ) {
-				return ( objectClass.isAssignableFrom( nodeObject.getClass() ) );
+				@SuppressWarnings("unchecked")
+				boolean result = objectClass.isAssignableFrom( nodeObject.getClass() );
+				return result;
 			}
 			else if ( o != null ) {
 				return ( o.equals( nodeState.getUserObject() ) );

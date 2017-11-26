@@ -42,9 +42,9 @@ public class FieldEditorPanel extends JPanel {
 
 	private GridBagConstraints gridC = new GridBagConstraints();
 
-	private Component nameStrut = Box.createHorizontalStrut(1);
-	private Component valueStrut = Box.createHorizontalStrut(120);
-	private Component reminderStrut = Box.createHorizontalStrut(90);
+	private Component nameStrut = Box.createHorizontalStrut( 1 );
+	private Component valueStrut = Box.createHorizontalStrut( 120 );
+	private Component reminderStrut = Box.createHorizontalStrut( 90 );
 
 	private boolean remindersVisible;
 
@@ -72,23 +72,23 @@ public class FieldEditorPanel extends JPanel {
 			gridC.gridy++;
 		}
 
-		gridC.insets = new Insets(2, 4, 2, 4);
+		gridC.insets = new Insets( 2, 4, 2, 4 );
 	}
 
 
 	public void setNameWidth( int width ) {
-		nameStrut.setMinimumSize( new Dimension(width, 0) );
-		nameStrut.setPreferredSize( new Dimension(width, 0) );
+		nameStrut.setMinimumSize( new Dimension( width, 0 ) );
+		nameStrut.setPreferredSize( new Dimension( width, 0 ) );
 	}
 
 	public void setValueWidth( int width ) {
-		valueStrut.setMinimumSize( new Dimension(width, 0) );
-		valueStrut.setPreferredSize( new Dimension(width, 0) );
+		valueStrut.setMinimumSize( new Dimension( width, 0 ) );
+		valueStrut.setPreferredSize( new Dimension( width, 0 ) );
 	}
 
 	public void setReminderWidth( int width ) {
-		reminderStrut.setMinimumSize( new Dimension(width, 0) );
-		reminderStrut.setPreferredSize( new Dimension(width, 0) );
+		reminderStrut.setMinimumSize( new Dimension( width, 0 ) );
+		reminderStrut.setPreferredSize( new Dimension( width, 0 ) );
 	}
 
 
@@ -113,11 +113,11 @@ public class FieldEditorPanel extends JPanel {
 			JTextArea valueArea = new JTextArea();
 			valueArea.setBackground(null);
 			valueArea.setEditable( false );
-			valueArea.setBorder(null);
+			valueArea.setBorder( null );
 			valueArea.setLineWrap( true );
 			valueArea.setWrapStyleWord( true );
 			valueArea.setFocusable( false );
-			valueArea.setFont( UIManager.getFont("Label.font") );
+			valueArea.setFont( UIManager.getFont( "Label.font" ) );
 
 			wrappedLabelMap.put( valueName, valueArea );
 			this.add( valueArea, gridC );
@@ -139,7 +139,7 @@ public class FieldEditorPanel extends JPanel {
 			gridC.anchor = GridBagConstraints.WEST;
 			JTextField valueField = new JTextField();
 			valueField.setHorizontalAlignment( JTextField.RIGHT );
-			valueField.setDocument( new RegexDocument("[0-9]*") );
+			valueField.setDocument( new RegexDocument( "[0-9]*" ) );
 			intMap.put( valueName, valueField );
 			this.add( valueField, gridC );
 		}
@@ -153,21 +153,21 @@ public class FieldEditorPanel extends JPanel {
 		else if ( contentType == ContentType.SLIDER ) {
 			gridC.anchor = GridBagConstraints.CENTER;
 			JPanel panel = new JPanel();
-			panel.setLayout( new BoxLayout(panel, BoxLayout.X_AXIS) );
+			panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ) );
 			final JSlider valueSlider = new JSlider( JSlider.HORIZONTAL );
-			valueSlider.setPreferredSize( new Dimension(50, valueSlider.getPreferredSize().height) );
+			valueSlider.setPreferredSize( new Dimension( 50, valueSlider.getPreferredSize().height ) );
 			sliderMap.put( valueName, valueSlider );
-			panel.add(valueSlider);
-			final JTextField valueField = new JTextField(3);
+			panel.add( valueSlider );
+			final JTextField valueField = new JTextField( 3 );
 			valueField.setMaximumSize( valueField.getPreferredSize() );
 			valueField.setHorizontalAlignment( JTextField.RIGHT );
 			valueField.setEditable( false );
-			panel.add(valueField);
+			panel.add( valueField );
 			this.add( panel, gridC );
 
 			valueSlider.addChangeListener(new ChangeListener() {
 				@Override
-				public void stateChanged(ChangeEvent e) {
+				public void stateChanged( ChangeEvent e ) {
 					valueField.setText( ""+valueSlider.getValue() );
 				}
 			});
@@ -175,20 +175,20 @@ public class FieldEditorPanel extends JPanel {
 		else if ( contentType == ContentType.COMBO ) {
 			gridC.anchor = GridBagConstraints.CENTER;
 			JComboBox valueCombo = new JComboBox();
-			valueCombo.setEditable(false);
+			valueCombo.setEditable( false );
 			comboMap.put( valueName, valueCombo );
 			this.add( valueCombo, gridC );
 		}
 		else if ( contentType == ContentType.CHOOSER ) {
 			gridC.anchor = GridBagConstraints.WEST;
 			JPanel panel = new JPanel();
-			panel.setLayout( new BoxLayout(panel, BoxLayout.X_AXIS) );
+			panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ) );
 
 			JTextField chooserField = new JTextField();
 			panel.add( chooserField );
 			panel.add( Box.createHorizontalStrut( 5 ) );
 			JButton chooserBtn = new JButton( "..." );
-			chooserBtn.setMargin( new Insets(1,2,1,2) );
+			chooserBtn.setMargin( new Insets( 1,2,1,2 ) );
 			panel.add( chooserBtn );
 			Chooser valueChooser = new Chooser( chooserField, chooserBtn );
 			chooserMap.put( valueName, valueChooser );
@@ -215,13 +215,13 @@ public class FieldEditorPanel extends JPanel {
 
 		gridC.anchor = GridBagConstraints.WEST;
 		JTextArea textArea = new JTextArea( text );
-		textArea.setBackground(null);
+		textArea.setBackground( null );
 		textArea.setEditable( false );
-		textArea.setBorder(null);
+		textArea.setBorder( null );
 		textArea.setLineWrap( true );
 		textArea.setWrapStyleWord( true );
 		textArea.setFocusable( false );
-		textArea.setFont( UIManager.getFont("Label.font") );
+		textArea.setFont( UIManager.getFont( "Label.font" ) );
 
 		this.add( textArea, gridC );
 		gridC.gridy++;
@@ -235,11 +235,11 @@ public class FieldEditorPanel extends JPanel {
 
 		JPanel panel = new JPanel();
 		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-		panel.add( Box.createVerticalStrut(8) );
+		panel.add( Box.createVerticalStrut( 8 ) );
 		JSeparator sep = new JSeparator();
-		sep.setPreferredSize( new Dimension(1, sep.getPreferredSize().height) );
+		sep.setPreferredSize( new Dimension( 1, sep.getPreferredSize().height ) );
 		panel.add( sep );
-		panel.add( Box.createVerticalStrut(8) );
+		panel.add( Box.createVerticalStrut( 8 ) );
 
 		this.add( panel, gridC );
 		gridC.gridy++;
@@ -251,7 +251,7 @@ public class FieldEditorPanel extends JPanel {
 		gridC.gridwidth = GridBagConstraints.REMAINDER;
 		gridC.gridx = 0;
 
-		this.add( Box.createVerticalStrut(12), gridC );
+		this.add( Box.createVerticalStrut( 12 ), gridC );
 		gridC.gridy++;
 	}
 
@@ -268,7 +268,7 @@ public class FieldEditorPanel extends JPanel {
 
 	public void setStringAndReminder( String valueName, String s ) {
 		JTextField valueField = stringMap.get( valueName );
-		if ( valueField != null ) valueField.setText(s);
+		if ( valueField != null ) valueField.setText( s );
 		if ( remindersVisible ) setReminder( valueName, s );
 	}
 
@@ -286,7 +286,7 @@ public class FieldEditorPanel extends JPanel {
 	}
 	public void setBoolAndReminder( String valueName, boolean b, String s ) {
 		JCheckBox valueCheck = boolMap.get( valueName );
-		if ( valueCheck != null ) valueCheck.setSelected(b);
+		if ( valueCheck != null ) valueCheck.setSelected( b );
 		if ( remindersVisible ) setReminder( valueName, s );
 	}
 
@@ -295,7 +295,7 @@ public class FieldEditorPanel extends JPanel {
 	}
 	public void setSliderAndReminder( String valueName, int n, String s ) {
 		JSlider valueSlider = sliderMap.get( valueName );
-		if ( valueSlider != null ) valueSlider.setValue(n);
+		if ( valueSlider != null ) valueSlider.setValue( n );
 		if ( remindersVisible ) setReminder( valueName, s );
 	}
 
@@ -304,13 +304,13 @@ public class FieldEditorPanel extends JPanel {
 	}
 	public void setComboAndReminder( String valueName, Object o, String s ) {
 		JComboBox valueCombo = comboMap.get( valueName );
-		if ( valueCombo != null ) valueCombo.setSelectedItem(o);
+		if ( valueCombo != null ) valueCombo.setSelectedItem( o );
 		if ( remindersVisible ) setReminder( valueName, s );
 	}
 
 	public void setChooserAndReminder( String valueName, String s ) {
 		Chooser valueChooser = chooserMap.get( valueName );
-		if ( valueChooser != null ) valueChooser.getTextField().setText(s);
+		if ( valueChooser != null ) valueChooser.getTextField().setText( s );
 		if ( remindersVisible ) setReminder( valueName, s );
 	}
 
@@ -354,31 +354,31 @@ public class FieldEditorPanel extends JPanel {
 
 	public void reset() {
 		for ( JTextArea valueArea : wrappedLabelMap.values() )
-			valueArea.setText("");
+			valueArea.setText( "" );
 
 		for ( JLabel valueLbl : labelMap.values() )
-			valueLbl.setText("");
+			valueLbl.setText( "" );
 
 		for ( JTextField valueField : stringMap.values() )
-			valueField.setText("");
+			valueField.setText( "" );
 
 		for ( JTextField valueField : intMap.values() )
-			valueField.setText("");
+			valueField.setText( "" );
 
 		for ( JCheckBox valueCheck : boolMap.values() )
-			valueCheck.setSelected(false);
+			valueCheck.setSelected( false );
 
 		for ( JSlider valueSlider : sliderMap.values() )
-			valueSlider.setValue(0);
+			valueSlider.setValue( 0 );
 
 		for ( JComboBox valueCombo : comboMap.values() )
 			valueCombo.removeAllItems();
 
 		for ( Chooser valueChooser : chooserMap.values() )
-			valueChooser.getTextField().setText("");
+			valueChooser.getTextField().setText( "" );
 
 		for ( JLabel valueReminder : reminderMap.values() )
-			valueReminder.setText("");
+			valueReminder.setText( "" );
 	}
 
 	@Override
@@ -403,7 +403,7 @@ public class FieldEditorPanel extends JPanel {
 
 		// No default width for col 0.
 		gridC.gridx = 0;
-		this.add( Box.createVerticalStrut(1), gridC );
+		this.add( Box.createVerticalStrut( 1 ), gridC );
 		gridC.gridx++;
 		this.add( valueStrut, gridC );
 		gridC.gridx++;
@@ -412,7 +412,7 @@ public class FieldEditorPanel extends JPanel {
 			gridC.gridy++;
 		}
 
-		gridC.insets = new Insets(2, 4, 2, 4);
+		gridC.insets = new Insets( 2, 4, 2, 4 );
 	}
 
 

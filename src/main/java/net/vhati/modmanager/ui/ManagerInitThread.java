@@ -39,7 +39,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ManagerInitThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger(ManagerInitThread.class);
+	private static final Logger log = LogManager.getLogger( ManagerInitThread.class );
 
 	private final ManagerFrame frame;
 	private final SlipstreamConfig appConfig;
@@ -177,7 +177,7 @@ public class ManagerInitThread extends Thread {
 		BufferedReader br = null;
 		try {
 			FileInputStream is = new FileInputStream( modsTableStateFile );
-			br = new BufferedReader(new InputStreamReader( is, Charset.forName("UTF-8") ));
+			br = new BufferedReader( new InputStreamReader( is, Charset.forName( "UTF-8" ) ) );
 			String line;
 			while ( (line = br.readLine()) != null ) {
 				fileNames.add( line );
