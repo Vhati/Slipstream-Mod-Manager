@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.HashObserver;
 
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +49,7 @@ public class HashThread extends Thread {
 	private String calcFileMD5( File f ) {
 		String result = null;
 		try {
-			result = FTLDat.calcFileMD5( f );
+			result = PackUtilities.calcFileMD5( f );
 		}
 		catch ( Exception e ) {
 			log.error( "Error while calculating hash for file: "+ f.getPath(), e );

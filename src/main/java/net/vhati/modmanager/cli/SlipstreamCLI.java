@@ -15,7 +15,9 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.AbstractPack;
+import net.vhati.ftldat.FolderPack;
+import net.vhati.ftldat.FTLPack;
 import net.vhati.modmanager.FTLModManager;
 import net.vhati.modmanager.core.DelayedDeleteHook;
 import net.vhati.modmanager.core.FTLUtilities;
@@ -202,16 +204,16 @@ public class SlipstreamCLI {
 			File resDatFile = new File( datsDir, "resource.dat" );
 			File[] datFiles = new File[] {dataDatFile, resDatFile};
 
-			FTLDat.AbstractPack srcP = null;
-			FTLDat.AbstractPack dstP = null;
+			AbstractPack srcP = null;
+			AbstractPack dstP = null;
 			InputStream is = null;
 			try {
 				if ( !extractDir.exists() ) extractDir.mkdirs();
 
-				dstP = new FTLDat.FolderPack( extractDir );
+				dstP = new FolderPack( extractDir );
 
 				for ( File datFile : datFiles ) {
-					srcP = new FTLDat.FTLPack( datFile, "r" );
+					srcP = new FTLPack( datFile, "r" );
 					List<String> innerPaths = srcP.list();
 
 					for ( String innerPath : innerPaths ) {

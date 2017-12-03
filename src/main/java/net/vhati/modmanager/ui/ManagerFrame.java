@@ -53,7 +53,6 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import net.vhati.ftldat.FTLDat;
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;

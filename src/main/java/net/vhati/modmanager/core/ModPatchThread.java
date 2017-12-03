@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.vhati.ftldat.FTLDat;
-import net.vhati.ftldat.FTLDat.AbstractPack;
-import net.vhati.ftldat.FTLDat.FTLPack;
+import net.vhati.ftldat.AbstractPack;
+import net.vhati.ftldat.FTLPack;
+import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModPatchObserver;
 import net.vhati.modmanager.core.ModUtilities;
 
@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ModPatchThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger(ModPatchThread.class);
+	private static final Logger log = LogManager.getLogger( ModPatchThread.class );
 
 	// Other threads can check or set this.
 	public volatile boolean keepRunning = true;
@@ -125,7 +125,7 @@ public class ModPatchThread extends Thread {
 					log.info( String.format( "Backing up \"%s\".", dat.datFile.getName() ) );
 					observer.patchingStatus( String.format( "Backing up \"%s\".", dat.datFile.getName() ) );
 
-					FTLDat.copyFile( dat.datFile, dat.bakFile );
+					PackUtilities.copyFile( dat.datFile, dat.bakFile );
 					backupsCreated++;
 					observer.patchingProgress( progMilestone + progBackupMax/allDats.length*backupsCreated, progMax );
 
@@ -144,7 +144,7 @@ public class ModPatchThread extends Thread {
 					log.info( String.format( "Restoring vanilla \"%s\"...", dat.datFile.getName() ) );
 					observer.patchingStatus( String.format( "Restoring vanilla \"%s\"...", dat.datFile.getName() ) );
 
-					FTLDat.copyFile( dat.bakFile, dat.datFile );
+					PackUtilities.copyFile( dat.bakFile, dat.datFile );
 					datsClobbered++;
 					observer.patchingProgress( progMilestone + progClobberMax/allDats.length*datsClobbered, progMax );
 
@@ -215,9 +215,9 @@ public class ModPatchThread extends Thread {
 							continue;
 						}
 
-						String parentPath = m.group(1);
-						String topFolder = m.group(2);
-						String fileName = m.group(3);
+						String parentPath = m.group( 1 );
+						String topFolder = m.group( 2 );
+						String fileName = m.group( 3 );
 
 						AbstractPack ftlP = topFolderMap.get( topFolder );
 						if ( ftlP == null ) {
@@ -378,7 +378,7 @@ public class ModPatchThread extends Thread {
 			observer.patchingProgress( progMilestone, progMax );
 
 			// Prune 'removed' files from dats.
-			for ( AbstractPack ftlP : new AbstractPack[]{dataP,resP} ) {
+			for ( AbstractPack ftlP : new AbstractPack[]{dataP, resP} ) {
 				if ( ftlP instanceof FTLPack ) {
 					observer.patchingStatus( String.format( "Repacking \"%s\"...", ftlP.getName() ) );
 

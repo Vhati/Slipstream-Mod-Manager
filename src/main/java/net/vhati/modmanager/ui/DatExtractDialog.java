@@ -8,7 +8,9 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.AbstractPack;
+import net.vhati.ftldat.FolderPack;
+import net.vhati.ftldat.FTLPack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,18 +89,18 @@ public class DatExtractDialog extends ProgressDialog {
 
 		@Override
 		public void run() {
-			FTLDat.AbstractPack srcP = null;
-			FTLDat.AbstractPack dstP = null;
+			AbstractPack srcP = null;
+			AbstractPack dstP = null;
 			InputStream is = null;
 			int progress = 0;
 
 			try {
 				if ( !extractDir.exists() ) extractDir.mkdirs();
 
-				dstP = new FTLDat.FolderPack( extractDir );
+				dstP = new FolderPack( extractDir );
 
 				for ( File datFile : datFiles ) {
-					srcP = new FTLDat.FTLPack( datFile, "r" );
+					srcP = new FTLPack( datFile, "r" );
 					progress = 0;
 					List<String> innerPaths = srcP.list();
 					setProgressLater( progress, innerPaths.size() );

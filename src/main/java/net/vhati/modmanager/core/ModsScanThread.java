@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModsScanObserver;
@@ -81,7 +81,7 @@ public class ModsScanThread extends Thread {
 	private String calcFileMD5( File f ) {
 		String result = null;
 		try {
-			result = FTLDat.calcFileMD5( f );
+			result = PackUtilities.calcFileMD5( f );
 		}
 		catch ( Exception e ) {
 			log.error( "Error while calculating hash for file: "+ f.getPath(), e );

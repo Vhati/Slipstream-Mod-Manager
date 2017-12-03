@@ -54,7 +54,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.UndoManager;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.FTLPack;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.XMLPatcher;
@@ -319,10 +319,10 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 	private void open() {
 		messageArea.setText( "" );
 
-		FTLDat.FTLPack dataP = null;
+		FTLPack dataP = null;
 		InputStream is = null;
 		try {
-			dataP = new FTLDat.FTLPack( dataDatFile, "r" );
+			dataP = new FTLPack( dataDatFile, "r" );
 			List<String> innerPaths = dataP.list();
 
 			String innerPath = promptForInnerPath( innerPaths );

@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.vhati.ftldat.FTLDat;
+import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModsInfo;
@@ -342,7 +342,7 @@ public class ForumScraper {
 			while( true ) {
 				try {
 					result.rawDesc = getFirstPost( result.threadURL );
-					result.threadHash = FTLDat.calcStreamMD5( new ByteArrayInputStream( result.rawDesc.getBytes( Charset.forName("UTF-8") ) ) );
+					result.threadHash = PackUtilities.calcStreamMD5( new ByteArrayInputStream( result.rawDesc.getBytes( Charset.forName("UTF-8") ) ) );
 					break;
 				}
 				catch ( IOException e ) {
@@ -440,7 +440,7 @@ public class ForumScraper {
 	 */
 	private static String hashThread( String url ) throws IOException, NoSuchAlgorithmException {
 		String rawDesc = getFirstPost( url );
-		return FTLDat.calcStreamMD5( new ByteArrayInputStream( rawDesc.getBytes( Charset.forName("UTF-8") ) ) );
+		return PackUtilities.calcStreamMD5( new ByteArrayInputStream( rawDesc.getBytes( Charset.forName("UTF-8") ) ) );
 	}
 
 
