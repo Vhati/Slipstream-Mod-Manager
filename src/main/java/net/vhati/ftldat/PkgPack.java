@@ -25,6 +25,7 @@ import java.util.zip.InflaterInputStream;
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.AbstractPack.PathAndSize;
 import net.vhati.ftldat.AbstractPack.RepackResult;
+import net.vhati.ftldat.FileChannelRegionInputStream;
 import net.vhati.ftldat.MeteredInputStream;
 
 
