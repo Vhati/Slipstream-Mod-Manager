@@ -30,38 +30,45 @@ import net.vhati.ftldat.FileChannelRegionInputStream;
 
 public class FTLDat {
 
-  /**
-	 * Splits a path on "/" the way FTL expects them in .dat files.
+	/**
+	 * Returns segments of a path string, split by each "/" occurrence.
 	 */
 	public static String[] ftlPathSplit( String path ) {
 		return path.split( "/" );
 	}
 
 	/**
-	 * Concatenates an array of Strings with "/" between them,
-	 * as seen in .dat files.
-	 * Backslashes will become forward-slashes.
+	 * Concatenates an array of strings with "/" between them.
+	 *
+	 * No slashes will be added for empty strings.
+	 * Any incidental backslashes will become forward slashes.
 	 */
 	public static String ftlPathJoin( String[] chunks ) {
 		StringBuilder buf = new StringBuilder();
 		boolean first = true;
 		for ( String chunk : chunks ) {
 			if ( chunk.length() == 0 ) continue;
-			if (first) {
+			if ( first ) {
 				buf.append( "/" );
 				first = false;
 			}
 			buf.append( chunk );
 		}
-		return buf.toString().replace("\\", "/");
+		return buf.toString().replace( "\\", "/" );
 	}
 
+	/**
+	 * Concatenates two strings with a "/" between them.
+	 *
+	 * No slash will be added if either string is empty.
+	 * Any incidental backslashes will become forward slashes.
+	 */
 	public static String ftlPathJoin( String a, String b ) {
 		StringBuilder buf = new StringBuilder();
 		if ( a.length() > 0 ) buf.append( a );
 		if ( a.length() * b.length() > 0 ) buf.append( "/" );
 		if ( b.length() > 0 ) buf.append( b );
-		return buf.toString().replace("\\", "/");
+		return buf.toString().replace( "\\", "/" );
 	}
 
 	/**
@@ -76,7 +83,7 @@ public class FTLDat {
 
 			byte[] buf = new byte[4096];
 			int len;
-			while ( (len = is.read(buf)) >= 0 ) {
+			while ( (len = is.read( buf )) >= 0 ) {
 				os.write( buf, 0, len );
 			}
 		}
@@ -98,14 +105,14 @@ public class FTLDat {
 		MessageDigest md = MessageDigest.getInstance( "MD5" );
 		byte[] buf = new byte[4096];
 		int len;
-		while ( (len = is.read(buf)) >= 0 ) {
+		while ( (len = is.read( buf )) >= 0 ) {
 			md.update( buf, 0, len );
 		}
 
 		byte[] hashBytes = md.digest();
 		StringBuilder hashStringBuf = new StringBuilder();
 		for ( byte b : hashBytes ) {
-			hashStringBuf.append( Integer.toString( (b & 0xff) + 0x100, 16 ).substring(1) );
+			hashStringBuf.append( Integer.toString( (b & 0xff) + 0x100, 16 ).substring( 1 ) );
 		}
 		return hashStringBuf.toString();
 	}
@@ -114,12 +121,12 @@ public class FTLDat {
 		String result = null;
 		FileInputStream is = null;
 		try {
-			is = new FileInputStream(f);
+			is = new FileInputStream( f );
 			result = FTLDat.calcStreamMD5( is );
 		}
 		finally {
 			try {if (is != null) is.close();}
-			catch (Exception e) {}
+			catch ( Exception e ) {}
 		}
 		return result;
 	}
@@ -129,11 +136,11 @@ public class FTLDat {
 	 * Returns an approximate byte count for humans.
 	 */
 	public static String humanReadableByteCount( long bytes, boolean si ) {
-    int unit = si ? 1000 : 1024;
-    if ( bytes < unit ) return bytes +" B";
-    int exp = (int)( Math.log(bytes) / Math.log(unit) );
-    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-    return String.format( "%.1f %sB", (bytes / Math.pow(unit, exp)), pre );
+		int unit = si ? 1000 : 1024;
+		if ( bytes < unit ) return bytes +" B";
+		int exp = (int)( Math.log( bytes ) / Math.log( unit ) );
+		String pre = (si ? "kMGTPE" : "KMGTPE").charAt( exp-1 ) + (si ? "" : "i");
+		return String.format( "%.1f %sB", (bytes / Math.pow( unit, exp )), pre );
 	}
 
 
@@ -370,7 +377,7 @@ public class FTLDat {
 
 				byte[] buf = new byte[4096];
 				int len;
-				while ( (len = is.read(buf)) >= 0 ) {
+				while ( (len = is.read( buf )) >= 0 ) {
 					os.write( buf, 0, len );
 				}
 			}
@@ -390,7 +397,7 @@ public class FTLDat {
 
 				byte[] buf = new byte[4096];
 				int len;
-				while ( (len = is.read(buf)) >= 0 ) {
+				while ( (len = is.read( buf )) >= 0 ) {
 					os.write( buf, 0, len );
 				}
 			}
@@ -424,7 +431,9 @@ public class FTLDat {
 		 * The location it represents is not guaranteed to exist.
 		 */
 		public File getFile( String innerPath ) {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			File tmpFile = new File( rootDir, innerPath );
 
 			// Check if the file is inside rootDir.
@@ -434,20 +443,28 @@ public class FTLDat {
 				parentDir = parentDir.getParentFile();
 			}
 
-			throw new IllegalArgumentException( String.format( "InnerPath \"%s\" is outside the FolderPack at \"%s\".", innerPath, rootDir ) );
+			throw new IllegalArgumentException( String.format( "InnerPath \"%s\" is outside the FolderPack at \"%s\"", innerPath, rootDir ) );
 		}
 	}
 
 
 
+	/**
+	 * The original format FTL used to store resources.
+	 *
+	 * Structure:
+	 *   Index = A count, followed by a series of offsets to entries.
+	 *   Entries = A series of {dataSize, innerPath, data} hunks.
+	 */
 	public static class FTLPack extends AbstractPack {
-		private CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
 
+		private CharsetEncoder asciiEncoder = Charset.forName( "US-ASCII" ).newEncoder();
+
+		private ByteBuffer byteBuffer = null;
 		private File datFile = null;
 		private RandomAccessFile raf = null;
-		private ArrayList<DatEntry> entryList = null;
-		private Map<String,Integer> pathToIndexMap = null;
-		private ByteBuffer byteBuffer = null;
+		private List<DatEntry> entryList = null;
+		private Map<String, Integer> pathToIndexMap = null;
 
 
 		/**
@@ -473,6 +490,10 @@ public class FTLDat {
 		 * @param indexSize size of the initial index if creating
 		 */
 		public FTLPack( File datFile, String mode, int indexSize ) throws IOException {
+			// A reusable buffer large enough for the unsigned read methods.
+			byteBuffer = ByteBuffer.allocate( 4 );
+			byteBuffer.order( ByteOrder.LITTLE_ENDIAN );
+
 			if ( mode.equals( "r" ) ) {
 				if ( !datFile.exists() )
 					throw new FileNotFoundException( String.format( "The datFile was not found: %s", datFile.getPath() ) );
@@ -495,7 +516,7 @@ public class FTLDat {
 				createIndex( indexSize );
 			}
 			else {
-				throw new IllegalArgumentException( String.format( "FTLPack constructor's mode arg was not 'r', 'r+', or 'w+' (%s).", mode ) );
+				throw new IllegalArgumentException( String.format( "FTLPack constructor's mode arg was not 'r', 'r+', or 'w+' (%s)", mode ) );
 			}
 		}
 
@@ -506,10 +527,7 @@ public class FTLDat {
 		 * so a long holds the value instead.
 		 */
 		private long readLittleUInt() throws IOException {
-			if ( byteBuffer == null || !byteBuffer.hasArray() || byteBuffer.array().length < 4 ) {
-				byteBuffer = ByteBuffer.wrap( new byte[4] );
-				byteBuffer.order( ByteOrder.LITTLE_ENDIAN );
-			}
+			byteBuffer.clear();
 			raf.readFully( byteBuffer.array(), 0, 4 );
 
 			// Read a signed int, then discard sign
@@ -521,10 +539,7 @@ public class FTLDat {
 		}
 
 		private void writeLittleUInt( long n ) throws IOException {
-			if ( byteBuffer == null || !byteBuffer.hasArray() || byteBuffer.array().length < 4 ) {
-				byteBuffer = ByteBuffer.wrap( new byte[4] );
-				byteBuffer.order( ByteOrder.LITTLE_ENDIAN );
-			}
+			byteBuffer.clear();
 
 			// Write a signed int, after discarding sign
 			// by casting from long and hacking off bits.
@@ -549,7 +564,7 @@ public class FTLDat {
 
 		/**
 		 * Returns the offset to seek within the header,
-		 * in order to read the offset of an innerFile entry.
+		 * in order to read the data offset of an innerFile entry.
 		 *
 		 * @param n the nth index.
 		 */
@@ -563,16 +578,18 @@ public class FTLDat {
 		 */
 		private void createIndex( int indexSize ) throws IOException {
 			entryList = new ArrayList<DatEntry>( indexSize );
-			for ( int i=0; i < indexSize; i++ )
+			for ( int i=0; i < indexSize; i++ ) {
 				entryList.add( null );
+			}
 
-			pathToIndexMap = new HashMap<String,Integer>( indexSize );
+			pathToIndexMap = new HashMap<String, Integer>( indexSize );
 
 			raf.seek( 0 );
 			raf.setLength( 0 );
 			writeLittleUInt( indexSize );
-			for ( int i=0; i < indexSize; i++ )
+			for ( int i=0; i < indexSize; i++ ) {
 				writeLittleUInt( 0 );
+			}
 		}
 
 		/**
@@ -582,14 +599,15 @@ public class FTLDat {
 			raf.seek( 0 );
 			int indexSize = (int)readLittleUInt();
 			if ( indexSize * 4 > raf.length() ) {
-				throw new IOException( String.format( "Corrupt dat file (%s): Its header claims to be larger than the entire file.", getName() ) );
+				throw new IOException( String.format( "Corrupt dat file (%s): header claims to be larger than the entire file", getName() ) );
 			}
 
 			entryList = new ArrayList<DatEntry>( indexSize );
-			for ( int i=0; i < indexSize; i++ )
+			for ( int i=0; i < indexSize; i++ ) {
 				entryList.add( null );
+			}
 
-			pathToIndexMap = new HashMap<String,Integer>( indexSize );
+			pathToIndexMap = new HashMap<String, Integer>( indexSize );
 
 			// Store partial DatEntry objects in entryList (leaving nulls where absent).
 			for ( int i=0; i < indexSize; i++ ) {
@@ -614,7 +632,7 @@ public class FTLDat {
 				if ( pathToIndexMap.containsKey( entry.innerPath ) ) {
 					throw new IOException( "InnerPath occurs more than once: "+ entry.innerPath );
 				}
-				pathToIndexMap.put( entry.innerPath, new Integer(i) );
+				pathToIndexMap.put( entry.innerPath, new Integer( i ) );
 			}
 		}
 
@@ -634,7 +652,7 @@ public class FTLDat {
 			int len;
 			while ( bytesRemaining > 0 ) {
 				raf.seek( oldOffset + totalBytes - bytesRemaining );
-				len = raf.read( buf, 0, (int)Math.min(buf.length, bytesRemaining) );
+				len = raf.read( buf, 0, (int)Math.min( buf.length, bytesRemaining ) );
 				if ( len == -1 ) {
 					throw new IOException( "EOF prematurely reached reading innerPath: "+  entry.innerPath );
 				}
@@ -651,7 +669,8 @@ public class FTLDat {
 		}
 
 		/**
-		 * Ensures the index has room for at least <amount> entries.
+		 * Ensures the index has room for at least n entries.
+		 *
 		 * This is done by moving the first innerFile after the index
 		 * to the end of the file. The region it used to occupy can then
 		 * be filled with additional indeces.
@@ -728,7 +747,9 @@ public class FTLDat {
 
 		@Override
 		public void add( String innerPath, InputStream is ) throws IOException {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			if ( pathToIndexMap.containsKey( innerPath ) ) {
 				throw new IOException( "InnerPath already exists: "+ innerPath );
 			}
@@ -758,7 +779,7 @@ public class FTLDat {
 
 			byte[] buf = new byte[4096];
 			int len;
-			while ( (len = is.read(buf)) >= 0 ) {
+			while ( (len = is.read( buf )) >= 0 ) {
 				raf.write( buf, 0, len );
 			}
 
@@ -773,7 +794,9 @@ public class FTLDat {
 
 		@Override
 		public void extractTo( String innerPath, OutputStream os ) throws FileNotFoundException, IOException {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}
@@ -788,7 +811,7 @@ public class FTLDat {
 			int len;
 			while ( bytesRemaining > 0 ) {
 				raf.seek( entry.dataOffset + entry.dataSize - bytesRemaining );
-				len = raf.read( buf, 0, (int)Math.min(buf.length, bytesRemaining) );
+				len = raf.read( buf, 0, (int)Math.min( buf.length, bytesRemaining ) );
 				if ( len == -1 ) {
 					throw new IOException( "EOF prematurely reached reading innerPath: "+  entry.innerPath );
 				}
@@ -799,7 +822,9 @@ public class FTLDat {
 
 		@Override
 		public void remove( String innerPath ) throws FileNotFoundException, IOException {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}
@@ -811,21 +836,25 @@ public class FTLDat {
 			raf.seek( getHeaderIndexPosition( entryIndex ) );
 			writeLittleUInt( 0 );
 
+			// If data was at the end, truncate.
 			if ( removedEntry.dataOffset + removedEntry.dataSize == raf.length() ) {
-				// Data appeared at the end. Truncate.
 				raf.setLength( removedEntry.entryOffset );
 			}
 		}
 
 		@Override
 		public boolean contains( String innerPath ) {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			return pathToIndexMap.containsKey( innerPath );
 		}
 
 		@Override
 		public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException {
-			if ( innerPath.indexOf("\\") != -1 ) throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			if ( innerPath.indexOf( "\\" ) != -1 ) {
+				throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
+			}
 			if ( !pathToIndexMap.containsKey( innerPath ) ) {
 				throw new FileNotFoundException( "InnerPath does not exist: "+ innerPath );
 			}
@@ -862,44 +891,27 @@ public class FTLDat {
 		 * be created when adding, removing or replacing files.
 		 */
 		public RepackResult repack() throws IOException {
+			long bytesChanged = 0;
+
+			int vacancyCount = Collections.frequency( entryList, null );
+
 			// Build a list of non-null entries, sorted in the order their data appears.
 
-			ArrayList<DatEntry> tmpEntries = new ArrayList<DatEntry>( pathToIndexMap.size() );
-			for ( Map.Entry<String,Integer> mapping : pathToIndexMap.entrySet() ) {
-				Integer iObj = mapping.getValue();
-				DatEntry entry = entryList.get( iObj.intValue() );
-				if ( entry != null ) {
-					tmpEntries.add( entry );
-				} else {  // The following should never happen!
-					throw new IOException ( "Bad entryIndex for innerPath: "+ mapping.getKey() );
-				}
+			List<DatEntry> tmpEntries = new ArrayList<DatEntry>( entryList.size() - vacancyCount );
+			for ( DatEntry entry : entryList ) {
+				if ( entry != null ) tmpEntries.add( entry );
 			}
-			Collections.sort( tmpEntries, new Comparator<DatEntry>() {
-				public int compare( DatEntry a, DatEntry b ) {
-					if ( b == null ) return -1;
-					if ( a == null ) return 1;
-					DatEntry dA = (DatEntry)a;
-					DatEntry dB = (DatEntry)b;
-					if ( dA.entryOffset < dB.entryOffset ) return -1;
-					if ( dA.entryOffset > dB.entryOffset ) return 1;
-					return 0;
-				}
-				@Override
-				public boolean equals( Object o ) {
-					return ( o != null ? o == this : false );
-				}
-			} );
+			Collections.sort( tmpEntries, new DatEntryDataOffsetComparator() );
 
 			for ( int i=0; i < tmpEntries.size()-1; i++ ) {
 				DatEntry a = tmpEntries.get( i );
 				DatEntry b = tmpEntries.get( i+1 );
 				if ( a.dataOffset+a.dataSize > b.entryOffset ) {
-					throw new IOException( String.format( "Cannot repack datfile with overlapping entries (\"%s\" and \"%s\").", a.innerPath, b.innerPath ) );
+					throw new IOException( String.format( "Cannot repack datfile with overlapping entries (\"%s\" and \"%s\")", a.innerPath, b.innerPath ) );
 				}
 			}
 
 			pathToIndexMap.clear();  // entryList gets replaced later.
-			long bytesChanged = 0;
 
 			// Write the header size.
 			if ( tmpEntries.size() != entryList.size() ) {
@@ -912,7 +924,7 @@ public class FTLDat {
 
 			for ( int i=0; i < tmpEntries.size(); i++ ) {
 				DatEntry entry = tmpEntries.get ( i );
-				pathToIndexMap.put( entry.innerPath, new Integer(i) );
+				pathToIndexMap.put( entry.innerPath, new Integer( i ) );
 
 				// Write the header index.
 				raf.seek( getHeaderIndexPosition( i ) );
@@ -927,9 +939,9 @@ public class FTLDat {
 					int len;
 					while ( bytesRemaining > 0 ) {
 						raf.seek( entry.entryOffset + totalBytes - bytesRemaining );
-						len = raf.read( buf, 0, (int)Math.min(buf.length, bytesRemaining) );
+						len = raf.read( buf, 0, (int)Math.min( buf.length, bytesRemaining ) );
 						if ( len == -1 ) {
-							throw new IOException( "EOF prematurely reached reading innerPath: "+  entry.innerPath );
+							throw new IOException( "EOF prematurely reached reading innerPath: "+ entry.innerPath );
 						}
 
 						raf.seek( pendingEntryOffset + totalBytes - bytesRemaining );
@@ -949,8 +961,29 @@ public class FTLDat {
 
 			long oldDatLength = raf.length();
 			long newDatLength = pendingEntryOffset;
-			raf.setLength( newDatLength );
+			raf.setLength( newDatLength );  // Trim off deallocated bytes at the end.
+
 			return new RepackResult( oldDatLength, newDatLength, bytesChanged );
+		}
+	}
+
+
+
+	/**
+	 * A Comparator to sort by dataOffset (asc).
+	 */
+	public static class DatEntryDataOffsetComparator implements Comparator<DatEntry> {
+		@Override
+		public int compare( DatEntry a, DatEntry b ) {
+			if ( b == null ) return -1;
+			if ( a == null ) return 1;
+			if ( a.entryOffset < b.entryOffset ) return -1;
+			if ( a.entryOffset > b.entryOffset ) return 1;
+			return 0;
+		}
+		@Override
+		public boolean equals( Object o ) {
+			return ( o != null ? o == this : false );
 		}
 	}
 }
