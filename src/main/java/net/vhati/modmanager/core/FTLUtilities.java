@@ -3,6 +3,8 @@ package net.vhati.modmanager.core;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
@@ -34,40 +36,54 @@ public class FTLUtilities {
 		String gogPath = "GOG.com/Faster Than Light/resources";
 		String humblePath = "FTL/resources";
 
-		String xdgDataHome = System.getenv("XDG_DATA_HOME");
-		if ( xdgDataHome == null )
-			xdgDataHome = System.getProperty("user.home") +"/.local/share";
+		String programFiles86 = System.getenv( "ProgramFiles(x86)" );
+		String programFiles = System.getenv( "ProgramFiles" );
 
-		String winePrefix = System.getProperty("WINEPREFIX");
-		if ( winePrefix == null )
-			winePrefix = System.getProperty("user.home") +"/.wine";
+		String home = System.getProperty( "user.home" );
 
-		File[] candidates = new File[] {
-			// Windows - Steam
-			new File( new File(""+System.getenv("ProgramFiles(x86)")), steamPath ),
-			new File( new File(""+System.getenv("ProgramFiles")), steamPath ),
-			// Windows - GOG
-			new File( new File(""+System.getenv("ProgramFiles(x86)")), gogPath ),
-			new File( new File(""+System.getenv("ProgramFiles")), gogPath ),
-			// Windows - Humble Bundle
-			new File( new File(""+System.getenv("ProgramFiles(x86)")), humblePath ),
-			new File( new File(""+System.getenv("ProgramFiles")), humblePath ),
-			// Linux - Steam
-			new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
-			new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data/resources" ),
-			new File( System.getProperty("user.home") +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ),
-			new File( System.getProperty("user.home") +"/.steam/steam/steamapps/common/FTL Faster Than Light/data/resources" ),
-			// OSX - Steam
-			new File( System.getProperty("user.home") +"/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ),
-			new File( System.getProperty("user.home") +"/Library/Application Support/Steam/steamapps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ),
-			// OSX
-			new File( "/Applications/FTL.app/Contents/Resources" ),
-			// Linux Wine
-			new File( winePrefix +"/drive_c/Program Files (x86)/"+ gogPath ),
-			new File( winePrefix +"/drive_c/Program Files/"+ gogPath ),
-			new File( winePrefix +"/drive_c/Program Files (x86)/"+ humblePath ),
-			new File( winePrefix +"/drive_c/Program Files/"+ humblePath )
-		};
+		String xdgDataHome = System.getenv( "XDG_DATA_HOME" );
+		if ( xdgDataHome == null && home != null )
+			xdgDataHome = home +"/.local/share";
+
+		String winePrefix = System.getProperty( "WINEPREFIX" );
+		if ( winePrefix == null && home != null )
+			winePrefix = home +"/.wine";
+
+		List<File> candidates = new ArrayList<File>();
+		// Windows - Steam, GOG, Humble Bundle.
+		if ( programFiles86 != null ) {
+			candidates.add( new File( new File( programFiles86 ), steamPath ) );
+			candidates.add( new File( new File( programFiles86 ), gogPath ) );
+			candidates.add( new File( new File( programFiles86 ), humblePath ) );
+		}
+		if ( programFiles != null ) {
+			candidates.add( new File( new File( programFiles ), steamPath ) );
+			candidates.add( new File( new File( programFiles ), gogPath ) );
+			candidates.add( new File( new File( programFiles ), humblePath ) );
+		}
+		// Linux - Steam.
+		if ( xdgDataHome != null ) {
+			candidates.add( new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data/resources" ) );
+			candidates.add( new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ) );
+		}
+		if ( home != null ) {
+			candidates.add( new File( home +"/.steam/steam/steamapps/common/FTL Faster Than Light/data/resources" ) );
+			candidates.add( new File( home +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ) );
+		}
+		// Linux - Wine.
+		if ( winePrefix != null ) {
+			candidates.add( new File( winePrefix +"/drive_c/Program Files (x86)/"+ gogPath ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files (x86)/"+ humblePath ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ gogPath ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ humblePath ) );
+		}
+		// OSX - Steam.
+		if ( home != null ) {
+			candidates.add( new File( home +"/Library/Application Support/Steam/steamapps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ) );
+			candidates.add( new File( home +"/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app/Contents/Resources" ) );
+		}
+		// OSX - Standalone.
+		candidates.add( new File( "/Applications/FTL.app/Contents/Resources" ) );
 
 		File result = null;
 
@@ -110,21 +126,22 @@ public class FTLUtilities {
 				return "FTL Data File - (FTL dir)/resources/data.dat";
 			}
 			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().equals("data.dat") || f.getName().equals("FTL.app");
+			public boolean accept( File f ) {
+				return f.isDirectory() || f.getName().equals( "data.dat" ) || f.getName().equals( "FTL.app" );
 			}
 		});
 		fc.setMultiSelectionEnabled(false);
 
 		if ( fc.showOpenDialog( parentComponent ) == JFileChooser.APPROVE_OPTION ) {
 			File f = fc.getSelectedFile();
-			if ( f.getName().equals("data.dat") ) {
+			if ( f.getName().equals( "data.dat" ) ) {
 				result = f.getParentFile();
 			}
-			else if ( f.getName().endsWith(".app") && f.isDirectory() ) {
-				File contentsPath = new File(f, "Contents");
-				if( contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists() )
-					result = new File(contentsPath, "Resources");
+			else if ( f.getName().endsWith( ".app" ) && f.isDirectory() ) {
+				File contentsPath = new File( f, "Contents" );
+				if ( contentsPath.exists() && contentsPath.isDirectory() && new File( contentsPath, "Resources" ).exists() ) {
+					result = new File( contentsPath, "Resources" );
+				}
 			}
 		}
 
@@ -146,21 +163,21 @@ public class FTLUtilities {
 	public static File findGameExe( File datsDir ) {
 		File result = null;
 
-		if ( System.getProperty("os.name").startsWith("Windows") ) {
+		if ( System.getProperty( "os.name" ).startsWith( "Windows" ) ) {
 			File ftlDir = datsDir.getParentFile();
 			if ( ftlDir != null ) {
 				File exeFile = new File( ftlDir, "FTLGame.exe" );
 				if ( exeFile.exists() ) result = exeFile;
 			}
 		}
-		else if ( System.getProperty("os.name").equals("Linux") ) {
+		else if ( System.getProperty( "os.name" ).equals( "Linux" ) ) {
 			File ftlDir = datsDir.getParentFile();
 			if ( ftlDir != null ) {
 				File exeFile = new File( ftlDir, "FTL" );
 				if ( exeFile.exists() ) result = exeFile;
 			}
 		}
-		else if ( System.getProperty("os.name").contains("OS X") ) {
+		else if ( System.getProperty( "os.name" ).contains( "OS X" ) ) {
 			// FTL.app/Contents/Resources/
 			File contentsDir = datsDir.getParentFile();
 			if ( contentsDir != null ) {
@@ -186,30 +203,35 @@ public class FTLUtilities {
 	 * The args to launch FTL are: ["-applaunch", STEAM_APPID_FTL]
 	 */
 	public static File findSteamExe() {
-		File result = null;
+		String programFiles86 = System.getenv( "ProgramFiles(x86)" );
+		String programFiles = System.getenv( "ProgramFiles" );
 
-		if ( System.getProperty("os.name").startsWith("Windows") ) {
-			File[] candidates = new File[] {
-				new File( new File(""+System.getenv("ProgramFiles(x86)")), "Steam/Steam.exe" ),
-				new File( new File(""+System.getenv("ProgramFiles")), "Steam/Steam.exe" )
-			};
+		String osName = System.getProperty( "os.name" );
 
-			for ( File candidate : candidates ) {
-				if ( candidate.exists() ) {
-					result = candidate;
-					break;
-				}
+		List<File> candidates = new ArrayList<File>();
+
+		if ( osName.startsWith( "Windows" ) ) {
+			if ( programFiles86 != null ) {
+				candidates.add( new File( new File( programFiles86 ), "Steam/Steam.exe" ) );
+			}
+			if ( programFiles != null ) {
+				candidates.add( new File( new File( programFiles ), "Steam/Steam.exe" ) );
 			}
 		}
-		else if ( System.getProperty("os.name").equals("Linux") ) {
-			File candidate = new File( "/usr/bin/steam" );
-
-			if ( candidate.exists() ) result = candidate;
+		else if ( osName.equals( "Linux" ) ) {
+			candidates.add( new File( "/usr/bin/steam" ) );
 		}
-		else if ( System.getProperty("os.name").contains("OS X") ) {
-			File candidate = new File( "/Applications/Steam.app" );
+		else if ( osName.contains( "OS X" ) ) {
+			candidates.add( new File( "/Applications/Steam.app" ) );
+		}
 
-			if ( candidate.exists() ) result = candidate;
+		File result = null;
+
+		for ( File candidate : candidates ) {
+			if ( candidate.exists() ) {
+				result = candidate;
+				break;
+			}
 		}
 
 		return result;
@@ -233,7 +255,7 @@ public class FTLUtilities {
 
 		Process result = null;
 		ProcessBuilder pb = null;
-		if ( System.getProperty("os.name").contains("OS X") ) {
+		if ( System.getProperty( "os.name" ).contains( "OS X" ) ) {
 			String[] args = new String[3 + exeArgs.length];
 			args[0] = "open";
 			args[1] = "-a";
@@ -261,21 +283,29 @@ public class FTLUtilities {
 	 * Returns the directory for user profiles and saved games, or null.
 	 */
 	public static File findUserDataDir() {
+		String home = System.getProperty( "user.home" );
 
-		String xdgDataHome = System.getenv("XDG_DATA_HOME");
-		if ( xdgDataHome == null )
-			xdgDataHome = System.getProperty("user.home") +"/.local/share";
+		String xdgDataHome = System.getenv( "XDG_DATA_HOME" );
+		if ( xdgDataHome == null && home != null )
+			xdgDataHome = home +"/.local/share";
 
-		File[] candidates = new File[] {
-			// Windows XP
-			new File( System.getProperty("user.home") +"/My Documents/My Games/FasterThanLight" ),
-			// Windows Vista/7
-			new File( System.getProperty("user.home") +"/Documents/My Games/FasterThanLight" ),
-			// Linux
-			new File( xdgDataHome +"/FasterThanLight" ),
-			// OSX
-			new File( System.getProperty("user.home") +"/Library/Application Support/FasterThanLight" )
-		};
+		List<File> candidates = new ArrayList<File>();
+
+		// Windows.
+		if ( home != null ) {
+			// Windows XP.
+			candidates.add( new File( home +"/My Documents/My Games/FasterThanLight" ) );
+			// Windows Vista/7/etc.
+			candidates.add( new File( home +"/Documents/My Games/FasterThanLight" ) );
+		}
+		// Linux.
+		if ( xdgDataHome != null ) {
+			candidates.add( new File( xdgDataHome +"/FasterThanLight" ) );
+		}
+		// OSX.
+		if ( home != null ) {
+			candidates.add( new File( home +"/Library/Application Support/FasterThanLight" ) );
+		}
 
 		File result = null;
 
