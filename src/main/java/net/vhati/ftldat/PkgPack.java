@@ -418,7 +418,12 @@ public class PkgPack extends AbstractPack {
 			entry.dataOffset = readBigUInt();
 			entry.dataSize = readBigUInt();
 			entry.unpackedSize = readBigUInt();
-			entryList.add( entry );
+
+			if ( entry.dataSize == 0 ) {  // Null entry, dat wasn't repacked.
+				entryList.add( null );
+			} else {
+				entryList.add( entry );
+			}
 		}
 
 		pathToIndexMap = new HashMap<String, Integer>( entryCount );
