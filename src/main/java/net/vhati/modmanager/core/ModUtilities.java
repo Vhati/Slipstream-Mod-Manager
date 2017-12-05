@@ -185,10 +185,10 @@ public class ModUtilities {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
-		mainText = xmlDeclPtn.matcher(mainText).replaceFirst( "" );
+		mainText = xmlDeclPtn.matcher( mainText ).replaceFirst( "" );
 
 		String appendText = decodeText( appendStream, appendDescription ).text;
-		appendText = xmlDeclPtn.matcher(appendText).replaceFirst( "" );
+		appendText = xmlDeclPtn.matcher( appendText ).replaceFirst( "" );
 
 		// Concatenate, filtering the stream to standardize newlines and encode.
 		//
@@ -230,13 +230,13 @@ public class ModUtilities {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
-		mainText = xmlDeclPtn.matcher(mainText).replaceFirst( "" );
+		mainText = xmlDeclPtn.matcher( mainText ).replaceFirst( "" );
 		mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
 		Document mainDoc = parseStrictOrSloppyXML( mainText, mainDescription+" (wrapped)" );
 		mainText = null;
 
 		String appendText = decodeText( appendStream, appendDescription ).text;
-		appendText = xmlDeclPtn.matcher(appendText).replaceFirst( "" );
+		appendText = xmlDeclPtn.matcher( appendText ).replaceFirst( "" );
 		appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
 		Document appendDoc = parseStrictOrSloppyXML( appendText, appendDescription+" (wrapped)" );
 		appendText = null;
@@ -282,7 +282,7 @@ public class ModUtilities {
 		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
 
 		String srcText = decodeText( srcStream, srcDescription ).text;
-		srcText = xmlDeclPtn.matcher(srcText).replaceFirst( "" );
+		srcText = xmlDeclPtn.matcher( srcText ).replaceFirst( "" );
 		srcText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ srcText +"</wrapper>";
 		Document doc = parseStrictOrSloppyXML( srcText, srcDescription+" (wrapped)" );
 		srcText = null;
@@ -350,7 +350,7 @@ public class ModUtilities {
 	 * @param innerPath a path with forward slashes
 	 */
 	public static boolean isJunkFile( String innerPath ) {
-		return junkFilePtn.matcher(innerPath).find();
+		return junkFilePtn.matcher( innerPath ).find();
 	}
 
 
@@ -369,7 +369,7 @@ public class ModUtilities {
 		Pattern validRootDirPtn = Pattern.compile( "^(?:audio|data|fonts|img|mod-appendix)/" );
 		List<String> seenJunkDirs = new ArrayList<String>();
 
-		CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
+		CharsetEncoder asciiEncoder = Charset.forName( "US-ASCII" ).newEncoder();
 
 		ZipInputStream zis = null;
 		try {
@@ -396,14 +396,14 @@ public class ModUtilities {
 					modValid = false;
 				}
 
-				if ( innerPath.indexOf("/") == -1 ) {
+				if ( innerPath.indexOf( "/" ) == -1 ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.WARNING,
 						String.format( "Extraneous top-level file." )
 					) );
 					modValid = false;
 				}
-				else if ( !validRootDirPtn.matcher(innerPath).find() ) {
+				else if ( !validRootDirPtn.matcher( innerPath ).find() ) {
 					String junkDir = innerPath.replaceFirst( "/.*", "/" );
 					if ( !seenJunkDirs.contains( junkDir ) ) {
 						seenJunkDirs.add( junkDir );
@@ -516,16 +516,16 @@ public class ModUtilities {
 					Map<Pattern,List<Character>> oddCharLists = new HashMap<Pattern,List<Character>>();
 
 					oddCharPtns.add( Pattern.compile( "\\u0060|\\u201A|\\u2018|\\u2019" ) );
-					oddCharSuggestions.put( oddCharPtns.get(oddCharPtns.size()-1), "'" );
+					oddCharSuggestions.put( oddCharPtns.get( oddCharPtns.size()-1 ), "'" );
 
 					oddCharPtns.add( Pattern.compile( "\\u201E|\\u201C|\\u201D" ) );
-					oddCharSuggestions.put( oddCharPtns.get(oddCharPtns.size()-1), "\"" );
+					oddCharSuggestions.put( oddCharPtns.get( oddCharPtns.size()-1 ), "\"" );
 
 					oddCharPtns.add( Pattern.compile( "\\u2013|\\u2014" ) );
-					oddCharSuggestions.put( oddCharPtns.get(oddCharPtns.size()-1), "-" );
+					oddCharSuggestions.put( oddCharPtns.get( oddCharPtns.size()-1 ), "-" );
 
 					oddCharPtns.add( Pattern.compile( "\\u2026" ) );
-					oddCharSuggestions.put( oddCharPtns.get(oddCharPtns.size()-1), "..." );
+					oddCharSuggestions.put( oddCharPtns.get( oddCharPtns.size()-1 ), "..." );
 
 					for ( Pattern ptn : oddCharPtns ) {
 						Matcher m = ptn.matcher( decodeResult.text );
@@ -534,7 +534,7 @@ public class ModUtilities {
 							if ( chars == null )
 								chars = new ArrayList<Character>();
 
-							Character cObj = new Character( m.group(0).charAt(0) );
+							Character cObj = new Character( m.group( 0 ).charAt( 0 ) );
 							if ( !chars.contains( cObj ) )
 								chars.add( cObj );
 						}
@@ -693,36 +693,36 @@ public class ModUtilities {
 		if ( !foundTopDecl )
 			dstBuf.insert( 0, Matcher.quoteReplacement( wrapperSTag ) );
 
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// Comments with long tails or double-dashes.
 		m = Pattern.compile( "(?s)<!--(-*)(.*?)(-*)-->" ).matcher( srcBuf );
 		while ( m.find() ) {
-			if ( m.group(1).length() > 0 || m.group(3).length() > 0 || m.group(2).indexOf("--") != -1 ) {
+			if ( m.group( 1 ).length() > 0 || m.group( 3 ).length() > 0 || m.group( 2 ).indexOf( "--" ) != -1 ) {
 				messages.add( new ReportMessage(
 					ReportMessage.ERROR,
 					"<!-- No other dashes should touch. -->"
 				) );
 			}
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(2).replaceAll("[^\n]", "")) );  // Strip comments, but preserve line count.
+			m.appendReplacement( dstBuf, m.quoteReplacement(m.group( 2 ).replaceAll( "[^\n]", "" )) );  // Strip comments, but preserve line count.
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// Mismatched single-line tags.
 		// Example: blueprints.xml: <title>...</type>
 		m = Pattern.compile( "<([^/!][^> ]+?)((?: [^>]+?)?)(?<!/)>([^<]+?)</([^>]+?)>" ).matcher( srcBuf );
 		while ( m.find() ) {
-			if ( m.group(1).equals( m.group(4) ) == false ) {
+			if ( m.group( 1 ).equals( m.group( 4 ) ) == false ) {
 				messages.add( new ReportMessage(
 					ReportMessage.ERROR,
-					"<"+ m.group(1) +"...>...</"+ m.group(4) +">"
+					"<"+ m.group( 1 ) +"...>...</"+ m.group( 4 ) +">"
 				) );
-				m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group(1) + m.group(2) +">"+ m.group(3) +"</"+ m.group(1) +">") );
+				m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group( 1 ) + m.group( 2 ) +">"+ m.group( 3 ) +"</"+ m.group( 1 ) +">") );
 			}
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// <pilot power="1"max="3" room="0"/>
 		// Groan, \t separates attribs sometimes.
@@ -730,12 +730,12 @@ public class ModUtilities {
 		while ( m.find() ) {
 			messages.add( new ReportMessage(
 				ReportMessage.ERROR,
-				"<"+ m.group(1) +"...\""+ m.group(3) +"...>"
+				"<"+ m.group( 1 ) +"...\""+ m.group( 3 ) +"...>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group(1) + m.group(2) +" "+ m.group(3) + m.group(4) +">") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( "<"+ m.group( 1 ) + m.group( 2 ) +" "+ m.group( 3 ) + m.group( 4 ) +">" ) );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// sector_data.xml closing tag.
 		m = Pattern.compile( "((?s)<sectorDescription[^>]*>.*?)</sectorDescrption>" ).matcher( srcBuf );
@@ -747,36 +747,36 @@ public class ModUtilities {
 			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(1) +"</sectorDescription>") );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// {anyship}.xml: <gib1>...</gib2>
 		m = Pattern.compile( "(?s)<(gib[0-9]+)>(.*?)</(gib[0-9]+)>" ).matcher( srcBuf );
 		while ( m.find() ) {
-			if ( m.group(1).equals( m.group(3) ) == false ) {
+			if ( m.group( 1 ).equals( m.group( 3 ) ) == false ) {
 				messages.add( new ReportMessage(
 					ReportMessage.ERROR,
-					"<"+ m.group(1) +">...</"+ m.group(3) +">"
+					"<"+ m.group( 1 ) +">...</"+ m.group( 3 ) +">"
 				) );
-				m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group(1) +">"+ m.group(2) +"</"+ m.group(1) +">") );
+				m.appendReplacement( dstBuf, m.quoteReplacement( "<"+ m.group( 1 ) +">"+ m.group( 2 ) +"</"+ m.group( 1 ) +">" ) );
 			}
 			else {
-				m.appendReplacement( dstBuf, m.quoteReplacement(m.group(0)) );
+				m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 0 ) ) );
 			}
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// event*.xml: <choice... hidden="true" hidden="true">
 		m = Pattern.compile( "<([a-zA-Z0-9_-]+?)((?: [^>]+?)?) ([^>]+?)(=\"[^\">]+?\") \\3(?:=\"[^\">]+?\")([^>]*)>" ).matcher( srcBuf );
 		while ( m.find() ) {
 			messages.add( new ReportMessage(
 				ReportMessage.ERROR,
-				"<"+ m.group(1) +"... "+ m.group(3) +"=... "+ m.group(3) +"=...>"
+				"<"+ m.group( 1 ) +"... "+ m.group( 3 ) +"=... "+ m.group( 3 ) +"=...>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group(1) + m.group(2) +" "+ m.group(3) + m.group(4) +" "+ m.group(5) +">") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( "<"+ m.group( 1 ) + m.group( 2 ) +" "+ m.group( 3 ) + m.group( 4 ) +" "+ m.group( 5 ) +">" ) );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// <shields>...</slot>
 		ptn = "";
@@ -792,10 +792,10 @@ public class ModUtilities {
 				ReportMessage.ERROR,
 				"<shields>...</slot>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(1) +"</shields>") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 1 ) +"</shields>" ) );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// <shipBlueprint>...</ship>
 		ptn = "";
@@ -818,10 +818,10 @@ public class ModUtilities {
 				ReportMessage.ERROR,
 				"<shipBlueprint>...</ship>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(1) +"</shipBlueprint>") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 1 ) +"</shipBlueprint>" ) );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// <textList>...</text>
 		ptn = "";
@@ -834,15 +834,15 @@ public class ModUtilities {
 				ReportMessage.ERROR,
 				"<textList>...</text>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(1) +"</textList>") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 1 ) +"</textList>" ) );
 		}
 		m.appendTail( dstBuf );
-		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength(0);
+		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		Document doc = null;
 		try {
 			SAXBuilder saxBuilder = new SAXBuilder();
-			doc = saxBuilder.build( new StringReader(srcBuf.toString()) );
+			doc = saxBuilder.build( new StringReader( srcBuf.toString() ) );
 
 			xmlValid = true;
 			for ( ReportMessage message : messages ) {
@@ -859,7 +859,7 @@ public class ModUtilities {
 				int badEnd = -1;
 				String badLine = "???";
 				m = Pattern.compile( "\n|\\z" ).matcher( srcBuf );
-				for ( int i=1; i <= lineNum && m.find(); i++) {
+				for ( int i=1; i <= lineNum && m.find(); i++ ) {
 					if ( i == lineNum-1 ) {
 						badStart = m.end();
 					} else if ( i == lineNum ) {
@@ -922,10 +922,11 @@ public class ModUtilities {
 				int badEnd = -1;
 				String badLine = "???";
 				Matcher m = Pattern.compile( "\n|\\z" ).matcher( text );
-				for ( int i=1; i <= lineNum && m.find(); i++) {
+				for ( int i=1; i <= lineNum && m.find(); i++ ) {
 					if ( i == lineNum-1 ) {
 						badStart = m.end();
-					} else if ( i == lineNum ) {
+					}
+					else if ( i == lineNum ) {
 						badEnd = m.start();
 						badLine = text.substring( badStart, badEnd );
 					}
