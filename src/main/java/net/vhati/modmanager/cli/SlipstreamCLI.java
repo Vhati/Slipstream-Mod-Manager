@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,13 +18,13 @@ import java.util.zip.ZipOutputStream;
 
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.FolderPack;
+import net.vhati.ftldat.PkgPack;
 import net.vhati.ftldat.FTLPack;
 import net.vhati.modmanager.FTLModManager;
 import net.vhati.modmanager.core.DelayedDeleteHook;
 import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.ModPatchObserver;
 import net.vhati.modmanager.core.ModPatchThread;
-import net.vhati.modmanager.core.ModPatchThread.BackedUpDat;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
@@ -124,7 +125,7 @@ public class SlipstreamCLI {
 			boolean anyInvalid = false;
 
 			for ( String modFileName : cmdline.getArgs() ) {
-				File modFile = new File(modsDir, modFileName);
+				File modFile = new File( modsDir, modFileName );
 
 				if ( modFile.isDirectory() ) {
 					log.info( String.format( "Zipping dir: %s/", modFile.getName() ) );
@@ -133,7 +134,7 @@ public class SlipstreamCLI {
 						deleteHook.addDoomedFile( modFile );
 					}
 					catch ( IOException e ) {
-						log.error( String.format( "Error zipping \"%s/\".", modFile.getName() ), e );
+						log.error( String.format( "Error zipping dir: %s/", modFile.getName() ), e );
 
 						List<ReportMessage> tmpMessages = new ArrayList<ReportMessage>();
 						tmpMessages.add( new ReportMessage( ReportMessage.SECTION, modFileName ) );
@@ -200,46 +201,61 @@ public class SlipstreamCLI {
 			String extractPath = cmdline.getOptionValue( "extract-dats" );
 			File extractDir = new File( extractPath );
 
-			File dataDatFile = new File( datsDir, "data.dat" );
-			File resDatFile = new File( datsDir, "resource.dat" );
-			File[] datFiles = new File[] {dataDatFile, resDatFile};
-
-			AbstractPack srcP = null;
-			AbstractPack dstP = null;
+			FolderPack dstPack = null;
+			List<AbstractPack> srcPacks = new ArrayList<AbstractPack>( 2 );
 			InputStream is = null;
 			try {
+				File ftlDatFile = new File( datsDir, "ftl.dat" );
+				File dataDatFile = new File( datsDir, "data.dat" );
+				File resourceDatFile = new File( datsDir, "resource.dat" );
+
+				if ( ftlDatFile.exists() ) {  // FTL 1.6.1.
+					AbstractPack ftlPack = new PkgPack( ftlDatFile, "r" );
+					srcPacks.add( ftlPack );
+				}
+				else if ( dataDatFile.exists() && resourceDatFile.exists() ) {  // FTL 1.01-1.5.13.
+					AbstractPack dataPack = new FTLPack( dataDatFile, "r" );
+					AbstractPack resourcePack = new FTLPack( resourceDatFile, "r" );
+					srcPacks.add( dataPack );
+					srcPacks.add( resourcePack );
+				}
+				else {
+					throw new FileNotFoundException( String.format( "Could not find either \"%s\" or both \"%s\" and \"%s\"", ftlDatFile.getName(), dataDatFile.getName(), resourceDatFile.getName() ) );
+				}
+
 				if ( !extractDir.exists() ) extractDir.mkdirs();
 
-				dstP = new FolderPack( extractDir );
+				dstPack = new FolderPack( extractDir );
 
-				for ( File datFile : datFiles ) {
-					srcP = new FTLPack( datFile, "r" );
-					List<String> innerPaths = srcP.list();
+				for ( AbstractPack srcPack : srcPacks ) {
+					List<String> innerPaths = srcPack.list();
 
 					for ( String innerPath : innerPaths ) {
-						if ( dstP.contains( innerPath ) ) {
+						if ( dstPack.contains( innerPath ) ) {
 							log.info( "While extracting resources, this file was overwritten: "+ innerPath );
-							dstP.remove( innerPath );
+							dstPack.remove( innerPath );
 						}
-						is = srcP.getInputStream( innerPath );
-						dstP.add( innerPath, is );
+						is = srcPack.getInputStream( innerPath );
+						dstPack.add( innerPath, is );
 					}
-					srcP.close();
+					srcPack.close();
 				}
 			}
 			catch ( IOException e ) {
-				log.error( "Error extracting dats.", e );
+				log.error( "Error extracting dats", e );
 				System.exit( 1 );
 			}
 			finally {
 				try {if ( is != null ) is.close();}
 				catch ( IOException ex ) {}
 
-				try {if ( srcP != null ) srcP.close();}
+				try {if ( dstPack != null ) dstPack.close();}
 				catch ( IOException ex ) {}
 
-				try {if ( dstP != null ) dstP.close();}
-				catch ( IOException ex ) {}
+				for ( AbstractPack pack : srcPacks ) {
+					try {pack.close();}
+					catch ( IOException ex ) {}
+				}
 			}
 
 			System.exit( 0 );
@@ -259,7 +275,7 @@ public class SlipstreamCLI {
 						deleteHook.addDoomedFile( modFile );
 					}
 					catch ( IOException e ) {
-						log.error( String.format( "Error zipping \"%s/\".", modFile.getName() ), e );
+						log.error( String.format( "Error zipping dir: %s/", modFile.getName() ), e );
 						System.exit( 1 );
 					}
 				}
@@ -267,17 +283,10 @@ public class SlipstreamCLI {
 				modFiles.add( modFile );
 			}
 
-			BackedUpDat dataDat = new BackedUpDat();
-			dataDat.datFile = new File( datsDir, "data.dat" );
-			dataDat.bakFile = new File( backupDir, "data.dat.bak" );
-			BackedUpDat resDat = new BackedUpDat();
-			resDat.datFile = new File( datsDir, "resource.dat" );
-			resDat.bakFile = new File( backupDir, "resource.dat.bak" );
-
 			boolean globalPanic = cmdline.hasOption( "global-panic" );
 
 			SilentPatchObserver patchObserver = new SilentPatchObserver();
-			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, globalPanic, patchObserver );
+			ModPatchThread patchThread = new ModPatchThread( modFiles, datsDir, backupDir, globalPanic, patchObserver );
 			patchThread.setDefaultUncaughtExceptionHandler( exceptionHandler );
 			deleteHook.addWatchedThread( patchThread );
 
@@ -301,7 +310,7 @@ public class SlipstreamCLI {
 				exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
 
 				if ( exeFile == null ) {
-					log.warn( "Steam executable could not be found. FTL will be launched directly." );
+					log.warn( "Steam executable could not be found; FTL will be launched directly" );
 				}
 			}
 			if ( exeFile == null ) {
@@ -309,7 +318,7 @@ public class SlipstreamCLI {
 				exeArgs = new String[0];
 
 				if ( exeFile == null ) {
-					log.warn( "FTL executable could not be found." );
+					log.warn( "FTL executable could not be found" );
 				}
 			}
 
@@ -317,12 +326,12 @@ public class SlipstreamCLI {
 				try {
 					FTLUtilities.launchExe( exeFile, exeArgs );
 				} catch ( Exception e ) {
-					log.error( "Error launching FTL.", e );
+					log.error( "Error launching FTL", e );
 					System.exit( 1 );
 				}
 			}
 			else {
-				log.error( "No executables were found to launch FTL." );
+				log.error( "No executables were found to launch FTL" );
 				System.exit( 1 );
 			}
 
@@ -352,13 +361,13 @@ public class SlipstreamCLI {
 		InputStream in = null;
 		try {
 			if ( configFile.exists() ) {
-				log.trace( "Loading properties from config file." );
+				log.trace( "Loading properties from config file" );
 				in = new FileInputStream( configFile );
 				config.load( new InputStreamReader( in, "UTF-8" ) );
 			}
 		}
 		catch ( IOException e ) {
-			log.error( "Error loading config.", e );
+			log.error( "Error loading config", e );
 		}
 		finally {
 			try {if ( in != null ) in.close();}
@@ -381,14 +390,14 @@ public class SlipstreamCLI {
 			log.info( "Using FTL dats path from config: "+ datsPath );
 			datsDir = new File( datsPath );
 			if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
-				log.error( "The config's ftl_dats_path does not exist." );
+				log.error( "The config's ftl_dats_path does not exist" );
 				datsDir = null;
 			}
 		} else {
-			log.error( "No FTL dats path previously set." );
+			log.error( "No FTL dats path previously set" );
 		}
 		if ( datsDir == null ) {
-			log.error( "Run the GUI once, or edit the config file, and try again." );
+			log.error( "Run the GUI once, or edit the config file, and try again" );
 			System.exit( 1 );
 		}
 

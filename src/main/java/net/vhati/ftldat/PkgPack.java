@@ -733,6 +733,7 @@ public class PkgPack extends AbstractPack {
 	 * All innerPaths will be rewritten to the paths region, sorted by
 	 * dataOffset.
 	 */
+	@Override
 	public RepackResult repack() throws IOException {
 		long bytesChanged = 0;
 

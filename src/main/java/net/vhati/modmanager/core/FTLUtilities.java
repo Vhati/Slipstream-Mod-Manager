@@ -19,22 +19,34 @@ public class FTLUtilities {
 	/**
 	 * Confirms the FTL resources dir exists and contains the dat files.
 	 *
+	 * This checks for either "ftl.dat" or both "data.dat" and "resource.dat".
+	 *
 	 * Note: Do d.getCanonicalFile() to resolve any symlinks first!
 	 */
 	public static boolean isDatsDirValid( File d ) {
 		if ( !d.exists() || !d.isDirectory() ) return false;
-		if ( !new File( d, "data.dat" ).exists() ) return false;
-		if ( !new File( d, "resource.dat" ).exists() ) return false;
-		return true;
+
+		if ( new File( d, "ftl.dat" ).exists() ) return true;
+
+		if ( new File( d, "data.dat" ).exists() && new File( d, "resource.dat" ).exists() ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
 	 * Returns the FTL resources dir, or null.
+	 *
+	 * Windows: Steam, GOG, HumbleBundle
+	 * Linux (Wine): GOG, HumbleBundle
+	 * Linux: Steam, HumbleBundle
+	 * OSX: Steam, HumbleBundle
 	 */
 	public static File findDatsDir() {
-		String steamPath = "Steam/steamapps/common/FTL Faster Than Light/resources";
-		String gogPath = "GOG.com/Faster Than Light/resources";
-		String humblePath = "FTL/resources";
+		String steamPath = "Steam/steamapps/common/FTL Faster Than Light";
+		String gogPath = "GOG.com/Faster Than Light";
+		String humblePath = "FTL";
 
 		String programFiles86 = System.getenv( "ProgramFiles(x86)" );
 		String programFiles = System.getenv( "ProgramFiles" );
@@ -55,18 +67,32 @@ public class FTLUtilities {
 			candidates.add( new File( new File( programFiles86 ), steamPath ) );
 			candidates.add( new File( new File( programFiles86 ), gogPath ) );
 			candidates.add( new File( new File( programFiles86 ), humblePath ) );
+
+			candidates.add( new File( new File( programFiles86 ), steamPath +"/resources" ) );
+			candidates.add( new File( new File( programFiles86 ), gogPath +"/resources" ) );
+			candidates.add( new File( new File( programFiles86 ), humblePath +"/resources" ) );
 		}
 		if ( programFiles != null ) {
 			candidates.add( new File( new File( programFiles ), steamPath ) );
 			candidates.add( new File( new File( programFiles ), gogPath ) );
 			candidates.add( new File( new File( programFiles ), humblePath ) );
+
+			candidates.add( new File( new File( programFiles ), steamPath +"/resources" ) );
+			candidates.add( new File( new File( programFiles ), gogPath +"/resources" ) );
+			candidates.add( new File( new File( programFiles ), humblePath +"/resources" ) );
 		}
 		// Linux - Steam.
 		if ( xdgDataHome != null ) {
+			candidates.add( new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data" ) );
+			candidates.add( new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data" ) );
+
 			candidates.add( new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data/resources" ) );
 			candidates.add( new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ) );
 		}
 		if ( home != null ) {
+			candidates.add( new File( home +"/.steam/steam/steamapps/common/FTL Faster Than Light/data" ) );
+			candidates.add( new File( home +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data" ) );
+
 			candidates.add( new File( home +"/.steam/steam/steamapps/common/FTL Faster Than Light/data/resources" ) );
 			candidates.add( new File( home +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data/resources" ) );
 		}
@@ -76,6 +102,11 @@ public class FTLUtilities {
 			candidates.add( new File( winePrefix +"/drive_c/Program Files (x86)/"+ humblePath ) );
 			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ gogPath ) );
 			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ humblePath ) );
+
+			candidates.add( new File( winePrefix +"/drive_c/Program Files (x86)/"+ gogPath +"/resources" ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files (x86)/"+ humblePath +"/resources" ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ gogPath +"/resources" ) );
+			candidates.add( new File( winePrefix +"/drive_c/Program Files/"+ humblePath +"/resources" ) );
 		}
 		// OSX - Steam.
 		if ( home != null ) {
@@ -113,28 +144,30 @@ public class FTLUtilities {
 
 		String message = "";
 		message += "You will now be prompted to locate FTL manually.\n";
-		message += "Select '(FTL dir)/resources/data.dat'.\n";
-		message += "Or 'FTL.app', if you're on OSX.";
+		message += "Look in {FTL dir} to select 'ftl.dat' or 'data.dat'.\n";
+		message += "\n";
+		message += "It may be buried under a subdirectory called 'resources/'.\n";
+		message += "Or select 'FTL.app', if you're on OSX.";
 		JOptionPane.showMessageDialog( parentComponent, message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
 
 		final JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle( "Find data.dat or FTL.app" );
+		fc.setDialogTitle( "Find ftl.dat or data.dat or FTL.app" );
 		fc.setFileHidingEnabled( false );
 		fc.addChoosableFileFilter(new FileFilter() {
 			@Override
 			public String getDescription() {
-				return "FTL Data File - (FTL dir)/resources/data.dat";
+				return "FTL Data File - ftl.dat|data.dat";
 			}
 			@Override
 			public boolean accept( File f ) {
-				return f.isDirectory() || f.getName().equals( "data.dat" ) || f.getName().equals( "FTL.app" );
+				return f.isDirectory() || f.getName().equals( "ftl.dat" ) || f.getName().equals( "data.dat" ) || f.getName().equals( "FTL.app" );
 			}
 		});
-		fc.setMultiSelectionEnabled(false);
+		fc.setMultiSelectionEnabled( false );
 
 		if ( fc.showOpenDialog( parentComponent ) == JFileChooser.APPROVE_OPTION ) {
 			File f = fc.getSelectedFile();
-			if ( f.getName().equals( "data.dat" ) ) {
+			if ( f.getName().equals( "ftl.dat" ) || f.getName().equals( "data.dat" ) ) {
 				result = f.getParentFile();
 			}
 			else if ( f.getName().endsWith( ".app" ) && f.isDirectory() ) {
@@ -152,29 +185,60 @@ public class FTLUtilities {
 		return null;
 	}
 
-
 	/**
 	 * Returns the executable that will launch FTL, or null.
 	 *
-	 * On Windows, FTLGame.exe is one dir above "resources/".
-	 * On Linux, FTL is a script, one dir above "resources/".
+	 * FTL 1.01-1.5.13:
+	 *   Windows
+	 *     {FTL dir}/resources/*.dat
+	 *     {FTL dir}/FTLGame.exe
+	 *   Linux
+	 *     {FTL dir}/data/resources/*.dat
+	 *     {FTL dir}/data/FTL
+	 *   OSX
+	 *     {FTL dir}/Contents/Resources/*.dat
+	 *     {FTL dir}
+	 *
+	 * FTL 1.6.1:
+	 *   Windows
+	 *     {FTL dir}/*.dat
+	 *     {FTL dir}/FTLGame.exe
+	 *   Linux
+	 *     {FTL dir}/data/*.dat
+	 *     {FTL dir}/data/FTL
+	 *   OSX
+	 *     {FTL dir}/Contents/Resources/*.dat
+	 *     {FTL dir}
+	 *
+	 * On Windows, FTLGame.exe is a binary.
+	 * On Linux, FTL is a script.
 	 * On OSX, FTL.app is the grandparent dir itself (a bundle).
 	 */
 	public static File findGameExe( File datsDir ) {
 		File result = null;
 
 		if ( System.getProperty( "os.name" ).startsWith( "Windows" ) ) {
-			File ftlDir = datsDir.getParentFile();
-			if ( ftlDir != null ) {
-				File exeFile = new File( ftlDir, "FTLGame.exe" );
-				if ( exeFile.exists() ) result = exeFile;
+
+			for ( File candidateDir : new File[] {datsDir, datsDir.getParentFile()} ) {
+				if ( candidateDir == null ) continue;
+
+				File exeFile = new File( candidateDir, "FTLGame.exe" );
+				if ( exeFile.exists() ) {
+					result = exeFile;
+					break;
+				}
 			}
 		}
 		else if ( System.getProperty( "os.name" ).equals( "Linux" ) ) {
-			File ftlDir = datsDir.getParentFile();
-			if ( ftlDir != null ) {
-				File exeFile = new File( ftlDir, "FTL" );
-				if ( exeFile.exists() ) result = exeFile;
+
+			for ( File candidateDir : new File[] {datsDir, datsDir.getParentFile()} ) {
+				if ( candidateDir == null ) continue;
+
+				File exeFile = new File( candidateDir, "FTL" );
+				if ( exeFile.exists() ) {
+					result = exeFile;
+					break;
+				}
 			}
 		}
 		else if ( System.getProperty( "os.name" ).contains( "OS X" ) ) {
@@ -189,16 +253,16 @@ public class FTLUtilities {
 				}
 			}
 		}
+
 		return result;
 	}
-
 
 	/**
 	 * Returns the executable that will launch Steam, or null.
 	 *
-	 * On Windows, Steam.exe.
-	 * On Linux, steam is a script. ( http://moritzmolch.com/815 )
-	 * On OSX, Steam.app is the grandparent dir itself (a bundle).
+	 * On Windows, "Steam.exe".
+	 * On Linux, "steam" is a script. ( http://moritzmolch.com/815 )
+	 * On OSX, "Steam.app" is a bundle.
 	 *
 	 * The args to launch FTL are: ["-applaunch", STEAM_APPID_FTL]
 	 */
@@ -237,13 +301,14 @@ public class FTLUtilities {
 		return result;
 	}
 
-
 	/**
 	 * Launches an executable.
 	 *
 	 * On Windows, *.exe.
 	 * On Linux, a binary or script.
 	 * On OSX, an *.app bundle dir.
+	 *
+	 * OSX bundles are executed with: "open -a bundle.app".
 	 *
 	 * @param exeFile see findGameExe() or findSteamExe()
 	 * @param exeArgs arguments for the executable
@@ -277,7 +342,6 @@ public class FTLUtilities {
 		}
 		return result;
 	}
-
 
 	/**
 	 * Returns the directory for user profiles and saved games, or null.

@@ -60,7 +60,6 @@ import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModFileInfo;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModPatchThread;
-import net.vhati.modmanager.core.ModPatchThread.BackedUpDat;
 import net.vhati.modmanager.core.ModsScanObserver;
 import net.vhati.modmanager.core.ModsScanThread;
 import net.vhati.modmanager.core.ModUtilities;
@@ -666,13 +665,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
 
-			BackedUpDat dataDat = new BackedUpDat();
-			dataDat.datFile = new File( datsDir, "data.dat" );
-			dataDat.bakFile = new File( backupDir, "data.dat.bak" );
-			BackedUpDat resDat = new BackedUpDat();
-			resDat.datFile = new File( datsDir, "resource.dat" );
-			resDat.bakFile = new File( backupDir, "resource.dat.bak" );
-
 			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
 
 			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
@@ -705,7 +697,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			log.info( "" );
 			log.info( "Patching..." );
 			log.info( "" );
-			ModPatchThread patchThread = new ModPatchThread( modFiles, dataDat, resDat, false, patchDlg );
+			ModPatchThread patchThread = new ModPatchThread( modFiles, datsDir, backupDir, false, patchDlg );
 			patchThread.setDefaultUncaughtExceptionHandler( this );
 			patchThread.start();
 
@@ -780,11 +772,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			File extractDir = extractChooser.getSelectedFile();
 
 			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
-			File dataDatFile = new File( datsDir, "data.dat" );
-			File resDatFile = new File( datsDir, "resource.dat" );
-			File[] datFiles = new File[] {dataDatFile, resDatFile};
 
-			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datFiles );
+			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datsDir );
 			extractDlg.getWorkerThread().setDefaultUncaughtExceptionHandler( this );
 			extractDlg.extract();
 			extractDlg.setVisible( true );
@@ -792,9 +781,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		else if ( source == sandboxMenuItem ) {
 			setStatusText( "" );
 			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
-			File dataDatFile = new File( datsDir, "data.dat" );
 
-			ModXMLSandbox sandboxFrame = new ModXMLSandbox( dataDatFile );
+			ModXMLSandbox sandboxFrame = new ModXMLSandbox( datsDir );
 			sandboxFrame.addWindowListener( nerfListener );
 			sandboxFrame.setSize( 800, 600 );
 			sandboxFrame.setLocationRelativeTo( null );

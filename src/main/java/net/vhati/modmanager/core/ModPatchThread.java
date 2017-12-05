@@ -15,7 +15,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.vhati.ftldat.AbstractPack;
+import net.vhati.ftldat.AbstractPack.RepackResult;
 import net.vhati.ftldat.FTLPack;
+import net.vhati.ftldat.PkgPack;
+import net.vhati.ftldat.PackContainer;
 import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModPatchObserver;
 import net.vhati.modmanager.core.ModUtilities;
@@ -36,8 +39,8 @@ public class ModPatchThread extends Thread {
 	private Thread shutdownHook = null;
 
 	private List<File> modFiles = new ArrayList<File>();
-	private BackedUpDat dataDat = null;
-	private BackedUpDat resDat = null;
+	private File datsDir = null;
+	private File backupDir = null;
 	private boolean globalPanic = false;
 	private ModPatchObserver observer = null;
 
@@ -48,10 +51,11 @@ public class ModPatchThread extends Thread {
 	private final int progRepackMax = 5;
 	private int progMilestone = 0;
 
-	public ModPatchThread( List<File> modFiles, BackedUpDat dataDat, BackedUpDat resDat, boolean globalPanic, ModPatchObserver observer ) {
+
+	public ModPatchThread( List<File> modFiles, File datsDir, File backupDir, boolean globalPanic, ModPatchObserver observer ) {
 		this.modFiles.addAll( modFiles );
-		this.dataDat = dataDat;
-		this.resDat = resDat;
+		this.datsDir = datsDir;
+		this.backupDir = backupDir;
 		this.globalPanic = globalPanic;
 		this.observer = observer;
 	}
@@ -103,10 +107,7 @@ public class ModPatchThread extends Thread {
 
 		observer.patchingProgress( 0, progMax );
 
-		BackedUpDat[] allDats = new BackedUpDat[] {dataDat, resDat};
-
-		FTLPack dataP = null;
-		FTLPack resP = null;
+		PackContainer packContainer = null;
 
 		try {
 			int backupsCreated = 0;
@@ -114,20 +115,34 @@ public class ModPatchThread extends Thread {
 			int modsInstalled = 0;
 			int datsRepacked = 0;
 
+			File ftlDatFile = new File( datsDir, "ftl.dat" );
+			File dataDatFile = new File( datsDir, "data.dat" );
+			File resourceDatFile = new File( datsDir, "resource.dat" );
+
+			List<BackedUpDat> backedUpDats = new ArrayList<BackedUpDat>( 2 );
+			for ( File datFile : new File[] {ftlDatFile, dataDatFile, resourceDatFile} ) {
+				if ( !datFile.exists() ) continue;
+
+				BackedUpDat bud = new BackedUpDat();
+				bud.datFile = datFile;
+				bud.bakFile = new File( backupDir, datFile.getName() +".bak" );
+				backedUpDats.add( bud );
+			}
+
 			// Don't let dats be read-only.
-			for ( BackedUpDat dat : allDats ) {
-				if ( dat.datFile.exists() ) dat.datFile.setWritable( true );
+			for ( BackedUpDat bud : backedUpDats ) {
+				if ( bud.datFile.exists() ) bud.datFile.setWritable( true );
 			}
 
 			// Create backup dats, if necessary.
-			for ( BackedUpDat dat : allDats ) {
-				if ( !dat.bakFile.exists() ) {
-					log.info( String.format( "Backing up \"%s\".", dat.datFile.getName() ) );
-					observer.patchingStatus( String.format( "Backing up \"%s\".", dat.datFile.getName() ) );
+			for ( BackedUpDat bud : backedUpDats ) {
+				if ( !bud.bakFile.exists() ) {
+					log.info( String.format( "Backing up \"%s\".", bud.datFile.getName() ) );
+					observer.patchingStatus( String.format( "Backing up \"%s\".", bud.datFile.getName() ) );
 
-					PackUtilities.copyFile( dat.datFile, dat.bakFile );
+					PackUtilities.copyFile( bud.datFile, bud.bakFile );
 					backupsCreated++;
-					observer.patchingProgress( progMilestone + progBackupMax/allDats.length*backupsCreated, progMax );
+					observer.patchingProgress( progMilestone + progBackupMax/backedUpDats.size()*backupsCreated, progMax );
 
 					if ( !keepRunning ) return false;
 				}
@@ -136,17 +151,17 @@ public class ModPatchThread extends Thread {
 			observer.patchingProgress( progMilestone, progMax );
 			observer.patchingStatus( null );
 
-			if ( backupsCreated != allDats.length ) {
+			if ( backupsCreated != backedUpDats.size() ) {
 				// Clobber current dat files with their respective backups.
 				// But don't bother if we made those backups just now.
 
-				for ( BackedUpDat dat : allDats ) {
-					log.info( String.format( "Restoring vanilla \"%s\"...", dat.datFile.getName() ) );
-					observer.patchingStatus( String.format( "Restoring vanilla \"%s\"...", dat.datFile.getName() ) );
+				for ( BackedUpDat bud : backedUpDats ) {
+					log.info( String.format( "Restoring vanilla \"%s\"...", bud.datFile.getName() ) );
+					observer.patchingStatus( String.format( "Restoring vanilla \"%s\"...", bud.datFile.getName() ) );
 
-					PackUtilities.copyFile( dat.bakFile, dat.datFile );
+					PackUtilities.copyFile( bud.bakFile, bud.datFile );
 					datsClobbered++;
-					observer.patchingProgress( progMilestone + progClobberMax/allDats.length*datsClobbered, progMax );
+					observer.patchingProgress( progMilestone + progClobberMax/backedUpDats.size()*datsClobbered, progMax );
 
 					if ( !keepRunning ) return false;
 				}
@@ -161,30 +176,48 @@ public class ModPatchThread extends Thread {
 				return true;
 			}
 
-			dataP = new FTLPack( dataDat.datFile, "r+" );
-			resP = new FTLPack( resDat.datFile, "r+" );
+			packContainer = new PackContainer();
+			if ( ftlDatFile.exists() ) {  // FTL 1.6.1.
+				AbstractPack ftlPack = new PkgPack( ftlDatFile, "r+" );
 
-			Map<String,AbstractPack> topFolderMap = new HashMap<String,AbstractPack>();
-			topFolderMap.put( "data", dataP );
-			topFolderMap.put( "audio", resP );
-			topFolderMap.put( "fonts", resP );
-			topFolderMap.put( "img", resP );
-			topFolderMap.put( "mod-appendix", null );
+				packContainer.setPackFor( "audio/", ftlPack );
+				packContainer.setPackFor( "data/", ftlPack );
+				packContainer.setPackFor( "fonts/", ftlPack );
+				packContainer.setPackFor( "img/", ftlPack );
+				packContainer.setPackFor( null, ftlPack );
+				// Supposedly "exe_icon.png" has been observed at top-level?
+			}
+			else if ( dataDatFile.exists() && resourceDatFile.exists() ) {  // FTL 1.01-1.5.13.
+				AbstractPack dataPack = new FTLPack( dataDatFile, "r+" );
+				AbstractPack resourcePack = new FTLPack( resourceDatFile, "r+" );
+
+				packContainer.setPackFor( "audio/", resourcePack );
+				packContainer.setPackFor( "data/", dataPack );
+				packContainer.setPackFor( "fonts/", resourcePack );
+				packContainer.setPackFor( "img/", resourcePack );
+			}
+			else {
+				throw new IOException( String.format( "Could not find either \"%s\" or both \"%s\" and \"%s\"", ftlDatFile.getName(), dataDatFile.getName(), resourceDatFile.getName() ) );
+			}
+			packContainer.setPackFor( "mod-appendix/", null );
 
 			// Track modified innerPaths in case they're clobbered.
 			List<String> moddedItems = new ArrayList<String>();
 
 			List<String> knownPaths = new ArrayList<String>();
-			knownPaths.addAll( dataP.list() );
-			knownPaths.addAll( resP.list() );
+			for ( AbstractPack pack : packContainer.getPacks() ) {
+				knownPaths.addAll( pack.list() );
+			}
 
 			List<String> knownPathsLower = new ArrayList<String>( knownPaths.size() );
 			for ( String innerPath : knownPaths ) {
 				knownPathsLower.add( innerPath.toLowerCase() );
 			}
 
-			// Group1: parentPath, Group2: topFolder, Group3: fileName
-			Pattern pathPtn = Pattern.compile( "^(([^/]+)/(?:.*/)?)([^/]+)$" );
+			List<String> knownRoots = packContainer.getRoots();
+
+			// Group1: parentPath/, Group2: root/, Group3: fileName.
+			Pattern pathPtn = Pattern.compile( "^(?:(([^/]+/)(?:.*/)?))?([^/]+)$" );
 
 			for ( File modFile : modFiles ) {
 				if ( !keepRunning ) return false;
@@ -216,12 +249,12 @@ public class ModPatchThread extends Thread {
 						}
 
 						String parentPath = m.group( 1 );
-						String topFolder = m.group( 2 );
+						String root = m.group( 2 );
 						String fileName = m.group( 3 );
 
-						AbstractPack ftlP = topFolderMap.get( topFolder );
-						if ( ftlP == null ) {
-							if ( !topFolderMap.containsKey( topFolder ) )
+						AbstractPack pack = packContainer.getPackFor( innerPath );
+						if ( pack == null ) {
+							if ( !knownRoots.contains( root ) )
 								log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
 							zis.closeEntry();
 							continue;
@@ -237,24 +270,24 @@ public class ModPatchThread extends Thread {
 							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]append|append[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
-							if ( !ftlP.contains( innerPath ) ) {
+							if ( !pack.contains( innerPath ) ) {
 								log.warn( String.format( "Non-existent innerPath wasn't appended: %s", innerPath ) );
 							}
 							else {
 								InputStream mainStream = null;
 								try {
-									mainStream = ftlP.getInputStream(innerPath);
-									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									mainStream = pack.getInputStream(innerPath);
+									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
-									ftlP.remove( innerPath );
-									ftlP.add( innerPath, mergedStream );
+									pack.remove( innerPath );
+									pack.add( innerPath, mergedStream );
 								}
 								finally {
 									try {if ( mainStream != null ) mainStream.close();}
 									catch ( IOException e ) {}
 								}
 
-								if ( !moddedItems.contains(innerPath) ) {
+								if ( !moddedItems.contains( innerPath ) ) {
 									moddedItems.add( innerPath );
 								}
 							}
@@ -263,25 +296,25 @@ public class ModPatchThread extends Thread {
 							innerPath = parentPath + fileName.replaceAll( "[.](?:xml[.]rawappend|rawappend[.]xml)$", ".xml" );
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
-							if ( !ftlP.contains( innerPath ) ) {
+							if ( !pack.contains( innerPath ) ) {
 								log.warn( String.format( "Non-existent innerPath wasn't raw appended: %s", innerPath ) );
 							}
 							else {
 								log.warn( String.format( "Appending xml as raw text: %s", innerPath ) );
 								InputStream mainStream = null;
 								try {
-									mainStream = ftlP.getInputStream(innerPath);
-									InputStream mergedStream = ModUtilities.appendXMLFile( mainStream, zis, "windows-1252", ftlP.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									mainStream = pack.getInputStream( innerPath );
+									InputStream mergedStream = ModUtilities.appendXMLFile( mainStream, zis, "windows-1252", pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
-									ftlP.remove( innerPath );
-									ftlP.add( innerPath, mergedStream );
+									pack.remove( innerPath );
+									pack.add( innerPath, mergedStream );
 								}
 								finally {
 									try {if ( mainStream != null ) mainStream.close();}
 									catch ( IOException e ) {}
 								}
 
-								if ( !moddedItems.contains(innerPath) ) {
+								if ( !moddedItems.contains( innerPath ) ) {
 									moddedItems.add( innerPath );
 								}
 							}
@@ -299,30 +332,30 @@ public class ModPatchThread extends Thread {
 
 							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
-							if ( !moddedItems.contains(innerPath) ) {
+							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
 							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
 							}
 
-							if ( ftlP.contains( innerPath ) )
-								ftlP.remove( innerPath );
-							ftlP.add( innerPath, fixedStream );
+							if ( pack.contains( innerPath ) )
+								pack.remove( innerPath );
+							pack.add( innerPath, fixedStream );
 						}
 						else if ( fileName.endsWith( ".xml" ) ) {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
 							InputStream fixedStream = ModUtilities.rebuildXMLFile( zis, "windows-1252", modFile.getName()+":"+parentPath+fileName );
 
-							if ( !moddedItems.contains(innerPath) ) {
+							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
 							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
 							}
 
-							if ( ftlP.contains( innerPath ) )
-								ftlP.remove( innerPath );
-							ftlP.add( innerPath, fixedStream );
+							if ( pack.contains( innerPath ) )
+								pack.remove( innerPath );
+							pack.add( innerPath, fixedStream );
 						}
 						else if ( fileName.endsWith( ".txt" ) ) {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
@@ -334,28 +367,28 @@ public class ModPatchThread extends Thread {
 
 							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
-							if ( !moddedItems.contains(innerPath) ) {
+							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
 							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
 							}
 
-							if ( ftlP.contains( innerPath ) )
-								ftlP.remove( innerPath );
-							ftlP.add( innerPath, fixedStream );
+							if ( pack.contains( innerPath ) )
+								pack.remove( innerPath );
+							pack.add( innerPath, fixedStream );
 						}
 						else {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
-							if ( !moddedItems.contains(innerPath) ) {
+							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
 							} else {
 								log.warn( String.format( "Clobbering earlier mods: %s", innerPath ) );
 							}
 
-							if ( ftlP.contains( innerPath ) )
-								ftlP.remove( innerPath );
-							ftlP.add( innerPath, zis );
+							if ( pack.contains( innerPath ) )
+								pack.remove( innerPath );
+							pack.add( innerPath, zis );
 						}
 
 						zis.closeEntry();
@@ -378,16 +411,17 @@ public class ModPatchThread extends Thread {
 			observer.patchingProgress( progMilestone, progMax );
 
 			// Prune 'removed' files from dats.
-			for ( AbstractPack ftlP : new AbstractPack[]{dataP, resP} ) {
-				if ( ftlP instanceof FTLPack ) {
-					observer.patchingStatus( String.format( "Repacking \"%s\"...", ftlP.getName() ) );
+			for ( AbstractPack pack : packContainer.getPacks() ) {
+				observer.patchingStatus( String.format( "Repacking \"%s\"...", pack.getName() ) );
 
-					long bytesChanged = ((FTLPack)ftlP).repack().bytesChanged;
-					log.info( String.format( "Repacked \"%s\" (%d bytes affected)", ftlP.getName(), bytesChanged ) );
-
-					datsRepacked++;
-					observer.patchingProgress( progMilestone + progRepackMax/allDats.length*datsRepacked, progMax );
+				AbstractPack.RepackResult repackResult = pack.repack();
+				if ( repackResult != null ) {
+					long bytesChanged = repackResult.bytesChanged;
+					log.info( String.format( "Repacked \"%s\" (%d bytes affected)", pack.getName(), bytesChanged ) );
 				}
+
+				datsRepacked++;
+				observer.patchingProgress( progMilestone + progRepackMax/backedUpDats.size()*datsRepacked, progMax );
 			}
 			progMilestone += progRepackMax;
 			observer.patchingProgress( progMilestone, progMax );
@@ -396,11 +430,12 @@ public class ModPatchThread extends Thread {
 			return true;
 		}
 		finally {
-			try {if ( dataP != null ) dataP.close();}
-			catch( Exception e ) {}
-
-			try {if ( resP != null ) resP.close();}
-			catch( Exception e ) {}
+			if ( packContainer != null ) {
+				for ( AbstractPack pack : packContainer.getPacks() ) {
+					try {pack.close();}
+					catch( Exception e ) {}
+				}
+			}
 		}
 	}
 

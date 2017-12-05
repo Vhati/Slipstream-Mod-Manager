@@ -13,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -54,7 +55,9 @@ import javax.swing.tree.TreePath;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.UndoManager;
 
+import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.FTLPack;
+import net.vhati.ftldat.PkgPack;
 import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.XMLPatcher;
@@ -72,7 +75,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 	private UndoManager undoManager = new UndoManager();
 	private Document mainDoc = null;
 
-	private File dataDatFile;
+	private File datsDir;
 
 	private JTabbedPane areasPane;
 	private JScrollPane mainScroll;
@@ -91,11 +94,11 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 	private JLabel statusLbl;
 
 
-	public ModXMLSandbox( File dataDatFile ) {
+	public ModXMLSandbox( File datsDir ) {
 		super( "Mod XML Sandbox" );
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
-		this.dataDatFile = dataDatFile;
+		this.datsDir = datsDir;
 
 		Font sandboxFont = new Font( "Monospaced", Font.PLAIN, 13 );
 
@@ -319,17 +322,29 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 	private void open() {
 		messageArea.setText( "" );
 
-		FTLPack dataP = null;
+		AbstractPack pack = null;
 		InputStream is = null;
 		try {
-			dataP = new FTLPack( dataDatFile, "r" );
-			List<String> innerPaths = dataP.list();
+			File ftlDatFile = new File( datsDir, "ftl.dat" );
+			File dataDatFile = new File( datsDir, "data.dat" );
+
+			if ( ftlDatFile.exists() ) {  // FTL 1.6.1.
+				pack = new PkgPack( ftlDatFile, "r" );
+			}
+			else if ( dataDatFile.exists() ) {  // FTL 1.01-1.5.13.
+				pack = new FTLPack( dataDatFile, "r" );
+			}
+			else {
+				throw new FileNotFoundException( String.format( "Could not find either \"%s\" or \"%s\"", ftlDatFile.getName(), dataDatFile.getName() ) );
+			}
+
+			List<String> innerPaths = pack.list();
 
 			String innerPath = promptForInnerPath( innerPaths );
 			if ( innerPath == null ) return;
 
-			is = dataP.getInputStream( innerPath );
-			String mainText = ModUtilities.decodeText( is, dataDatFile.getName()+":"+innerPath ).text;
+			is = pack.getInputStream( innerPath );
+			String mainText = ModUtilities.decodeText( is, pack.getName()+":"+innerPath ).text;
 			is.close();
 
 			mainText = mainText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
@@ -356,7 +371,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			try {if ( is != null ) is.close();}
 			catch ( IOException f ) {}
 
-			try {if ( dataP != null ) dataP.close();}
+			try {if ( pack != null ) pack.close();}
 			catch ( IOException f ) {}
 		}
 	}

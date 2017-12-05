@@ -466,6 +466,7 @@ public class FTLPack extends AbstractPack {
 	 * Repacks the dat file. This will remove gaps, which could
 	 * be created when adding, removing or replacing files.
 	 */
+	@Override
 	public RepackResult repack() throws IOException {
 		long bytesChanged = 0;
 

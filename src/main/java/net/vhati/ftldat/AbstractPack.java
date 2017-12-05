@@ -75,6 +75,15 @@ public abstract class AbstractPack {
 	public void close() throws IOException {
 	}
 
+	/**
+	 * Tidies up the dat before closing (possibly mandatory).
+	 *
+	 * @returns a result, or null if nothing happened
+	 */
+	public RepackResult repack() throws IOException {
+		return null;
+	}
+
 
 
 	/**
