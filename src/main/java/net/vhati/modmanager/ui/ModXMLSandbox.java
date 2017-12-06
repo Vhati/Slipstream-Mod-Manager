@@ -11,6 +11,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -63,7 +64,6 @@ import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.XMLPatcher;
 import net.vhati.modmanager.ui.ClipboardMenuMouseListener;
 
-import org.jdom2.Document;
 import org.jdom2.JDOMException;
 
 
@@ -73,7 +73,7 @@ import org.jdom2.JDOMException;
 public class ModXMLSandbox extends JFrame implements ActionListener {
 
 	private UndoManager undoManager = new UndoManager();
-	private Document mainDoc = null;
+	private String mainText = null;
 
 	private File datsDir;
 
@@ -344,17 +344,11 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			if ( innerPath == null ) return;
 
 			is = pack.getInputStream( innerPath );
-			String mainText = ModUtilities.decodeText( is, pack.getName()+":"+innerPath ).text;
+			InputStream rebuiltStream = ModUtilities.rebuildXMLFile( is, "windows-1252", pack.getName()+":"+innerPath );
+			String rebuiltText = ModUtilities.decodeText( rebuiltStream, "Sandbox Main XML" ).text;
 			is.close();
 
-			mainText = mainText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
-			mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
-			mainDoc = ModUtilities.parseStrictOrSloppyXML( mainText, "Sandbox Main XML" );
-
-			StringWriter writer = new StringWriter();
-			SloppyXMLOutputProcessor.sloppyPrint( mainDoc, writer, null );
-			String displayedText = writer.toString().replaceAll( "\r(?!\n)|(?<!\r)\n|\r\n", "\n" );  // sloppyPrint needs normalizing!?
-			mainArea.setText( displayedText );
+			mainArea.setText( rebuiltText );
 			mainArea.setCaretPosition( 0 );
 			areasPane.setSelectedComponent( mainScroll );
 			resultArea.setText( "" );
@@ -378,29 +372,26 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 
 	private void patch() {
-		if ( mainDoc == null ) return;
+		String mainText = mainArea.getText();
+		if ( mainText.length() == 0 ) return;
 
 		messageArea.setText( "" );
 
 		try {
+			InputStream mainStream = new ByteArrayInputStream( mainText.getBytes( "UTF-8" ) );
+
 			String appendText = appendArea.getText();
-			appendText = appendText.replaceFirst( "<[?]xml [^>]*?[?]>", "" );
-			appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
-			Document appendDoc = ModUtilities.parseStrictOrSloppyXML( appendText, "Sandbox Append XML" );
+			InputStream appendStream = new ByteArrayInputStream( appendText.getBytes( "UTF-8" ) );
 
-			XMLPatcher patcher = new XMLPatcher();
-			patcher.setGlobalPanic( false );
-			Document resultDoc = patcher.patch( mainDoc, appendDoc );
+			InputStream resultStream = ModUtilities.patchXMLFile( mainStream, appendStream, "windows-1252", false, "Sandbox Main XML", "Sandbox Append XML" );
+			String resultText = ModUtilities.decodeText( resultStream, "Sandbox Result XML" ).text;
 
-			StringWriter writer = new StringWriter();
-			SloppyXMLOutputProcessor.sloppyPrint( resultDoc, writer, null );
-			String displayedText = writer.toString().replaceAll( "\r(?!\n)|(?<!\r)\n|\r\n", "\n" );  // sloppyPrint needs normalizing!?
-			resultArea.setText( displayedText );
+			resultArea.setText( resultText );
 			resultArea.setCaretPosition( 0 );
 			areasPane.setSelectedComponent( resultScroll );
 		}
-		catch ( Exception f ) {
-			messageArea.setText( f.getMessage() );
+		catch ( Exception e ) {
+			messageArea.setText( e.toString() );
 			messageArea.setCaretPosition( 0 );
 		}
 	}

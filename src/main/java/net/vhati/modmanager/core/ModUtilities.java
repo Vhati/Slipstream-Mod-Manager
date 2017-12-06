@@ -35,7 +35,9 @@ import net.vhati.modmanager.core.SloppyXMLParser;
 
 import ar.com.hjg.pngj.PngReader;
 
+import org.jdom2.Content;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
@@ -85,7 +87,7 @@ public class ModUtilities {
 		byte[] buf = new byte[4096];
 		int len;
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
-		while ( (len = is.read(buf)) >= 0 ) {
+		while ( (len = is.read( buf )) >= 0 ) {
 			tmpData.write( buf, 0, len );
 		}
 		byte[] allBytes = tmpData.toByteArray();
@@ -166,6 +168,10 @@ public class ModUtilities {
 	 * tacked on as-is. Any xml declaration tags will be scrubbed from both
 	 * streams, and a new one will be prepended.
 	 *
+	 * If the mainStream had &lt;FTL&gt; tags (introduced in FTL 1.6.1), they
+	 * will be scrubbed, and new ones will be added after appending. If
+	 * appendStream has those tags, they will be scrubbed.
+	 *
 	 * The two InputStreams are read, and the combined result is returned as a
 	 * new third InputStream.
 	 *
@@ -182,13 +188,27 @@ public class ModUtilities {
 	 * the source of new content to append as the first argument).
 	 */
 	public static InputStream appendXMLFile( InputStream mainStream, InputStream appendStream, String encoding, String mainDescription, String appendDescription ) throws IOException {
-		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
+		// XML declaration, or root FTL tags.
+		Pattern comboPtn = Pattern.compile( "(<[?]xml [^>]*?[?]>\n*)|(</?FTL>)" );
+		Matcher m = null;
+		boolean mainHadRootTags = false;
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
-		mainText = xmlDeclPtn.matcher( mainText ).replaceFirst( "" );
+		StringBuffer mainBuf = new StringBuffer( mainText.length() );
+		m = comboPtn.matcher( mainText );
+		while ( m.find() ) {
+			if ( m.group( 2 ) != null ) mainHadRootTags = true;
+			m.appendReplacement( mainBuf, "" );
+		}
+		m.appendTail( mainBuf );
 
 		String appendText = decodeText( appendStream, appendDescription ).text;
-		appendText = xmlDeclPtn.matcher( appendText ).replaceFirst( "" );
+		StringBuffer appendBuf = new StringBuffer( appendText.length() );
+		m = comboPtn.matcher( appendText );
+		while ( m.find() ) {
+			m.appendReplacement( appendBuf, "" );
+		}
+		m.appendTail( appendBuf );
 
 		// Concatenate, filtering the stream to standardize newlines and encode.
 		//
@@ -197,10 +217,12 @@ public class ModUtilities {
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
 		writer.append( "<?xml version=\"1.0\" encoding=\""+ encoding +"\"?>\n" );
-		writer.append( mainText );
+		if ( mainHadRootTags ) writer.append( "<FTL>\n" );
+		writer.append( mainBuf );
 		writer.append( "\n\n<!-- Appended by Slipstream -->\n\n" );
-		writer.append( appendText );
+		writer.append( appendBuf );
 		writer.append( "\n" );
+		if ( mainHadRootTags ) writer.append( "</FTL>\n" );
 		writer.flush();
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 
@@ -210,6 +232,10 @@ public class ModUtilities {
 
 	/**
 	 * Appends and modifies mainStream, using content from appendStream.
+	 *
+	 * If the mainStream had &lt;FTL&gt; tags (introduced in FTL 1.6.1), they
+	 * will be scrubbed, and new ones will be added after appending. If
+	 * appendStream has those tags, they will be scrubbed.
 	 *
 	 * The two InputStreams are read, and the combined result
 	 * is returned as a new third InputStream.
@@ -227,25 +253,63 @@ public class ModUtilities {
 	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
 	 */
 	public static InputStream patchXMLFile( InputStream mainStream, InputStream appendStream, String encoding, boolean globalPanic, String mainDescription, String appendDescription ) throws IOException, JDOMException {
-		Pattern xmlDeclPtn = Pattern.compile( "<[?]xml [^>]*?[?]>\n*" );
+		// XML declaration, or root FTL tags.
+		Pattern comboPtn = Pattern.compile( "(<[?]xml [^>]*?[?]>\n*)|(</?FTL>)" );
+		Matcher m = null;
+		boolean mainHadRootTags = false;
+		String wrapperOpenTag = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>";
+		String wrapperCloseTag = "</wrapper>";
+		StringBuffer buf = null;
 
 		String mainText = decodeText( mainStream, mainDescription ).text;
-		mainText = xmlDeclPtn.matcher( mainText ).replaceFirst( "" );
-		mainText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ mainText +"</wrapper>";
-		Document mainDoc = parseStrictOrSloppyXML( mainText, mainDescription+" (wrapped)" );
+		buf = new StringBuffer( wrapperOpenTag.length() + mainText.length() + wrapperCloseTag.length() );
+		buf.append( wrapperOpenTag );
+		m = comboPtn.matcher( mainText );
+		while ( m.find() ) {
+			if ( m.group( 2 ) != null ) mainHadRootTags = true;
+			m.appendReplacement( buf, "" );
+		}
+		m.appendTail( buf );
+		buf.append( wrapperCloseTag );
 		mainText = null;
+		Document mainDoc = parseStrictOrSloppyXML( buf, mainDescription+" (wrapped)" );
+		buf.setLength( 0 );
 
 		String appendText = decodeText( appendStream, appendDescription ).text;
-		appendText = xmlDeclPtn.matcher( appendText ).replaceFirst( "" );
-		appendText = "<wrapper xmlns:mod='mod' xmlns:mod-append='mod-append' xmlns:mod-overwrite='mod-overwrite'>"+ appendText +"</wrapper>";
-		Document appendDoc = parseStrictOrSloppyXML( appendText, appendDescription+" (wrapped)" );
+		buf.ensureCapacity( wrapperOpenTag.length() + appendText.length() + wrapperCloseTag.length() );
+		buf.append( wrapperOpenTag );
+		m = comboPtn.matcher( appendText );
+		while ( m.find() ) {
+			m.appendReplacement( buf, "" );
+		}
+		m.appendTail( buf );
+		buf.append( wrapperCloseTag );
 		appendText = null;
+		Document appendDoc = parseStrictOrSloppyXML( buf, appendDescription+" (wrapped)" );
+		buf.setLength( 0 );
+
+		buf.trimToSize();  // Free the buffer.
+		buf = null;
 
 		XMLPatcher patcher = new XMLPatcher();
 		patcher.setGlobalPanic( globalPanic );
 		Document mergedDoc = patcher.patch( mainDoc, appendDoc );
 		mainDoc = null;
 		appendDoc = null;
+
+		// Add FTL tags and move all content inside them.
+		// Collect live getContent() results in an Arraylist to avoid
+		// ConcurrentModificationException when detaching in the loop.
+		if ( mainHadRootTags ) {
+			Element mergedRoot = mergedDoc.getRootElement();
+			Element ftlNode = new Element( "FTL" );
+			List<Content> mergedContentList = new ArrayList<Content>( mergedRoot.getContent() );
+			for ( Content c : mergedContentList ) {  // 
+				c.detach();
+			}
+			ftlNode.addContent( mergedContentList );
+			mergedRoot.addContent( ftlNode );
+		}
 
 		// Bake XML into text, filtering the stream to standardize newlines and encode.
 		// TODO: sloppyPrint() needs EOL normalizing!?
@@ -704,7 +768,7 @@ public class ModUtilities {
 					"<!-- No other dashes should touch. -->"
 				) );
 			}
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group( 2 ).replaceAll( "[^\n]", "" )) );  // Strip comments, but preserve line count.
+			m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 2 ).replaceAll( "[^\n]", "" ) ) );  // Strip comments, but preserve line count.
 		}
 		m.appendTail( dstBuf );
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
@@ -718,7 +782,7 @@ public class ModUtilities {
 					ReportMessage.ERROR,
 					"<"+ m.group( 1 ) +"...>...</"+ m.group( 4 ) +">"
 				) );
-				m.appendReplacement( dstBuf, m.quoteReplacement("<"+ m.group( 1 ) + m.group( 2 ) +">"+ m.group( 3 ) +"</"+ m.group( 1 ) +">") );
+				m.appendReplacement( dstBuf, m.quoteReplacement( "<"+ m.group( 1 ) + m.group( 2 ) +">"+ m.group( 3 ) +"</"+ m.group( 1 ) +">" ) );
 			}
 		}
 		m.appendTail( dstBuf );
@@ -744,7 +808,7 @@ public class ModUtilities {
 				ReportMessage.ERROR,
 				"<sectorDescription>...</sectorDescrption>"
 			) );
-			m.appendReplacement( dstBuf, m.quoteReplacement(m.group(1) +"</sectorDescription>") );
+			m.appendReplacement( dstBuf, m.quoteReplacement( m.group( 1 ) +"</sectorDescription>" ) );
 		}
 		m.appendTail( dstBuf );
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );

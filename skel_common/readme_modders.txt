@@ -39,6 +39,12 @@ The Append Extension
   When you're not overriding something, try to use unique names, so that
   it won't clobber another mod and vice versa.
 
+  FTL 1.6.1 introduced <FTL>...</FTL> root tags wrapping XML files. If present,
+  Slipstream will remove them, append, and put them back afterward. Special
+  tags (see "Advanced XML" below) will be unaware of them. Mod files are not
+  required to include these root tags, though they can. Slipstream will remove
+  those as well.
+
 
 General
 
