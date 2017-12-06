@@ -205,18 +205,24 @@ Advanced XML
 
 Raw XML
 
+  This feature was a workaround for a bug that was fixed in Slipstream 1.7.
+
+  The bug caused Slipstream to trim off leading/trailing space in XML values.
+  This was problematic for "misc.xml" (in FTL 1.5.4-1.5.13), which defined
+  phrases for localization. Some phrases had spaces, which led to ugly results
+  in-game if trimmed.
+
   FTL is quirky. Occasionally you may need to include non-standard XML in a
-  mod without elaborate parsing. For instance, "misc.xml" defines phrases
-  for localization, which may begin/end with a space. Normally, this
-  whitespace would be trimmed away, leading to ugly results in-game.
+  mod without elaborate parsing.
 
   If your mod has a file named "misc.xml.rawappend", the content of that
   file will be tacked onto the end of "misc.xml". Line-endings and encoding
-  will be standardized, but Slipstream will make no attempt to
-  (mis)understand the tags of either file.
+  will be standardized. Root <FTL> tags, if present, will be removed before
+  appending and restored after, but Slipstream will make no attempt to
+  (mis)understand the tags of either file for advanced modding.
 
   You can still override existing tags by adding your own with the same
-  name attribute, since FTL honors the last it sees.
+  'name' attribute, since FTL honors the last it sees.
 
   Similarly a file named "misc.xml.rawclobber" will entirely replace the
   original "misc.xml".

@@ -37,6 +37,7 @@ import org.jdom2.util.NamespaceStack;
  */
 public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 
+
 	// Copied from AbstractXMLOutputProcessor in JDOM 2.0.5, with modification.
 	@Override
 	protected void printElement( Writer out, FormatStack fstack, NamespaceStack nstack, Element element ) throws IOException {
@@ -79,13 +80,15 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 			}
 
 			try {
+				// Always null!? And what about other TextModes?
 				final String space = element.getAttributeValue( "space", Namespace.XML_NAMESPACE );
-				if ( "default".equals(space) ) {
+				if ( "default".equals( space ) ) {
 					fstack.setTextMode( fstack.getDefaultMode() );
 				}
-				else if ( "preserve".equals(space) ) {
+				else if ( "preserve".equals( space ) ) {
 					fstack.setTextMode( Format.TextMode.PRESERVE );
 				}
+				//if ( space != null ) System.out.println( space );
 
 				Walker walker = buildWalker( fstack, content, true );
 				if ( !walker.hasNext() ) {
@@ -154,6 +157,7 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 */
 	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
 		Format format = Format.getPrettyFormat();
+		format.setTextMode( Format.TextMode.PRESERVE );  // Permit leading/trailing space.
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );
 		format.setIndent( "\t" );
