@@ -287,8 +287,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					log.error( String.format( "Error writing metadata from local mods to \"%s\".", metadataFile.getName() ), f );
 				}
 
-				System.gc();  // Ward off an intermittent InterruptedException from exit()?
-				System.exit( 0 );
+				System.gc();
+				//System.exit( 0 );  // Don't interrupt lingering non-daemon threads.
 			}
 		});
 
