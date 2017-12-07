@@ -331,7 +331,7 @@ public class FTLUtilities {
 		}
 		else {
 			String[] args = new String[1 + exeArgs.length];
-
+			args[0] = exeFile.getAbsolutePath();
 			System.arraycopy( exeArgs, 0, args, 1, exeArgs.length );
 
 			pb = new ProcessBuilder( args );
