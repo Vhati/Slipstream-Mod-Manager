@@ -288,7 +288,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				}
 
 				System.gc();
-				//System.exit( 0 );  // Don't interrupt lingering non-daemon threads.
+				//System.exit( 0 );  // Don't do this (InterruptedException). Let EDT end gracefully.
 			}
 		});
 

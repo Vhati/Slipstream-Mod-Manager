@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FTLModManager {
 
-	private static final Logger log = LogManager.getLogger(FTLModManager.class);
+	private static final Logger log = LogManager.getLogger( FTLModManager.class );
 
 	public static final String APP_NAME = "Slipstream Mod Manager";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.7" );
@@ -48,15 +48,18 @@ public class FTLModManager {
 	private static void guiInit() {
 
 		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
-		log.debug( String.format( "%s %s", System.getProperty("os.name"), System.getProperty("os.version") ) );
-		log.debug( String.format( "%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch") ) );
+		log.debug( String.format( "%s %s", System.getProperty( "os.name" ), System.getProperty( "os.version" ) ) );
+		log.debug( String.format( "%s, %s, %s", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) ) );
 
 		// Nag if the jar was double-clicked.
-		if ( new File("./mods/").exists() == false ) {
-			String currentPath = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
+		if ( new File( "./mods/" ).exists() == false ) {
+			String currentPath = new File( "." ).getAbsoluteFile().getParentFile().getAbsolutePath();
 			showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
 			System.err.println( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting.", currentPath ) );
-			System.exit( 1 );
+
+			System.gc();
+			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
+			return;
 		}
 
 
@@ -148,7 +151,10 @@ public class FTLModManager {
 		if ( datsDir == null ) {
 			showErrorDialog( "FTL resources were not found.\nThe Mod Manager will now exit." );
 			log.debug( "No FTL dats path found, exiting." );
-			System.exit( 1 );
+
+			System.gc();
+			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
+			return;
 		}
 
 		// Prompt if update_catalog is invalid or hasn't been set.
@@ -156,9 +162,9 @@ public class FTLModManager {
 		String catalogUpdateInterval = config.getProperty( "update_catalog" );
 		String appUpdateInterval = config.getProperty( "update_app" );
 
-		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches("^\\d+$") )
+		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
 			askAboutUpdates = true;
-		if ( appUpdateInterval == null || !appUpdateInterval.matches("^\\d+$") )
+		if ( appUpdateInterval == null || !appUpdateInterval.matches( "^\\d+$" ) )
 			askAboutUpdates = true;
 
 		if ( askAboutUpdates ) {
@@ -168,7 +174,7 @@ public class FTLModManager {
 			message += "for the latest mods?\n\n";
 			message += "You can change this later in modman.cfg.";
 
-			int response = JOptionPane.showConfirmDialog(null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
 				config.setProperty( "update_catalog", "7" );
 				config.setProperty( "update_app", "4" );
@@ -195,11 +201,14 @@ public class FTLModManager {
 		try {
 			ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
 			frame.init();
-			frame.setVisible(true);
+			frame.setVisible( true );
 		}
 		catch ( Exception e ) {
 			log.error( "Exception while creating ManagerFrame.", e );
-			System.exit(1);
+
+			System.gc();
+			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
+			return;
 		}
 	}
 
