@@ -277,14 +277,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					appConfig.writeConfig();
 				}
 				catch ( IOException f ) {
-					log.error( String.format( "Error writing config to \"%s\".", appConfig.getConfigFile().getName() ), f );
+					log.error( String.format( "Error writing config to \"%s\"", appConfig.getConfigFile().getName() ), f );
 				}
 
 				try {
 					JacksonCatalogWriter.write( localModDB.getCollatedModInfo(), metadataFile );
 				}
 				catch ( IOException f ) {
-					log.error( String.format( "Error writing metadata from local mods to \"%s\".", metadataFile.getName() ), f );
+					log.error( String.format( "Error writing metadata from local mods to \"%s\"", metadataFile.getName() ), f );
 				}
 
 				System.gc();
@@ -463,7 +463,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			bw.flush();
 		}
 		catch ( IOException e ) {
-			log.error( String.format( "Error writing \"%s\".", modsTableStateFile.getName() ), e );
+			log.error( String.format( "Error writing \"%s\"", modsTableStateFile.getName() ), e );
 		}
 		finally {
 			try {if ( bw != null ) bw.close();}
@@ -567,7 +567,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			infoArea.setCaretPosition( 0 );
 		}
 		catch ( Exception e ) {
-			log.error( "Error filling info text area.", e );
+			log.error( "Error filling info text area", e );
 		}
 	}
 
@@ -608,7 +608,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 						epochTime = ModUtilities.getModFileTime( modFileInfo.getFile() );
 					}
 					catch ( IOException e ) {
-						log.error( String.format( "Error while getting modified time of mod file contents for \"%s\".", modFileInfo.getFile() ), e );
+						log.error( String.format( "Error while getting modified time of mod file contents for \"%s\"", modFileInfo.getFile() ), e );
 					}
 					if ( epochTime != -1 ) {
 						modDate = new Date( epochTime );
@@ -677,7 +677,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
 
 					if ( exeFile == null ) {
-						log.warn( "Steam executable could not be found. FTL will be launched directly." );
+						log.warn( "Steam executable could not be found; FTL will be launched directly" );
 					}
 				}
 				if ( exeFile == null ) {
@@ -685,7 +685,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					exeArgs = new String[0];
 
 					if ( exeFile == null ) {
-						log.warn( "FTL executable could not be found." );
+						log.warn( "FTL executable could not be found" );
 					}
 				}
 
@@ -739,13 +739,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		}
 		else if ( source == modsFolderBtn ) {
 			try {
-				if ( Desktop.isDesktopSupported() )
+				if ( Desktop.isDesktopSupported() ) {
 					Desktop.getDesktop().open( modsDir.getCanonicalFile() );
-				else
-					log.error( "Opening the mods/ folder is not possible on your OS." );
+				} else {
+					log.error( "Opening the mods/ folder is not possible on your OS" );
+				}
 			}
 			catch ( IOException f ) {
-				log.error( "Error opening mods/ folder.", f );
+				log.error( "Error opening mods/ folder", f );
 			}
 		}
 		else if ( source == updateBtn ) {
@@ -977,7 +978,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 						FTLUtilities.launchExe( exeFile, exeArgs );
 					}
 					catch ( Exception e ) {
-						log.error( "Error launching FTL.", e );
+						log.error( "Error launching FTL", e );
 					}
 					exitApp();
 				}
