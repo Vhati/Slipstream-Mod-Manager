@@ -66,13 +66,13 @@ public class FTLModManager {
 		File configFile = new File( "modman.cfg" );
 
 		boolean writeConfig = false;
-		Properties config = new Properties();
-		config.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
-		config.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
-		config.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
-		config.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
-		config.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
-		config.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
+		Properties props = new Properties();
+		props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
+		props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+		props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+		props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+		props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
 		// "update_catalog" doesn't have a default.
 		// "update_app" doesn't have a default.
 		// "manager_geometry" doesn't have a default.
@@ -81,15 +81,15 @@ public class FTLModManager {
 		InputStream in = null;
 		try {
 			if ( configFile.exists() ) {
-				log.trace( "Loading properties from config file." );
+				log.debug( "Loading config file" );
 				in = new FileInputStream( configFile );
-				config.load( new InputStreamReader( in, "UTF-8" ) );
+				props.load( new InputStreamReader( in, "UTF-8" ) );
 			} else {
 				writeConfig = true; // Create a new cfg, but only if necessary.
 			}
 		}
 		catch ( IOException e ) {
-			log.error( "Error loading config.", e );
+			log.error( "Error loading config", e );
 			showErrorDialog( "Error loading config from "+ configFile.getPath() );
 		}
 		finally {
@@ -97,36 +97,66 @@ public class FTLModManager {
 			catch ( IOException e ) {}
 		}
 
-		// Look-and-Feel.
-		String useDefaultUI = config.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+		SlipstreamConfig appConfig = new SlipstreamConfig( props, configFile );
 
-		if ( !useDefaultUI.equals("true") ) {
+		// Look-and-Feel.
+		boolean useDefaultUI = "true".equals( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ) );
+
+		if ( !useDefaultUI ) {
+			LookAndFeel defaultLaf = UIManager.getLookAndFeel();
+			log.debug( "Default look and feel is: "+ defaultLaf.getName() );
+
 			try {
-				log.trace( "Using system Look and Feel" );
+				log.debug( "Setting system look and feel: "+ UIManager.getSystemLookAndFeelClassName() );
+
+				// SystemLaf is risky. It may throw an exception, or lead to graphical bugs.
+				// Problems are geneally caused by custom Windows themes.
 				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 			}
 			catch ( Exception e ) {
-				log.error( "Error setting system Look and Feel.", e );
-				log.info( "Setting '"+ SlipstreamConfig.USE_DEFAULT_UI +"=true' in the config file will prevent this error." );
+				log.error( "Failed to set system look and feel", e );
+				log.info( "Setting "+ SlipstreamConfig.USE_DEFAULT_UI +"=true in the config file to prevent this error..." );
+
+				appConfig.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "true" );
+				writeConfig = true;
+
+				try {
+					UIManager.setLookAndFeel( defaultLaf );
+				}
+				catch ( Exception f ) {
+					log.error( "Error returning to the default look and feel after failing to set system look and feel", f );
+
+					// Write an emergency config and exit.
+					try {
+						appConfig.writeConfig();
+					}
+					catch ( IOException g ) {
+						log.error( String.format( "Error writing config to \"%s\"", configFile.getPath(), g ) );
+					}
+
+					System.gc();
+					return;
+				}
 			}
 		}
 		else {
-			log.debug( "Using default Look and Feel." );
+			log.debug( "Using default Look and Feel" );
 		}
 
 		// FTL Resources Path.
 		File datsDir = null;
-		String datsPath = config.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		String datsPath = appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
 
 		if ( datsPath.length() > 0 ) {
 			log.info( "Using FTL dats path from config: "+ datsPath );
 			datsDir = new File( datsPath );
 			if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
-				log.error( "The config's ftl_dats_path does not exist, or it lacks data.dat." );
+				log.error( "The config's "+ SlipstreamConfig.FTL_DATS_PATH +" does not exist, or it is invalid" );
 				datsDir = null;
 			}
-		} else {
-			log.trace( "No FTL dats path previously set." );
+		}
+		else {
+			log.debug( "No "+ SlipstreamConfig.FTL_DATS_PATH +" previously set" );
 		}
 
 		// Find/prompt for the path to set in the config.
@@ -138,12 +168,12 @@ public class FTLModManager {
 			}
 
 			if ( datsDir == null ) {
-				log.debug( "FTL dats path was not located automatically. Prompting user for location." );
+				log.debug( "FTL dats path was not located automatically. Prompting user for location" );
 				datsDir = FTLUtilities.promptForDatsDir( null );
 			}
 
 			if ( datsDir != null ) {
-				config.setProperty( SlipstreamConfig.FTL_DATS_PATH, datsDir.getAbsolutePath() );
+				appConfig.setProperty( SlipstreamConfig.FTL_DATS_PATH, datsDir.getAbsolutePath() );
 				writeConfig = true;
 				log.info( "FTL dats located at: "+ datsDir.getAbsolutePath() );
 			}
@@ -151,7 +181,7 @@ public class FTLModManager {
 
 		if ( datsDir == null ) {
 			showErrorDialog( "FTL resources were not found.\nThe Mod Manager will now exit." );
-			log.debug( "No FTL dats path found, exiting." );
+			log.debug( "No FTL dats path found, exiting" );
 
 			System.gc();
 			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
@@ -160,8 +190,8 @@ public class FTLModManager {
 
 		// Prompt if update_catalog is invalid or hasn't been set.
 		boolean askAboutUpdates = false;
-		String catalogUpdateInterval = config.getProperty( SlipstreamConfig.UPDATE_CATALOG );
-		String appUpdateInterval = config.getProperty( SlipstreamConfig.UPDATE_APP );
+		String catalogUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_CATALOG );
+		String appUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_APP );
 
 		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
 			askAboutUpdates = true;
@@ -177,23 +207,22 @@ public class FTLModManager {
 
 			int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
-				config.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
-				config.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
 			}
 			else {
-				config.setProperty( SlipstreamConfig.UPDATE_CATALOG, "0" );
-				config.setProperty( SlipstreamConfig.UPDATE_APP, "0" );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "0" );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "0" );
 			}
+			writeConfig = true;
 		}
 
-
-		SlipstreamConfig appConfig = new SlipstreamConfig( config, configFile );
 		if ( writeConfig ) {
 			try {
 				appConfig.writeConfig();
 			}
 			catch ( IOException e ) {
-				String errorMsg = String.format( "Error writing config to \"%s\".", configFile.getPath() );
+				String errorMsg = String.format( "Error writing config to \"%s\"", configFile.getPath() );
 				log.error( errorMsg, e );
 				showErrorDialog( errorMsg );
 			}
@@ -206,7 +235,7 @@ public class FTLModManager {
 			frame.setVisible( true );
 		}
 		catch ( Exception e ) {
-			log.error( "Exception while creating ManagerFrame.", e );
+			log.error( "Exception while creating ManagerFrame", e );
 
 			System.gc();
 			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
