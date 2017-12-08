@@ -67,12 +67,12 @@ public class FTLModManager {
 
 		boolean writeConfig = false;
 		Properties config = new Properties();
-		config.setProperty( "allow_zip", "false" );
-		config.setProperty( "ftl_dats_path", "" );
-		config.setProperty( "run_steam_ftl", "false" );
-		config.setProperty( "never_run_ftl", "false" );
-		config.setProperty( "use_default_ui", "false" );
-		config.setProperty( "remember_geometry", "true" );
+		config.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
+		config.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		config.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+		config.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+		config.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+		config.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
 		// "update_catalog" doesn't have a default.
 		// "update_app" doesn't have a default.
 		// "manager_geometry" doesn't have a default.
@@ -98,7 +98,7 @@ public class FTLModManager {
 		}
 
 		// Look-and-Feel.
-		String useDefaultUI = config.getProperty( "use_default_ui", "false" );
+		String useDefaultUI = config.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
 
 		if ( !useDefaultUI.equals("true") ) {
 			try {
@@ -107,15 +107,16 @@ public class FTLModManager {
 			}
 			catch ( Exception e ) {
 				log.error( "Error setting system Look and Feel.", e );
-				log.info( "Setting 'useDefaultUI=true' in the config file will prevent this error." );
+				log.info( "Setting '"+ SlipstreamConfig.USE_DEFAULT_UI +"=true' in the config file will prevent this error." );
 			}
-		} else {
+		}
+		else {
 			log.debug( "Using default Look and Feel." );
 		}
 
 		// FTL Resources Path.
 		File datsDir = null;
-		String datsPath = config.getProperty( "ftl_dats_path", "" );
+		String datsPath = config.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
 
 		if ( datsPath.length() > 0 ) {
 			log.info( "Using FTL dats path from config: "+ datsPath );
@@ -142,7 +143,7 @@ public class FTLModManager {
 			}
 
 			if ( datsDir != null ) {
-				config.setProperty( "ftl_dats_path", datsDir.getAbsolutePath() );
+				config.setProperty( SlipstreamConfig.FTL_DATS_PATH, datsDir.getAbsolutePath() );
 				writeConfig = true;
 				log.info( "FTL dats located at: "+ datsDir.getAbsolutePath() );
 			}
@@ -159,8 +160,8 @@ public class FTLModManager {
 
 		// Prompt if update_catalog is invalid or hasn't been set.
 		boolean askAboutUpdates = false;
-		String catalogUpdateInterval = config.getProperty( "update_catalog" );
-		String appUpdateInterval = config.getProperty( "update_app" );
+		String catalogUpdateInterval = config.getProperty( SlipstreamConfig.UPDATE_CATALOG );
+		String appUpdateInterval = config.getProperty( SlipstreamConfig.UPDATE_APP );
 
 		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
 			askAboutUpdates = true;
@@ -176,11 +177,12 @@ public class FTLModManager {
 
 			int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
-				config.setProperty( "update_catalog", "7" );
-				config.setProperty( "update_app", "4" );
-			} else {
-				config.setProperty( "update_catalog", "0" );
-				config.setProperty( "update_app", "0" );
+				config.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
+				config.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
+			}
+			else {
+				config.setProperty( SlipstreamConfig.UPDATE_CATALOG, "0" );
+				config.setProperty( SlipstreamConfig.UPDATE_APP, "0" );
 			}
 		}
 

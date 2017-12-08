@@ -175,7 +175,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		patchBtn = new JButton( "Patch" );
 		patchBtn.setMargin( actionInsets );
-		patchBtn.addMouseListener( new StatusbarMouseListener( this, "Incorporate all selected mods into the game." ) );
+		patchBtn.addMouseListener( new StatusbarMouseListener( this, "Incorporate all selected mods into the game. Or revert to vanilla, if none are." ) );
 		patchBtn.addActionListener( this );
 		modActionsPanel.add( patchBtn );
 
@@ -264,12 +264,12 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 				SlipstreamConfig appConfig = ManagerFrame.this.appConfig;
 
-				if ( appConfig.getProperty( "remember_geometry" ).equals( "true" ) ) {
+				if ( appConfig.getProperty( SlipstreamConfig.REMEMBER_GEOMETRY ).equals( "true" ) ) {
 					if ( ManagerFrame.this.getExtendedState() == JFrame.NORMAL ) {
 						Rectangle managerBounds = ManagerFrame.this.getBounds();
 						int dividerLoc = splitPane.getDividerLocation();
 						String geometry = String.format( "x,%d;y,%d;w,%d;h,%d;divider,%d", managerBounds.x, managerBounds.y, managerBounds.width, managerBounds.height, dividerLoc );
-						appConfig.setProperty( "manager_geometry", geometry );
+						appConfig.setProperty( SlipstreamConfig.MANAGER_GEOMETRY, geometry );
 					}
 				}
 
@@ -347,14 +347,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		this.setMinimumSize( new Dimension( 300, modActionsPanel.getPreferredSize().height+90 ) );
 		this.setLocationRelativeTo( null );
 
-		if ( appConfig.getProperty( "remember_geometry" ).equals( "true" ) )
+		if ( appConfig.getProperty( SlipstreamConfig.REMEMBER_GEOMETRY ).equals( "true" ) )
 			setGeometryFromConfig();
 
 		showAboutInfo();
   }
 
 	private void setGeometryFromConfig() {
-		String geometry = appConfig.getProperty( "manager_geometry" );
+		String geometry = appConfig.getProperty( SlipstreamConfig.MANAGER_GEOMETRY );
 		if ( geometry != null ) {
 			int[] xywh = new int[4];
 			int dividerLoc = -1;
@@ -490,7 +490,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		modFileHashes.clear();
 		modsTablePanel.clear();
 
-		boolean allowZip = appConfig.getProperty( "allow_zip", "false" ).equals( "true" );
+		boolean allowZip = appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
 		File[] modFiles = modsDir.listFiles( new ModFileFilter( allowZip ) );
 
 		List<ModFileInfo> unsortedMods = new ArrayList<ModFileInfo>();
@@ -663,16 +663,16 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				modFiles.add( modFileInfo.getFile() );
 			}
 
-			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH ) );
 
 			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
 
-			String neverRunFtl = appConfig.getProperty( "never_run_ftl", "false" );
+			String neverRunFtl = appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
 			if ( !neverRunFtl.equals( "true" ) ) {
 				File exeFile = null;
 				String[] exeArgs = null;
 
-				if ( appConfig.getProperty( "run_steam_ftl", "false" ).equals( "true" ) ) {
+				if ( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) ) {
 					exeFile = FTLUtilities.findSteamExe();
 					exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
 
@@ -680,6 +680,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 						log.warn( "Steam executable could not be found; FTL will be launched directly" );
 					}
 				}
+				// Try to run directly.
 				if ( exeFile == null ) {
 					exeFile = FTLUtilities.findGameExe( datsDir );
 					exeArgs = new String[0];
@@ -772,7 +773,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 			File extractDir = extractChooser.getSelectedFile();
 
-			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH ) );
 
 			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datsDir );
 			extractDlg.getWorkerThread().setDefaultUncaughtExceptionHandler( this );
@@ -781,7 +782,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		}
 		else if ( source == sandboxMenuItem ) {
 			setStatusText( "" );
-			File datsDir = new File( appConfig.getProperty( "ftl_dats_path" ) );
+			File datsDir = new File( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH ) );
 
 			ModXMLSandbox sandboxFrame = new ModXMLSandbox( datsDir );
 			sandboxFrame.addWindowListener( nerfListener );

@@ -29,6 +29,7 @@ import net.vhati.modmanager.core.ModUtilities;
 import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.Report.ReportMessage;
+import net.vhati.modmanager.core.SlipstreamConfig;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.OptionBuilder;
@@ -170,7 +171,7 @@ public class SlipstreamCLI {
 		if ( cmdline.hasOption( "list-mods" ) ) {  // Exits.
 			log.info( "Listing mods..." );
 
-			boolean allowZip = config.getProperty( "allow_zip", "false" ).equals( "true" );
+			boolean allowZip = config.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
 			File[] modFiles = modsDir.listFiles( new ModAndDirFileFilter( allowZip, true ) );
 			List<String> dirList = new ArrayList<String>();
 			List<String> fileList = new ArrayList<String>();
@@ -305,7 +306,7 @@ public class SlipstreamCLI {
 			File exeFile = null;
 			String[] exeArgs = null;
 
-			if ( config.getProperty( "run_steam_ftl", "false" ).equals( "true" ) ) {
+			if ( config.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) ) {
 				exeFile = FTLUtilities.findSteamExe();
 				exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
 
@@ -351,10 +352,10 @@ public class SlipstreamCLI {
 	private static Properties getConfig( File configFile ) {
 
 		Properties config = new Properties();
-		config.setProperty( "allow_zip", "false" );
-		config.setProperty( "ftl_dats_path", "" );
-		config.setProperty( "never_run_ftl", "false" );
-		config.setProperty( "use_default_ui", "false" );
+		config.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
+		config.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		config.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+		config.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
 		// "update_catalog" doesn't have a default.
 
 		// Read the config file.
@@ -384,7 +385,7 @@ public class SlipstreamCLI {
 	 */
 	private static File getDatsDir( Properties config ) {
 		File datsDir = null;
-		String datsPath = config.getProperty( "ftl_dats_path", "" );
+		String datsPath = config.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
 
 		if ( datsPath.length() > 0 ) {
 			log.info( "Using FTL dats path from config: "+ datsPath );

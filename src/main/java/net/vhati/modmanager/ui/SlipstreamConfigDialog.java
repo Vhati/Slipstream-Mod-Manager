@@ -27,14 +27,15 @@ import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
 
 
 public class SlipstreamConfigDialog extends JFrame implements ActionListener {
-	protected static final String ALLOW_ZIP = "allow_zip";
-	protected static final String RUN_STEAM_FTL = "run_steam_ftl";
-	protected static final String NEVER_RUN_FTL = "never_run_ftl";
-	protected static final String USE_DEFAULT_UI = "use_default_ui";
-	protected static final String REMEMBER_GEOMETRY = "remember_geometry";
-	protected static final String UPDATE_CATALOG = "update_catalog";
-	protected static final String UPDATE_APP = "update_app";
-	protected static final String FTL_DATS_PATH = "ftl_dats_path";
+
+	protected static final String ALLOW_ZIP = SlipstreamConfig.ALLOW_ZIP;
+	protected static final String RUN_STEAM_FTL = SlipstreamConfig.RUN_STEAM_FTL;
+	protected static final String NEVER_RUN_FTL = SlipstreamConfig.NEVER_RUN_FTL;
+	protected static final String USE_DEFAULT_UI = SlipstreamConfig.USE_DEFAULT_UI;
+	protected static final String REMEMBER_GEOMETRY = SlipstreamConfig.REMEMBER_GEOMETRY;
+	protected static final String UPDATE_CATALOG = SlipstreamConfig.UPDATE_CATALOG;
+	protected static final String UPDATE_APP = SlipstreamConfig.UPDATE_APP;
+	protected static final String FTL_DATS_PATH = SlipstreamConfig.FTL_DATS_PATH;
 
 	protected SlipstreamConfig appConfig;
 
@@ -80,25 +81,25 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		editorPanel.addBlankRow();
 		editorPanel.addFillRow();
 
-		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( appConfig.getProperty( ALLOW_ZIP, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( appConfig.getProperty( RUN_STEAM_FTL, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( appConfig.getProperty( NEVER_RUN_FTL, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( appConfig.getProperty( USE_DEFAULT_UI, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( REMEMBER_GEOMETRY ).setSelected( appConfig.getProperty( REMEMBER_GEOMETRY, "true" ).equals( "true" ) );
-		editorPanel.getInt( UPDATE_CATALOG ).setText( Integer.toString(appConfig.getPropertyAsInt( UPDATE_CATALOG, 0 )) );
-		editorPanel.getInt( UPDATE_APP ).setText( Integer.toString(appConfig.getPropertyAsInt( UPDATE_APP, 0 )) );
+		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" ) );
+		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) );
+		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" ).equals( "true" ) );
+		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ).equals( "true" ) );
+		editorPanel.getBoolean( REMEMBER_GEOMETRY ).setSelected( appConfig.getProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" ).equals( "true" ) );
+		editorPanel.getInt( UPDATE_CATALOG ).setText( Integer.toString( appConfig.getPropertyAsInt( SlipstreamConfig.UPDATE_CATALOG, 0 ) ) );
+		editorPanel.getInt( UPDATE_APP ).setText( Integer.toString( appConfig.getPropertyAsInt( SlipstreamConfig.UPDATE_APP, 0 ) ) );
 
 		JTextField ftlDatsPathField = editorPanel.getChooser( FTL_DATS_PATH ).getTextField();
-		ftlDatsPathField.setText( appConfig.getProperty( FTL_DATS_PATH, "" ) );
-		ftlDatsPathField.setPreferredSize( new Dimension(150, ftlDatsPathField.getPreferredSize().height) );
-		editorPanel.getChooser( FTL_DATS_PATH ).getButton().addActionListener(this);
+		ftlDatsPathField.setText( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" ) );
+		ftlDatsPathField.setPreferredSize( new Dimension( 150, ftlDatsPathField.getPreferredSize().height ) );
+		editorPanel.getChooser( FTL_DATS_PATH ).getButton().addActionListener( this );
 
 		JPanel ctrlPanel = new JPanel();
 		ctrlPanel.setLayout( new BoxLayout( ctrlPanel, BoxLayout.X_AXIS ) );
 		ctrlPanel.setBorder( BorderFactory.createEmptyBorder( 10, 0, 10, 0 ) );
 		ctrlPanel.add( Box.createHorizontalGlue() );
 		applyBtn = new JButton( "Apply" );
-		applyBtn.addActionListener(this);
+		applyBtn.addActionListener( this );
 		ctrlPanel.add( applyBtn );
 		ctrlPanel.add( Box.createHorizontalGlue() );
 
@@ -106,20 +107,20 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		editorScroll.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
 		editorScroll.getVerticalScrollBar().setUnitIncrement( 10 );
 		int vbarWidth = editorScroll.getVerticalScrollBar().getPreferredSize().width;
-		editorScroll.setPreferredSize( new Dimension(editorPanel.getPreferredSize().width+vbarWidth+5, 400) );
+		editorScroll.setPreferredSize( new Dimension( editorPanel.getPreferredSize().width+vbarWidth+5, 400 ) );
 
 		JPanel contentPane = new JPanel( new BorderLayout() );
 		contentPane.add( editorScroll, BorderLayout.CENTER );
 		contentPane.add( ctrlPanel, BorderLayout.SOUTH );
 		this.setContentPane( contentPane );
 		this.pack();
-		this.setMinimumSize( new Dimension(250, 250) );
+		this.setMinimumSize( new Dimension( 250, 250 ) );
 
 
 		editorScroll.addAncestorListener(new AncestorListener() {
 			@Override
 			public void ancestorAdded( AncestorEvent e ) {
-				editorScroll.getViewport().setViewPosition( new Point(0, 0) );
+				editorScroll.getViewport().setViewPosition( new Point( 0, 0 ) );
 			}
 			@Override
 			public void ancestorMoved( AncestorEvent e ) {
@@ -137,17 +138,17 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 
 		if ( source == applyBtn ) {
 			String tmp;
-			appConfig.setProperty( ALLOW_ZIP, editorPanel.getBoolean( ALLOW_ZIP ).isSelected() ? "true" : "false" );
-			appConfig.setProperty( RUN_STEAM_FTL, editorPanel.getBoolean( RUN_STEAM_FTL ).isSelected() ? "true" : "false" );
-			appConfig.setProperty( NEVER_RUN_FTL, editorPanel.getBoolean( NEVER_RUN_FTL ).isSelected() ? "true" : "false" );
-			appConfig.setProperty( USE_DEFAULT_UI, editorPanel.getBoolean( USE_DEFAULT_UI ).isSelected() ? "true" : "false" );
-			appConfig.setProperty( REMEMBER_GEOMETRY, editorPanel.getBoolean( REMEMBER_GEOMETRY ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.ALLOW_ZIP, editorPanel.getBoolean( ALLOW_ZIP ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, editorPanel.getBoolean( RUN_STEAM_FTL ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.NEVER_RUN_FTL, editorPanel.getBoolean( NEVER_RUN_FTL ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.USE_DEFAULT_UI, editorPanel.getBoolean( USE_DEFAULT_UI ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, editorPanel.getBoolean( REMEMBER_GEOMETRY ).isSelected() ? "true" : "false" );
 
 			tmp = editorPanel.getInt( UPDATE_CATALOG ).getText();
 			try {
 				int n = Integer.parseInt( tmp );
 				n = Math.max( 0, n );
-				appConfig.setProperty( UPDATE_CATALOG, Integer.toString( n ) );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, Integer.toString( n ) );
 			}
 			catch ( NumberFormatException f ) {}
 
@@ -155,13 +156,13 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 			try {
 				int n = Integer.parseInt( tmp );
 				n = Math.max( 0, n );
-				appConfig.setProperty( UPDATE_APP, Integer.toString( n ) );
+				appConfig.setProperty( SlipstreamConfig.UPDATE_APP, Integer.toString( n ) );
 			}
 			catch ( NumberFormatException f ) {}
 
 			tmp = editorPanel.getChooser( FTL_DATS_PATH ).getTextField().getText();
-			if ( tmp.length() > 0 && FTLUtilities.isDatsDirValid( new File(tmp) ) ) {
-				appConfig.setProperty( FTL_DATS_PATH, tmp );
+			if ( tmp.length() > 0 && FTLUtilities.isDatsDirValid( new File( tmp ) ) ) {
+				appConfig.setProperty( SlipstreamConfig.FTL_DATS_PATH, tmp );
 			}
 
 			this.setVisible( false );
