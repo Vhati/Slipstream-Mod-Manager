@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JOptionPane;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import net.vhati.modmanager.cli.SlipstreamCLI;
 import net.vhati.modmanager.core.ComparableVersion;
@@ -46,205 +48,222 @@ public class FTLModManager {
 
 
 	private static void guiInit() {
-
-		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
-		log.debug( String.format( "%s %s", System.getProperty( "os.name" ), System.getProperty( "os.version" ) ) );
-		log.debug( String.format( "%s, %s, %s", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) ) );
-
-		// Nag if the jar was double-clicked.
-		if ( new File( "./mods/" ).exists() == false ) {
-			String currentPath = new File( "." ).getAbsoluteFile().getParentFile().getAbsolutePath();
-			showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
-			System.err.println( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting.", currentPath ) );
-
-			System.gc();
-			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
-			return;
-		}
-
-
-		File configFile = new File( "modman.cfg" );
-
-		boolean writeConfig = false;
-		Properties props = new Properties();
-		props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
-		props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
-		props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
-		props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
-		props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
-		props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
-		// "update_catalog" doesn't have a default.
-		// "update_app" doesn't have a default.
-		// "manager_geometry" doesn't have a default.
-
-		// Read the config file.
-		InputStream in = null;
 		try {
-			if ( configFile.exists() ) {
-				log.debug( "Loading config file" );
-				in = new FileInputStream( configFile );
-				props.load( new InputStreamReader( in, "UTF-8" ) );
-			} else {
-				writeConfig = true; // Create a new cfg, but only if necessary.
+			log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
+			log.debug( String.format( "%s %s", System.getProperty( "os.name" ), System.getProperty( "os.version" ) ) );
+			log.debug( String.format( "%s, %s, %s", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) ) );
+
+			// Nag if the jar was double-clicked.
+			if ( new File( "./mods/" ).exists() == false ) {
+				String currentPath = new File( "." ).getAbsoluteFile().getParentFile().getAbsolutePath();
+				showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
+				System.err.println( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting.", currentPath ) );
+
+				throw new ExitException();
 			}
-		}
-		catch ( IOException e ) {
-			log.error( "Error loading config", e );
-			showErrorDialog( "Error loading config from "+ configFile.getPath() );
-		}
-		finally {
-			try {if ( in != null ) in.close();}
-			catch ( IOException e ) {}
-		}
 
-		SlipstreamConfig appConfig = new SlipstreamConfig( props, configFile );
 
-		// Look-and-Feel.
-		boolean useDefaultUI = "true".equals( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ) );
+			File configFile = new File( "modman.cfg" );
 
-		if ( !useDefaultUI ) {
-			LookAndFeel defaultLaf = UIManager.getLookAndFeel();
-			log.debug( "Default look and feel is: "+ defaultLaf.getName() );
+			boolean writeConfig = false;
+			Properties props = new Properties();
+			props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
+			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+			props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+			props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+			props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
+			// "update_catalog" doesn't have a default.
+			// "update_app" doesn't have a default.
+			// "manager_geometry" doesn't have a default.
 
+			// Read the config file.
+			InputStream in = null;
 			try {
-				log.debug( "Setting system look and feel: "+ UIManager.getSystemLookAndFeelClassName() );
-
-				// SystemLaf is risky. It may throw an exception, or lead to graphical bugs.
-				// Problems are geneally caused by custom Windows themes.
-				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+				if ( configFile.exists() ) {
+					log.debug( "Loading config file" );
+					in = new FileInputStream( configFile );
+					props.load( new InputStreamReader( in, "UTF-8" ) );
+				} else {
+					writeConfig = true; // Create a new cfg, but only if necessary.
+				}
 			}
-			catch ( Exception e ) {
-				log.error( "Failed to set system look and feel", e );
-				log.info( "Setting "+ SlipstreamConfig.USE_DEFAULT_UI +"=true in the config file to prevent this error..." );
+			catch ( IOException e ) {
+				log.error( "Error loading config", e );
+				showErrorDialog( "Error loading config from "+ configFile.getPath() );
+			}
+			finally {
+				try {if ( in != null ) in.close();}
+				catch ( IOException e ) {}
+			}
 
-				appConfig.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "true" );
-				writeConfig = true;
+			SlipstreamConfig appConfig = new SlipstreamConfig( props, configFile );
+
+			// Look-and-Feel.
+			boolean useDefaultUI = "true".equals( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ) );
+
+			if ( !useDefaultUI ) {
+				LookAndFeel defaultLaf = UIManager.getLookAndFeel();
+				log.debug( "Default look and feel is: "+ defaultLaf.getName() );
 
 				try {
-					UIManager.setLookAndFeel( defaultLaf );
-				}
-				catch ( Exception f ) {
-					log.error( "Error returning to the default look and feel after failing to set system look and feel", f );
+					log.debug( "Setting system look and feel: "+ UIManager.getSystemLookAndFeelClassName() );
 
-					// Write an emergency config and exit.
+					// SystemLaf is risky. It may throw an exception, or lead to graphical bugs.
+					// Problems are geneally caused by custom Windows themes.
+					UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+				}
+				catch ( Exception e ) {
+					log.error( "Failed to set system look and feel", e );
+					log.info( "Setting "+ SlipstreamConfig.USE_DEFAULT_UI +"=true in the config file to prevent this error..." );
+
+					appConfig.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "true" );
+					writeConfig = true;
+
 					try {
-						appConfig.writeConfig();
+						UIManager.setLookAndFeel( defaultLaf );
 					}
-					catch ( IOException g ) {
-						log.error( String.format( "Error writing config to \"%s\"", configFile.getPath(), g ) );
-					}
+					catch ( Exception f ) {
+						log.error( "Error returning to the default look and feel after failing to set system look and feel", f );
 
-					System.gc();
-					return;
+						// Write an emergency config and exit.
+						try {
+							appConfig.writeConfig();
+						}
+						catch ( IOException g ) {
+							log.error( String.format( "Error writing config to \"%s\"", configFile.getPath(), g ) );
+						}
+
+						throw new ExitException();
+					}
 				}
 			}
-		}
-		else {
-			log.debug( "Using default Look and Feel" );
-		}
-
-		// FTL Resources Path.
-		File datsDir = null;
-		String datsPath = appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
-
-		if ( datsPath.length() > 0 ) {
-			log.info( "Using FTL dats path from config: "+ datsPath );
-			datsDir = new File( datsPath );
-			if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
-				log.error( "The config's "+ SlipstreamConfig.FTL_DATS_PATH +" does not exist, or it is invalid" );
-				datsDir = null;
+			else {
+				log.debug( "Using default Look and Feel" );
 			}
-		}
-		else {
-			log.debug( "No "+ SlipstreamConfig.FTL_DATS_PATH +" previously set" );
-		}
 
-		// Find/prompt for the path to set in the config.
-		if ( datsDir == null ) {
-			datsDir = FTLUtilities.findDatsDir();
-			if ( datsDir != null ) {
-				int response = JOptionPane.showConfirmDialog( null, "FTL resources were found in:\n"+ datsDir.getPath() +"\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
-				if ( response == JOptionPane.NO_OPTION ) datsDir = null;
+			// FTL Resources Path.
+			File datsDir = null;
+			String datsPath = appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+
+			if ( datsPath.length() > 0 ) {
+				log.info( "Using FTL dats path from config: "+ datsPath );
+				datsDir = new File( datsPath );
+				if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
+					log.error( "The config's "+ SlipstreamConfig.FTL_DATS_PATH +" does not exist, or it is invalid" );
+					datsDir = null;
+				}
+			}
+			else {
+				log.debug( "No "+ SlipstreamConfig.FTL_DATS_PATH +" previously set" );
+			}
+
+			// Find/prompt for the path to set in the config.
+			if ( datsDir == null ) {
+				datsDir = FTLUtilities.findDatsDir();
+				if ( datsDir != null ) {
+					int response = JOptionPane.showConfirmDialog( null, "FTL resources were found in:\n"+ datsDir.getPath() +"\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+					if ( response == JOptionPane.NO_OPTION ) datsDir = null;
+				}
+
+				if ( datsDir == null ) {
+					log.debug( "FTL dats path was not located automatically. Prompting user for location" );
+					datsDir = FTLUtilities.promptForDatsDir( null );
+				}
+
+				if ( datsDir != null ) {
+					appConfig.setProperty( SlipstreamConfig.FTL_DATS_PATH, datsDir.getAbsolutePath() );
+					writeConfig = true;
+					log.info( "FTL dats located at: "+ datsDir.getAbsolutePath() );
+				}
 			}
 
 			if ( datsDir == null ) {
-				log.debug( "FTL dats path was not located automatically. Prompting user for location" );
-				datsDir = FTLUtilities.promptForDatsDir( null );
+				showErrorDialog( "FTL resources were not found.\nThe Mod Manager will now exit." );
+				log.debug( "No FTL dats path found, exiting" );
+
+				throw new ExitException();
 			}
 
-			if ( datsDir != null ) {
-				appConfig.setProperty( SlipstreamConfig.FTL_DATS_PATH, datsDir.getAbsolutePath() );
+			// Prompt if update_catalog is invalid or hasn't been set.
+			boolean askAboutUpdates = false;
+			String catalogUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_CATALOG );
+			String appUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_APP );
+
+			if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
+				askAboutUpdates = true;
+			if ( appUpdateInterval == null || !appUpdateInterval.matches( "^\\d+$" ) )
+				askAboutUpdates = true;
+
+			if ( askAboutUpdates ) {
+				String message = "";
+				message += "Would you like Slipstream to periodically\n";
+				message += "check for updates and download descriptions\n";
+				message += "for the latest mods?\n\n";
+				message += "You can change this later in modman.cfg.";
+
+				int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+				if ( response == JOptionPane.YES_OPTION ) {
+					appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
+					appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
+				}
+				else {
+					appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "0" );
+					appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "0" );
+				}
 				writeConfig = true;
-				log.info( "FTL dats located at: "+ datsDir.getAbsolutePath() );
 			}
-		}
 
-		if ( datsDir == null ) {
-			showErrorDialog( "FTL resources were not found.\nThe Mod Manager will now exit." );
-			log.debug( "No FTL dats path found, exiting" );
-
-			System.gc();
-			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
-			return;
-		}
-
-		// Prompt if update_catalog is invalid or hasn't been set.
-		boolean askAboutUpdates = false;
-		String catalogUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_CATALOG );
-		String appUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_APP );
-
-		if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
-			askAboutUpdates = true;
-		if ( appUpdateInterval == null || !appUpdateInterval.matches( "^\\d+$" ) )
-			askAboutUpdates = true;
-
-		if ( askAboutUpdates ) {
-			String message = "";
-			message += "Would you like Slipstream to periodically\n";
-			message += "check for updates and download descriptions\n";
-			message += "for the latest mods?\n\n";
-			message += "You can change this later in modman.cfg.";
-
-			int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
-			if ( response == JOptionPane.YES_OPTION ) {
-				appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
-				appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
+			if ( writeConfig ) {
+				try {
+					appConfig.writeConfig();
+				}
+				catch ( IOException e ) {
+					String errorMsg = String.format( "Error writing config to \"%s\"", configFile.getPath() );
+					log.error( errorMsg, e );
+					showErrorDialog( errorMsg );
+				}
 			}
-			else {
-				appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "0" );
-				appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "0" );
-			}
-			writeConfig = true;
-		}
 
-		if ( writeConfig ) {
+			// Create the main window.
 			try {
-				appConfig.writeConfig();
+				ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
+				frame.init();
+				frame.setVisible( true );
 			}
-			catch ( IOException e ) {
-				String errorMsg = String.format( "Error writing config to \"%s\"", configFile.getPath() );
-				log.error( errorMsg, e );
-				showErrorDialog( errorMsg );
+			catch ( Exception e ) {
+				log.error( "Exception while creating ManagerFrame", e );
+
+				throw new ExitException();
 			}
 		}
-
-		// Create the main window.
-		try {
-			ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
-			frame.init();
-			frame.setVisible( true );
-		}
-		catch ( Exception e ) {
-			log.error( "Exception while creating ManagerFrame", e );
-
+		catch ( ExitException e ) {
 			System.gc();
 			// System.exit( 1 );  // Don't do this (InterruptedException). Let EDT end gracefully.
 			return;
 		}
 	}
 
-
 	private static void showErrorDialog( String message ) {
 		JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
+	}
+
+
+
+	private static class ExitException extends RuntimeException {
+		public ExitException() {
+		}
+
+		public ExitException( String message ) {
+			super( message );
+		}
+
+		public ExitException( Throwable cause ) {
+			super( cause );
+		}
+
+		public ExitException( String message, Throwable cause ) {
+			super( message, cause );
+		}
 	}
 }
