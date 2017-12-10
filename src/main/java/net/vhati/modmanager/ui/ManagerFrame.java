@@ -816,11 +816,11 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		else if ( source == configMenuItem ) {
 			setStatusText( "" );
 
-			SlipstreamConfigDialog configFrame = new SlipstreamConfigDialog( appConfig );
-			configFrame.addWindowListener( nerfListener );
-			//configFrame.setSize( 300, 400 );
-			configFrame.setLocationRelativeTo( null );
-			configFrame.setVisible( true );
+			SlipstreamConfigDialog configDlg = new SlipstreamConfigDialog( ManagerFrame.this, appConfig );
+			configDlg.addWindowListener( nerfListener );
+			//configDlg.setSize( 300, 400 );
+			configDlg.setLocationRelativeTo( null );
+			configDlg.setVisible( true );
 		}
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );

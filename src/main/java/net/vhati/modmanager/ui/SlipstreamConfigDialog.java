@@ -2,6 +2,7 @@ package net.vhati.modmanager.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,8 +12,8 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,7 +28,7 @@ import net.vhati.modmanager.ui.FieldEditorPanel;
 import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
 
 
-public class SlipstreamConfigDialog extends JFrame implements ActionListener {
+public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 
 	protected static final String ALLOW_ZIP = SlipstreamConfig.ALLOW_ZIP;
 	protected static final String RUN_STEAM_FTL = SlipstreamConfig.RUN_STEAM_FTL;
@@ -45,9 +46,9 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 	protected JButton applyBtn;
 
 
-	public SlipstreamConfigDialog( SlipstreamConfig appConfig ) {
-		super( "Preferences..." );
-		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	public SlipstreamConfigDialog( Frame owner, SlipstreamConfig appConfig ) {
+		super( owner, "Preferences..." );
+		this.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
 
 		this.appConfig = appConfig;
 
