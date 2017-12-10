@@ -1,10 +1,15 @@
 package net.vhati.modmanager.core;
 
 import java.awt.Component;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
@@ -89,7 +94,7 @@ public class FTLUtilities {
 			candidates.add( new File( xdgDataHome +"/Steam/steamapps/common/FTL Faster Than Light/data/resources" ) );
 			candidates.add( new File( xdgDataHome +"/Steam/SteamApps/common/FTL Faster Than Light/data/resources" ) );
 		}
-		if ( home != null ) {
+		if ( home != null ) {  // I think .steam/ contains symlinks to the paths above.
 			candidates.add( new File( home +"/.steam/steam/steamapps/common/FTL Faster Than Light/data" ) );
 			candidates.add( new File( home +"/.steam/steam/SteamApps/common/FTL Faster Than Light/data" ) );
 
@@ -150,7 +155,7 @@ public class FTLUtilities {
 		message += "Or select 'FTL.app', if you're on OSX.";
 		JOptionPane.showMessageDialog( parentComponent, message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
 
-		final JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle( "Find ftl.dat or data.dat or FTL.app" );
 		fc.setFileHidingEnabled( false );
 		fc.addChoosableFileFilter(new FileFilter() {
@@ -264,7 +269,12 @@ public class FTLUtilities {
 	 * On Linux, "steam" is a script. ( http://moritzmolch.com/815 )
 	 * On OSX, "Steam.app" is a bundle.
 	 *
+	 * The definitive Windows registry will not be checked.
+	 *   Key,Name,Type: "HKCU\\Software\\Valve\\Steam", "SteamExe", "REG_SZ".
+	 *
 	 * The args to launch FTL are: ["-applaunch", STEAM_APPID_FTL]
+	 *
+	 * @see #queryRegistryKey(String, String, String)
 	 */
 	public static File findSteamExe() {
 		String programFiles86 = System.getenv( "ProgramFiles(x86)" );
@@ -299,6 +309,27 @@ public class FTLUtilities {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Tells Steam to "verify game cache".
+	 *
+	 * This will spawn a process to notify Steam and exit immediately.
+	 *
+	 * Steam will start, if not already running, and a popup with progress bar
+	 * will appear.
+	 *
+	 * For FTL, this method amounts to running:
+	 *   Steam.exe "steam://validate/212680"
+	 *
+	 * Steam registers itself with the OS as a custom URI handler. The URI gets
+	 * passed as an argument when a "steam://" address is visited.
+	 */
+	public static Process verifySteamGameCache( File exeFile, String appId ) throws IOException {
+		if ( appId == null || appId.length() == 0 ) throw new IllegalArgumentException( "No Steam APP_ID was provided" );
+
+		String[] exeArgs = new String[] {"steam://validate/"+ appId};
+		return launchExe( exeFile, exeArgs );
 	}
 
 	/**
@@ -381,5 +412,64 @@ public class FTLUtilities {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Returns a value from the Windows registry, by scraping reg.exe, or null.
+	 *
+	 * This is equivalent to: reg.exe query {key} /v {valueName} /t {valueType}
+	 *
+	 * This view will not be jailed in Wow6432Node, even if Java is?
+	 * Characters outside windows-1252 are unsupported (results will be mangled).
+	 *
+	 * Bad unicode example: "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Console\\TrueTypeFont", "932", "REG_SZ".
+	 *
+	 * @param key a backslash path starting with HKLM, HKCU, HKCR, HKU, HKCC
+	 * @param valueName a value name, or "" for the "(Default)" value
+	 * @param valueType REG_SZ ("Abc"), REG_DWORD ("0x1"), REG_BINARY ("44E09C"), etc
+	 */
+	public static String queryRegistryKey( String key, String valueName, String valueType ) throws IOException {
+		if ( !System.getProperty( "os.name" ).startsWith( "Windows" ) ) return null;
+		if ( key == null || valueType == null || key.length() * valueType.length() == 0  ) {
+			throw new IllegalArgumentException( "key and valueType cannot be null or empty" );
+		}
+
+		BufferedReader r = null;
+		try {
+			String regExePath = "reg.exe";
+			String winDir = System.getenv( "windir" );
+
+			if ( winDir != null && winDir.length() > 0 ) {
+				// When Java's in Wow64 redirection jail, sysnative is a virtual dir with the 64bit commands.
+				// I don't know if this will ever happen to Java.
+				File unWowRegExeFile = new File( winDir, "sysnative\\reg.exe" );
+				if ( unWowRegExeFile.exists() ) regExePath = unWowRegExeFile.getAbsolutePath();
+			}
+
+			String[] steamRegArgs = new String[] {regExePath, "query", key, "/v", valueName, "/t", valueType};
+			Pattern regPtn = Pattern.compile( Pattern.quote( (( valueName != null ) ? valueName : "(Default)") ) +"\\s+"+ Pattern.quote( valueType ) +"\\s+(.*)" );
+
+			Process p = new ProcessBuilder( steamRegArgs ).start();
+			p.waitFor();
+			if ( p.exitValue() == 0 ) {
+				r = new BufferedReader( new InputStreamReader( p.getInputStream(), "windows-1252" ) );
+				Matcher m;
+				String line;
+				while ( (line=r.readLine()) != null ) {
+					if ( (m=regPtn.matcher( line )).find() ) {
+						return m.group( 1 );
+					}
+				}
+			}
+		}
+		catch ( InterruptedException e ) {  // *shrug*
+			Thread.currentThread().interrupt();  // Set interrupt flag.
+		}
+		finally {
+			try {if ( r != null ) r.close();}
+			catch ( IOException e ) {}
+		}
+
+		return null;
 	}
 }

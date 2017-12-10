@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Properties;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
@@ -69,6 +70,7 @@ public class FTLModManager {
 			Properties props = new Properties();
 			props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
 			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
 			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
 			props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
 			props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
@@ -185,21 +187,90 @@ public class FTLModManager {
 				throw new ExitException();
 			}
 
+			// Ask about Steam.
+			if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() == 0 ) {
+
+				int steamBasedResponse = JOptionPane.showConfirmDialog( null, "Was FTL installed via Steam?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+				if ( steamBasedResponse == JOptionPane.YES_OPTION ) {
+					File steamExeFile = FTLUtilities.findSteamExe();
+
+					if ( steamExeFile == null && System.getProperty( "os.name" ).startsWith( "Windows" ) ) {
+						try {
+							String registryExePath = FTLUtilities.queryRegistryKey( "HKCU\\Software\\Valve\\Steam", "SteamExe", "REG_SZ" );
+							if ( registryExePath != null && !(steamExeFile=new File( registryExePath )).exists() ) {
+								steamExeFile = null;
+							}
+						}
+						catch( IOException e ) {
+							log.error( "Error while querying registry for Steam's path", e );
+						}
+					}
+
+					if ( steamExeFile != null ) {
+						int response = JOptionPane.showConfirmDialog( null, "Steam was found at:\n"+ steamExeFile.getPath() +"\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+						if ( response == JOptionPane.NO_OPTION ) steamExeFile = null;
+					}
+
+					if ( steamExeFile == null ) {
+						log.debug( "Steam was not located automatically. Prompting user for location" );
+
+						StringBuilder steamBuf = new StringBuilder();
+						steamBuf.append( "You will be prompted to locate Steam's executable.\n" );
+						steamBuf.append( "- Windows: Steam.exe\n" );
+						steamBuf.append( "- Linux: steam\n" );
+						steamBuf.append( "- OSX: Steam.app\n" );
+						steamBuf.append( "\n" );
+						steamBuf.append( "If you can't find it, you can cancel and set it later." );
+						JOptionPane.showMessageDialog( null, steamBuf.toString(), "Find Steam", JOptionPane.INFORMATION_MESSAGE );
+
+						JFileChooser steamExeChooser = new JFileChooser();
+						steamExeChooser.setDialogTitle( "Find Steam.exe or steam or Steam.app" );
+						steamExeChooser.setFileHidingEnabled( false );
+						steamExeChooser.setMultiSelectionEnabled( false );
+
+						if ( steamExeChooser.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION ) {
+							steamExeFile = steamExeChooser.getSelectedFile();
+							if ( !steamExeFile.exists() ) steamExeFile = null;
+						}
+					}
+
+					if ( steamExeFile != null ) {
+						appConfig.setProperty( SlipstreamConfig.STEAM_EXE_PATH, steamExeFile.getAbsolutePath() );
+						writeConfig = true;
+						log.info( "Steam located at: "+ steamExeFile.getAbsolutePath() );
+					}
+
+					if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() > 0 ) {
+
+						String[] launchOptions = new String[] {"Directly", "Steam"};
+						int launchResponse = JOptionPane.showOptionDialog( null, "Would you prefer to launch FTL directly, or via Steam?", "How to Launch?", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, launchOptions, launchOptions[1] );
+						if ( launchResponse == 0 ) {
+							appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+							writeConfig = true;
+						}
+						else if ( launchResponse == 1 ) {
+							appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "true" );
+							writeConfig = true;
+						}
+					}
+				}
+				else {
+					appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+					writeConfig = true;
+				}
+			}
+
 			// Prompt if update_catalog is invalid or hasn't been set.
 			boolean askAboutUpdates = false;
-			String catalogUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_CATALOG );
-			String appUpdateInterval = appConfig.getProperty( SlipstreamConfig.UPDATE_APP );
-
-			if ( catalogUpdateInterval == null || !catalogUpdateInterval.matches( "^\\d+$" ) )
+			if ( !appConfig.getProperty( SlipstreamConfig.UPDATE_CATALOG, "" ).matches( "^\\d+$" ) )
 				askAboutUpdates = true;
-			if ( appUpdateInterval == null || !appUpdateInterval.matches( "^\\d+$" ) )
+			if ( !appConfig.getProperty( SlipstreamConfig.UPDATE_APP, "" ).matches( "^\\d+$" ) )
 				askAboutUpdates = true;
 
 			if ( askAboutUpdates ) {
 				String message = "";
-				message += "Would you like Slipstream to periodically\n";
-				message += "check for updates and download descriptions\n";
-				message += "for the latest mods?\n\n";
+				message += "Would you like Slipstream to periodically check for updates?\n";
+				message += "\n";
 				message += "You can change this later in modman.cfg.";
 
 				int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );

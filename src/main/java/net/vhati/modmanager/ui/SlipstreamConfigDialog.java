@@ -11,6 +11,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,6 +37,7 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 	protected static final String UPDATE_CATALOG = SlipstreamConfig.UPDATE_CATALOG;
 	protected static final String UPDATE_APP = SlipstreamConfig.UPDATE_APP;
 	protected static final String FTL_DATS_PATH = SlipstreamConfig.FTL_DATS_PATH;
+	protected static final String STEAM_EXE_PATH = SlipstreamConfig.STEAM_EXE_PATH;
 
 	protected SlipstreamConfig appConfig;
 
@@ -76,16 +78,19 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		editorPanel.addRow( FTL_DATS_PATH, ContentType.CHOOSER );
 		editorPanel.addTextRow( "Path to FTL's resources folder." );
 		editorPanel.addSeparatorRow();
+		editorPanel.addRow( STEAM_EXE_PATH, ContentType.CHOOSER );
+		editorPanel.addTextRow( "Path to Steam's executable." );
+		editorPanel.addSeparatorRow();
 		editorPanel.addBlankRow();
 		editorPanel.addTextRow( "Note: Some changes may have no immediate effect." );
 		editorPanel.addBlankRow();
 		editorPanel.addFillRow();
 
-		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ).equals( "true" ) );
-		editorPanel.getBoolean( REMEMBER_GEOMETRY ).setSelected( appConfig.getProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" ).equals( "true" ) );
+		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ) ) );
+		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ) ) );
+		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" ) ) );
+		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ) ) );
+		editorPanel.getBoolean( REMEMBER_GEOMETRY ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" ) ) );
 		editorPanel.getInt( UPDATE_CATALOG ).setText( Integer.toString( appConfig.getPropertyAsInt( SlipstreamConfig.UPDATE_CATALOG, 0 ) ) );
 		editorPanel.getInt( UPDATE_APP ).setText( Integer.toString( appConfig.getPropertyAsInt( SlipstreamConfig.UPDATE_APP, 0 ) ) );
 
@@ -93,6 +98,11 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 		ftlDatsPathField.setText( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" ) );
 		ftlDatsPathField.setPreferredSize( new Dimension( 150, ftlDatsPathField.getPreferredSize().height ) );
 		editorPanel.getChooser( FTL_DATS_PATH ).getButton().addActionListener( this );
+
+		JTextField steamExePathField = editorPanel.getChooser( STEAM_EXE_PATH ).getTextField();
+		steamExePathField.setText( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ) );
+		steamExePathField.setPreferredSize( new Dimension( 150, steamExePathField.getPreferredSize().height ) );
+		editorPanel.getChooser( STEAM_EXE_PATH ).getButton().addActionListener( this );
 
 		JPanel ctrlPanel = new JPanel();
 		ctrlPanel.setLayout( new BoxLayout( ctrlPanel, BoxLayout.X_AXIS ) );
@@ -165,6 +175,11 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 				appConfig.setProperty( SlipstreamConfig.FTL_DATS_PATH, tmp );
 			}
 
+			tmp = editorPanel.getChooser( STEAM_EXE_PATH ).getTextField().getText();
+			if ( tmp.length() > 0 && new File( tmp ).exists() ) {
+				appConfig.setProperty( SlipstreamConfig.STEAM_EXE_PATH, tmp );
+			}
+
 			this.setVisible( false );
 			this.dispose();
 		}
@@ -172,6 +187,24 @@ public class SlipstreamConfigDialog extends JFrame implements ActionListener {
 			File datsDir = FTLUtilities.promptForDatsDir( this );
 			if ( datsDir != null ) {
 				editorPanel.getChooser( FTL_DATS_PATH ).getTextField().setText( datsDir.getAbsolutePath() );
+			}
+		}
+		else if ( source == editorPanel.getChooser( STEAM_EXE_PATH ).getButton() ) {
+			String currentPath = editorPanel.getChooser( STEAM_EXE_PATH ).getTextField().getText();
+
+			JFileChooser steamExeChooser = new JFileChooser();
+			steamExeChooser.setDialogTitle( "Find Steam.exe or steam or Steam.app" );
+			steamExeChooser.setFileHidingEnabled( false );
+			steamExeChooser.setMultiSelectionEnabled( false );
+			if ( currentPath.length() > 0 ) {
+				steamExeChooser.setCurrentDirectory( new File( currentPath ) );
+			}
+
+			if ( steamExeChooser.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION ) {
+				File steamExeFile = steamExeChooser.getSelectedFile();
+				if ( steamExeFile.exists() ) {
+					editorPanel.getChooser( STEAM_EXE_PATH ).getTextField().setText( steamExeFile.getAbsolutePath() );
+				}
 			}
 		}
 	}

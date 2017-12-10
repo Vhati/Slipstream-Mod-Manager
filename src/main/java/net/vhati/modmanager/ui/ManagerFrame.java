@@ -193,7 +193,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 		modsFolderBtn = new JButton( "Open mods/" );
 		modsFolderBtn.setMargin( actionInsets );
-		modsFolderBtn.addMouseListener( new StatusbarMouseListener( this, "Open the mods/ folder." ) );
+		modsFolderBtn.addMouseListener( new StatusbarMouseListener( this, String.format( "Open the %s/ folder.", modsDir.getName() ) ) );
 		modsFolderBtn.addActionListener( this );
 		modsFolderBtn.setEnabled( Desktop.isDesktopSupported() );
 		modActionsPanel.add( modsFolderBtn );
@@ -258,7 +258,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			@Override
 			public void windowClosed( WindowEvent e ) {
 				// dispose() was called.
-
 				ListState<ModFileInfo> tableState = getCurrentModsTableState();
 				saveModsTableState( tableState );
 
@@ -667,25 +666,38 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 			ModPatchDialog patchDlg = new ModPatchDialog( this, true );
 
-			String neverRunFtl = appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
-			if ( !neverRunFtl.equals( "true" ) ) {
+			// Offer to run FTL.
+			if ( !"true".equals( appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" ) ) ) {
 				File exeFile = null;
 				String[] exeArgs = null;
 
-				if ( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) ) {
-					exeFile = FTLUtilities.findSteamExe();
-					exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+				// Try to run via Steam.
+				if ( "true".equals( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ) ) ) {
+
+					String steamPath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH );
+					if ( steamPath.length() > 0 ) {
+						exeFile = new File( steamPath );
+
+						if ( exeFile.exists() ) {
+							exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+						}
+						else {
+							log.warn( String.format( "%s does not exist: %s", SlipstreamConfig.STEAM_EXE_PATH, exeFile.getAbsolutePath() ) );
+							exeFile = null;
+						}
+					}
 
 					if ( exeFile == null ) {
-						log.warn( "Steam executable could not be found; FTL will be launched directly" );
+						log.warn( "Steam executable could not be found, so FTL will be launched directly" );
 					}
 				}
 				// Try to run directly.
 				if ( exeFile == null ) {
 					exeFile = FTLUtilities.findGameExe( datsDir );
-					exeArgs = new String[0];
 
-					if ( exeFile == null ) {
+					if ( exeFile != null ) {
+						exeArgs = new String[0];
+					} else {
 						log.warn( "FTL executable could not be found" );
 					}
 				}
@@ -743,7 +755,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				if ( Desktop.isDesktopSupported() ) {
 					Desktop.getDesktop().open( modsDir.getCanonicalFile() );
 				} else {
-					log.error( "Opening the mods/ folder is not possible on your OS" );
+					log.error( String.format( "Java cannot open the %s/ folder for you on this OS", modsDir.getName() ) );
 				}
 			}
 			catch ( IOException f ) {
