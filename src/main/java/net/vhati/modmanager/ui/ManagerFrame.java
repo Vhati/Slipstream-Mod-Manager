@@ -134,6 +134,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private JMenuItem configMenuItem;
 	private JMenuItem exitMenuItem;
 	private JMenu helpMenu;
+	private JMenuItem deleteBackupsMenuItem;
+	private JMenuItem steamVerifyCacheMenuItem;
 	private JMenuItem aboutMenuItem;
 
 	private JButton patchBtn;
@@ -332,6 +334,15 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		menubar.add( fileMenu );
 		helpMenu = new JMenu( "Help" );
 		helpMenu.setMnemonic( KeyEvent.VK_H );
+		deleteBackupsMenuItem = new JMenuItem( "Delete Backups" );
+		deleteBackupsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Delete backed up resources." ) );
+		deleteBackupsMenuItem.addActionListener( this );
+		helpMenu.add( deleteBackupsMenuItem );
+		steamVerifyCacheMenuItem = new JMenuItem( "Steam: Verify Game Cache" );
+		steamVerifyCacheMenuItem.addMouseListener( new StatusbarMouseListener( this, "Tell Steam to 'Verify Game Cache'." ) );
+		steamVerifyCacheMenuItem.addActionListener( this );
+		helpMenu.add( steamVerifyCacheMenuItem );
+		helpMenu.add( new JSeparator() );
 		aboutMenuItem = new JMenuItem( "About" );
 		aboutMenuItem.addMouseListener( new StatusbarMouseListener( this, "Show info about this application." ) );
 		aboutMenuItem.addActionListener( this );
@@ -814,6 +825,99 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		else if ( source == exitMenuItem ) {
 			setStatusText( "" );
 			exitApp();
+		}
+		else if ( source == deleteBackupsMenuItem ) {
+			StringBuilder deleteBuf = new StringBuilder();
+			deleteBuf.append( "Slipstream uses backups to revert FTL to a state without mods.\n" );
+			deleteBuf.append( "You are about to delete them.\n" );
+			deleteBuf.append( "\n" );
+			deleteBuf.append( "The next time you click 'patch', Slipstream will create fresh backups.\n" );
+			deleteBuf.append( "\n" );
+			deleteBuf.append( "FTL *must be* in a working unmodded state *before* you click 'patch'.\n" );
+			deleteBuf.append( "\n" );
+			deleteBuf.append( "To get FTL into a working unmodded state, you may need to reinstall FTL\n" );
+			deleteBuf.append( "or use Steam's \"Verify Game Cache\" feature.\n" );
+			deleteBuf.append( "\n" );
+			deleteBuf.append( "Whenever FTL is updated, you will need to delete stale backups or the\n" );
+			deleteBuf.append( "game will break.\n" );
+			deleteBuf.append( "\n" );
+			deleteBuf.append( "Are you sure you want to continue?" );
+
+			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, deleteBuf.toString(), "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+			if ( response == JOptionPane.YES_OPTION ) {
+
+				List<String> failures = new ArrayList<String>( 2 );
+				boolean backupsExist = false;
+				for ( String datName : new String[] {"ftl.dat", "data.dat", "resource.dat"} ) {
+					File bakFile = new File( backupDir, datName +".bak" );
+					if ( bakFile.exists() ) {
+						backupsExist = true;
+
+						if ( !bakFile.delete() ) {
+							log.error( "Unable to delete backup: "+ bakFile.getName() );
+							failures.add( bakFile.getName() );
+						}
+					}
+				}
+				if ( !backupsExist ) {
+					JOptionPane.showMessageDialog( ManagerFrame.this, "There were no backups to delete.", "Nothing to do", JOptionPane.INFORMATION_MESSAGE );
+				}
+				else if ( failures.isEmpty() ) {
+					JOptionPane.showMessageDialog( ManagerFrame.this, "Backups were deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE );
+				}
+				else {
+					StringBuilder failBuf = new StringBuilder( "The following files couldn't be deleted:" );
+					for ( String s : failures ) {
+						failBuf.append( "- \"" ).append( s ).append( "\"\n" );
+					}
+					failBuf.append( "\nTry going in the \"SMM/backup/\" folder and deleting them manually?" );
+					JOptionPane.showMessageDialog( ManagerFrame.this, failBuf.toString(), "Error", JOptionPane.ERROR_MESSAGE );
+
+					try {
+						if ( Desktop.isDesktopSupported() ) {
+							Desktop.getDesktop().open( backupDir.getCanonicalFile() );
+						} else {
+							log.error( String.format( "Java cannot open the %s/ folder for you on this OS", backupDir.getName() ) );
+						}
+					}
+					catch ( IOException f ) {
+						log.error( "Error opening mods/ folder", f );
+					}
+				}
+			}
+		}
+		else if ( source == steamVerifyCacheMenuItem ) {
+			StringBuilder verifyBuf = new StringBuilder();
+			verifyBuf.append( "Slipstream is about to tell Steam to re-download FTL's resources. This will get\n" );
+			verifyBuf.append( "the game back to a working unmodded state, but it could take a while.\n" );
+			verifyBuf.append( "\n" );
+			verifyBuf.append( "You can do it manually like this...\n" );
+			verifyBuf.append( "- Go to Steam's Library.\n" );
+			verifyBuf.append( "- Right-click FTL, choose \"Properties\".\n" );
+			verifyBuf.append( "- Click the \"Verify integrity of game files...\" button.\n" );
+			verifyBuf.append( "\n" );
+			verifyBuf.append( "If you do not have Steam, you will need to reinstall FTL instead.\n" );
+			verifyBuf.append( "\n" );
+			verifyBuf.append( "Either way, you should delete Slipstream's backups as well.\n" );
+			verifyBuf.append( "\n" );
+			verifyBuf.append( "Are you sure you want to continue?" );
+
+			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, verifyBuf.toString(), "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+			if ( response == JOptionPane.YES_OPTION ) {
+				try {
+					String exePath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
+					File exeFile = null;
+					if ( exePath.length() > 0 && (exeFile=new File( exePath )).exists() ) {
+						FTLUtilities.verifySteamGameCache( exeFile, FTLUtilities.STEAM_APPID_FTL );
+					} else {
+						log.warn( "Steam executable could not be found" );
+					}
+				}
+				catch ( IOException f ) {
+					log.error( "Couldn't tell Steam to 'verify game cache'", f );
+				}
+			}
+
 		}
 		else if ( source == aboutMenuItem ) {
 			setStatusText( "" );
