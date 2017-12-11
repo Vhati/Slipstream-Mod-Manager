@@ -638,17 +638,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 				if ( modDate != null ) {
 					SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
-					String dateString = dateFormat.format( modDate );
-					body += "It was released some time after "+ dateString +".\n\n";
-				} else {
+					body += String.format( "It was released some time after %s.\n\n", dateFormat.format( modDate ) );
+				}
+				else {
 					body += "The date of its release could not be determined.\n\n";
 				}
 
-				body += "If it is stable and has been out for over a month,\n";
-				body += "please let the Slipstream devs know where you ";
-				body += "found it.\n\n";
-				body += "Include the mod's version, and this hash.\n";
-				body += "MD5: "+ modHash +"\n";
+				body += "Mods can include an embedded description, but this one did not.\n";
+
 				infoArea.setDescription( modFileInfo.getName(), body );
 			}
 		}
