@@ -184,6 +184,10 @@ Advanced XML
     <mod:setAttributes a="1" b="2" />
       Sets/adds one or more attributes on the context tag.
 
+    <mod:removeAttributes a="" b="" />
+      Removes one or more attributes on the context tag (the values here
+      will be ignored). This was introduced in SMM 1.7.
+
     <mod:removeTag />
       Removes the context tag entirely.
 

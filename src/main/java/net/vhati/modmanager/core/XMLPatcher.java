@@ -379,6 +379,12 @@ public class XMLPatcher {
 						contextNode.setAttribute( attrib.clone() );
 					}
 				}
+				else if ( cmdNode.getName().equals( "removeAttributes" ) ) {
+					handled = true;
+					for ( Attribute attrib : cmdNode.getAttributes() ) {
+						contextNode.removeAttribute( attrib.getName() );
+					}
+				}
 				else if ( cmdNode.getName().equals( "setValue" ) ) {
 					handled = true;
 					contextNode.setText( cmdNode.getTextTrim() );
