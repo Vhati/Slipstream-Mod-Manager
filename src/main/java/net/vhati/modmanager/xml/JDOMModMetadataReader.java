@@ -9,11 +9,6 @@ import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.vhati.modmanager.core.ModDB;
-import net.vhati.modmanager.core.ModInfo;
-import net.vhati.modmanager.core.ModUtilities;
-import net.vhati.modmanager.core.ModUtilities.DecodeResult;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -22,10 +17,15 @@ import org.jdom2.input.SAXBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.vhati.modmanager.core.ModDB;
+import net.vhati.modmanager.core.ModInfo;
+import net.vhati.modmanager.core.ModUtilities;
+import net.vhati.modmanager.core.ModUtilities.DecodeResult;
+
 
 public class JDOMModMetadataReader {
 
-	private static final Logger log = LogManager.getLogger(JDOMModMetadataReader.class);
+	private static final Logger log = LogManager.getLogger( JDOMModMetadataReader.class );
 
 	public static final String METADATA_INNERPATH = "mod-appendix/metadata.xml";
 

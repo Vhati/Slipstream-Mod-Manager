@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 public class URLFetcher {
 
-	private static final Logger log = LogManager.getLogger(URLFetcher.class);
+	private static final Logger log = LogManager.getLogger( URLFetcher.class );
 
 
 	/**

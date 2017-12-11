@@ -9,14 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModInfo;
 import net.vhati.modmanager.core.ModsScanObserver;
 import net.vhati.modmanager.xml.JDOMModMetadataReader;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ModsScanThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger(ModsScanThread.class);
+	private static final Logger log = LogManager.getLogger( ModsScanThread.class );
 
 	private List<File> fileList = new ArrayList<File>();
 	private ModDB newDB;
@@ -35,7 +35,7 @@ public class ModsScanThread extends Thread {
 
 
 	public ModsScanThread( File[] files, ModDB knownDB, ModsScanObserver scanObserver ) {
-		this.fileList.addAll( Arrays.asList(files) );
+		this.fileList.addAll( Arrays.asList( files ) );
 		this.newDB = new ModDB( knownDB );
 		this.scanObserver = scanObserver;
 	}

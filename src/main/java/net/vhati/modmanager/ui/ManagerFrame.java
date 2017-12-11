@@ -53,6 +53,9 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
@@ -78,9 +81,6 @@ import net.vhati.modmanager.ui.Statusbar;
 import net.vhati.modmanager.ui.StatusbarMouseListener;
 import net.vhati.modmanager.ui.table.ChecklistTablePanel;
 import net.vhati.modmanager.ui.table.ListState;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar, Thread.UncaughtExceptionHandler {

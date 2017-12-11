@@ -153,7 +153,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 			// Matched groups 1 and 2... or 3.
 
 			if ( m.group(1) != null ) {
-				suffixDivider = m.group(1);
+				suffixDivider = m.group( 1 );
 			}
 
 			if ( m.group(2) != null ) {
@@ -162,7 +162,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 				suffixNum = -1;
 			}
 
-			suffix = m.group(0);
+			suffix = m.group( 0 );
 		}
 		else {
 			throw new IllegalArgumentException( "Could not parse version suffix string: "+ s );
@@ -177,7 +177,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 
 		Matcher m = commentPtn.matcher( s );
 		if ( m.matches() ) {
-			comment = m.group(1);
+			comment = m.group( 1 );
 		}
 		else {
 			throw new IllegalArgumentException( "Could not parse version comment string: "+ s );
@@ -320,7 +320,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 
 		List<Integer> tmpNumbers = new ArrayList<Integer>( getNumbers().length );
 		for ( int n : getNumbers() )
-			tmpNumbers.add( new Integer(n) );
+			tmpNumbers.add( new Integer( n ) );
 		result = salt * result + tmpNumbers.hashCode();
 
 		String tmpSuffix = getSuffix();

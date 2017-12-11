@@ -16,6 +16,16 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.FolderPack;
 import net.vhati.ftldat.PkgPack;
@@ -30,16 +40,6 @@ import net.vhati.modmanager.core.Report;
 import net.vhati.modmanager.core.Report.ReportFormatter;
 import net.vhati.modmanager.core.Report.ReportMessage;
 import net.vhati.modmanager.core.SlipstreamConfig;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class SlipstreamCLI {

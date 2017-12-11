@@ -10,13 +10,13 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.FolderPack;
 import net.vhati.ftldat.FTLPack;
 import net.vhati.ftldat.PkgPack;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class DatExtractDialog extends ProgressDialog {

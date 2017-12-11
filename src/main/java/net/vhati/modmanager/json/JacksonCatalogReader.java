@@ -3,9 +3,6 @@ package net.vhati.modmanager.json;
 import java.io.File;
 import java.io.IOException;
 
-import net.vhati.modmanager.core.ModDB;
-import net.vhati.modmanager.core.ModInfo;
-
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonParser;
@@ -16,10 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.vhati.modmanager.core.ModDB;
+import net.vhati.modmanager.core.ModInfo;
+
 
 public class JacksonCatalogReader {
 
-	private static final Logger log = LogManager.getLogger(JacksonCatalogReader.class);
+	private static final Logger log = LogManager.getLogger( JacksonCatalogReader.class );
 
 
 	public static ModDB parse( File jsonFile ) {
@@ -38,7 +38,7 @@ public class JacksonCatalogReader {
 			for ( JsonNode infoNode : catalogNode ) {
 				String threadURL = infoNode.get( "url" ).textValue();
 				String threadHash = infoNode.get( "thread_hash" ).textValue();
-				if ( !threadURL.equals("???") && !threadHash.equals("???") )
+				if ( !"???".equals( threadURL ) && !"???".equals( threadHash ) )
 					modDB.putThreadHash( threadURL, threadHash );
 
 				JsonNode versionsNode = infoNode.get( "versions" );

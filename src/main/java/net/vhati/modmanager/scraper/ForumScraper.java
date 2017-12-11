@@ -34,13 +34,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.vhati.ftldat.PackUtilities;
-import net.vhati.modmanager.core.ModDB;
-import net.vhati.modmanager.core.ModInfo;
-import net.vhati.modmanager.core.ModsInfo;
-import net.vhati.modmanager.json.JacksonCatalogReader;
-import net.vhati.modmanager.json.JacksonCatalogWriter;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -63,10 +56,17 @@ import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.vhati.ftldat.PackUtilities;
+import net.vhati.modmanager.core.ModDB;
+import net.vhati.modmanager.core.ModInfo;
+import net.vhati.modmanager.core.ModsInfo;
+import net.vhati.modmanager.json.JacksonCatalogReader;
+import net.vhati.modmanager.json.JacksonCatalogWriter;
+
 
 public class ForumScraper {
 
-	private static final Logger log = LogManager.getLogger(ForumScraper.class);
+	private static final Logger log = LogManager.getLogger( ForumScraper.class );
 
 	private static final String MASTER_LIST_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=2645";
 	private static final String FORUM_URL_FRAGMENT = "http://www.ftlgame.com/forum/viewtopic.php";

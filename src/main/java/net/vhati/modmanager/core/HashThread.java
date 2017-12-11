@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.vhati.ftldat.PackUtilities;
-import net.vhati.modmanager.core.HashObserver;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.vhati.ftldat.PackUtilities;
+import net.vhati.modmanager.core.HashObserver;
 
 
 /**
@@ -21,14 +21,14 @@ import org.apache.logging.log4j.Logger;
  */
 public class HashThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger(HashThread.class);
+	private static final Logger log = LogManager.getLogger( HashThread.class );
 
 	private List<File> fileList = new ArrayList<File>();
 	private HashObserver hashObserver = null;
 
 
 	public HashThread( File[] files, HashObserver hashObserver ) {
-		this.fileList.addAll( Arrays.asList(files) );
+		this.fileList.addAll( Arrays.asList( files ) );
 		this.hashObserver = hashObserver;
 	}
 

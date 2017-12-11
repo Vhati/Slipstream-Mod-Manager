@@ -27,12 +27,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory;
-import net.vhati.modmanager.core.EOLWriter;
-import net.vhati.modmanager.core.Report;
-import net.vhati.modmanager.core.Report.ReportMessage;
-import net.vhati.modmanager.core.SloppyXMLParser;
-
 import ar.com.hjg.pngj.PngReader;
 
 import org.jdom2.Content;
@@ -44,6 +38,12 @@ import org.jdom2.input.SAXBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory;
+import net.vhati.modmanager.core.EOLWriter;
+import net.vhati.modmanager.core.Report;
+import net.vhati.modmanager.core.Report.ReportMessage;
+import net.vhati.modmanager.core.SloppyXMLParser;
 
 
 public class ModUtilities {

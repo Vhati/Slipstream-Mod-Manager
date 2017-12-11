@@ -8,10 +8,10 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 
-import net.vhati.modmanager.ui.table.Reorderable;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.vhati.modmanager.ui.table.Reorderable;
 
 
 /**

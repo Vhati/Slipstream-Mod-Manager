@@ -9,12 +9,12 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import net.vhati.modmanager.core.ModsInfo;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import net.vhati.modmanager.core.ModsInfo;
 
 
 public class JacksonCatalogWriter {
@@ -60,7 +60,7 @@ public class JacksonCatalogWriter {
 		OutputStream os = null;
 		try {
 			os = new FileOutputStream( dstFile );
-			OutputStreamWriter writer = new OutputStreamWriter( os, Charset.forName("US-ASCII") );
+			OutputStreamWriter writer = new OutputStreamWriter( os, Charset.forName( "US-ASCII" ) );
 			mapper.writeValue( writer, rootNode );
 		}
 		finally {

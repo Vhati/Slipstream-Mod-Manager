@@ -102,7 +102,7 @@ public class EmptyAwareSAXHandlerFactory implements SAXHandlerFactory {
 				int endTagLine = loc.getLineNumber();
 				int endTagColumn = loc.getColumnNumber();
 
-				if ( startTagLine != -1 && endTagLine != -1 && startTagLine != endTagLine) {
+				if ( startTagLine != -1 && endTagLine != -1 && startTagLine != endTagLine ) {
 					twoPartTag = true;
 				}
 				else if ( startTagColumn != -1 && endTagColumn != -1 && startTagColumn != endTagColumn ) {

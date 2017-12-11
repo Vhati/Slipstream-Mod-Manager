@@ -18,8 +18,10 @@ import java.util.List;
  *   Runtime.getRuntime().addShutdownHook( deleteHook );
  */
 public class DelayedDeleteHook extends Thread {
+
 	private LinkedHashSet<Thread> watchedThreads = new LinkedHashSet<Thread>();
 	private LinkedHashSet<File> doomedFiles = new LinkedHashSet<File>();
+
 
 	public synchronized void addWatchedThread( Thread t ) {
 		if ( watchedThreads == null )

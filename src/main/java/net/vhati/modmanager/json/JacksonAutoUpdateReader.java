@@ -8,9 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.vhati.modmanager.core.AutoUpdateInfo;
-import net.vhati.modmanager.core.ComparableVersion;
-
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonParser;
@@ -21,10 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.vhati.modmanager.core.AutoUpdateInfo;
+import net.vhati.modmanager.core.ComparableVersion;
+
 
 public class JacksonAutoUpdateReader {
 
-	private static final Logger log = LogManager.getLogger(JacksonAutoUpdateReader.class);
+	private static final Logger log = LogManager.getLogger( JacksonAutoUpdateReader.class );
 
 
 	public static AutoUpdateInfo parse( File jsonFile ) {

@@ -13,14 +13,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.modmanager.cli.SlipstreamCLI;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.SlipstreamConfig;
 import net.vhati.modmanager.ui.ManagerFrame;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class FTLModManager {

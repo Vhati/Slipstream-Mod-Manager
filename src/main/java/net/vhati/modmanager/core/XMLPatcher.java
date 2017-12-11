@@ -303,11 +303,11 @@ public class XMLPatcher {
 
 				String parOp = node.getAttributeValue( "op" );
 
-				if ( parOp == null || (!parOp.equals("AND") && !parOp.equals("OR")) )
+				if ( parOp == null || (!parOp.equals( "AND" ) && !parOp.equals( "OR" )) )
 					throw new IllegalArgumentException( String.format( "Invalid \"op\" attribute (%s). Must be 'AND' or 'OR'.", getPathToRoot(node) ) );
 
-				boolean isAnd = parOp.equals("AND");
-				boolean isOr = parOp.equals("OR");
+				boolean isAnd = parOp.equals( "AND" );
+				boolean isOr = parOp.equals( "OR" );
 
 				Set<Element> candidateSet = new HashSet<Element>();
 				for ( Element criteriaNode : node.getChildren() ) {
@@ -317,7 +317,7 @@ public class XMLPatcher {
 					} else {
 						candidates = handleModFind( contextNode, criteriaNode );
 						if ( candidates == null )
-							throw new IllegalArgumentException( String.format( "Invalid <par> search criteria <%s> (%s). Must be a <find...> or <par>.", criteriaNode.getName(), getPathToRoot(criteriaNode) ) );
+							throw new IllegalArgumentException( String.format( "Invalid <par> search criteria <%s> (%s). Must be a <find...> or <par>.", criteriaNode.getName(), getPathToRoot( criteriaNode ) ) );
 					}
 
 					if ( isOr || candidateSet.isEmpty() ) {
@@ -330,7 +330,7 @@ public class XMLPatcher {
 				Map<Integer,Element> orderedCandidateMap = new TreeMap<Integer,Element>();
 				for ( Element candidate : candidateSet ) {
 					int index = contextNode.indexOf( candidate );
-					orderedCandidateMap.put( new Integer(index), candidate );
+					orderedCandidateMap.put( new Integer( index ), candidate );
 				}
 
 				List<Element> matchedNodes = new ArrayList<Element>( orderedCandidateMap.values() );
@@ -420,7 +420,7 @@ public class XMLPatcher {
 			}
 
 			if ( !handled ) {
-				throw new IllegalArgumentException( String.format( "Unrecognized mod tag <%s> (%s).", cmdNode.getName(), getPathToRoot(cmdNode) ) );
+				throw new IllegalArgumentException( String.format( "Unrecognized mod tag <%s> (%s).", cmdNode.getName(), getPathToRoot( cmdNode ) ) );
 			}
 		}
 	}
@@ -462,7 +462,7 @@ public class XMLPatcher {
 		} else if ( tmp.equals( "false" ) ) {
 			return false;
 		} else {
-			throw new IllegalArgumentException( String.format( "Invalid boolean attribute \"%s\" (%s). Must be 'true' or 'false'.", attrName, getPathToRoot(node) ) );
+			throw new IllegalArgumentException( String.format( "Invalid boolean attribute \"%s\" (%s). Must be 'true' or 'false'.", attrName, getPathToRoot( node ) ) );
 		}
 	}
 
@@ -476,7 +476,7 @@ public class XMLPatcher {
 			return Integer.parseInt( tmp );
 		}
 		catch ( NumberFormatException e ) {
-			throw new IllegalArgumentException( String.format( "Invalid int attribute \"%s\" (%s).", attrName, getPathToRoot(node) ) );
+			throw new IllegalArgumentException( String.format( "Invalid int attribute \"%s\" (%s).", attrName, getPathToRoot( node ) ) );
 		}
 	}
 

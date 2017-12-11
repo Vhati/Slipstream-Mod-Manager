@@ -24,10 +24,10 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import net.vhati.modmanager.ui.Statusbar;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.vhati.modmanager.ui.Statusbar;
 
 
 public class ModInfoArea extends JScrollPane {

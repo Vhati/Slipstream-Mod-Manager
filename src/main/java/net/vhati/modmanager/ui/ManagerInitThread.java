@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import javax.swing.SwingUtilities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ModDB;
 import net.vhati.modmanager.core.ModFileInfo;
@@ -24,9 +27,6 @@ import net.vhati.modmanager.json.JacksonCatalogReader;
 import net.vhati.modmanager.json.URLFetcher;
 import net.vhati.modmanager.ui.ManagerFrame;
 import net.vhati.modmanager.ui.table.ListState;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 /**

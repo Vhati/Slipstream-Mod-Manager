@@ -127,7 +127,7 @@ public class Report {
 				if ( m.start() - lastEnd > 0 )
 					buf.append( seq.subSequence( lastEnd, m.start() ) );
 
-				if ( m.group(1).length() > 0 ) {
+				if ( m.group( 1 ).length() > 0 ) {
 					// At \n, instead of 0-length beginning (^).
 					buf.append( "\n" );
 					for ( int i=0; i < indentCount; i++ ) {
@@ -212,7 +212,7 @@ public class Report {
 			if ( o instanceof ReportMessage == false ) return false;
 			ReportMessage other = (ReportMessage)o;
 			if ( this.type != other.type ) return false;
-			if ( !this.text.equals(other.text) ) return false;
+			if ( !this.text.equals( other.text ) ) return false;
 
 			if ( this.nestedMessages == null ) {
 				if ( other.nestedMessages != null )

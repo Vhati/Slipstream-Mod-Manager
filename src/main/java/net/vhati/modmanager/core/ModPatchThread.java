@@ -14,6 +14,11 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jdom2.JDOMException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.AbstractPack.RepackResult;
 import net.vhati.ftldat.FTLPack;
@@ -22,11 +27,6 @@ import net.vhati.ftldat.PackContainer;
 import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModPatchObserver;
 import net.vhati.modmanager.core.ModUtilities;
-
-import org.jdom2.JDOMException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class ModPatchThread extends Thread {

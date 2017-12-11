@@ -22,13 +22,13 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.vhati.modmanager.ui.FieldEditorPanel;
 import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
 import net.vhati.modmanager.ui.RegexDocument;
 import net.vhati.modmanager.xml.JDOMModMetadataWriter;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class CreateModDialog extends JDialog implements ActionListener {
