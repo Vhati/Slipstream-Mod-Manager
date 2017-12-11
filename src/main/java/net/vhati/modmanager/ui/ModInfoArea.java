@@ -3,6 +3,7 @@ package net.vhati.modmanager.ui;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import javax.swing.JScrollPane;
@@ -124,11 +125,11 @@ public class ModInfoArea extends JScrollPane {
 
 			boolean first = true;
 			if ( author != null ) {
-				doc.insertString( doc.getLength(), String.format("%sby %s", (first ? "" : " "), author), regularStyle );
+				doc.insertString( doc.getLength(), String.format( "%sby %s", (first ? "" : " "), author ), regularStyle );
 				first = false;
 			}
 			if ( version != null ) {
-				doc.insertString( doc.getLength(), String.format("%s(version %s)", (first ? "" : " "), version), regularStyle );
+				doc.insertString( doc.getLength(), String.format( "%s(version %s)", (first ? "" : " "), version ), regularStyle );
 				first = false;
 			}
 			if ( !first ) {
@@ -156,7 +157,7 @@ public class ModInfoArea extends JScrollPane {
 			}
 		}
 		catch ( BadLocationException e ) {
-			log.error( "Error filling info text area.", e );
+			log.error( "Error filling info text area", e );
 		}
 
 		textPane.setCaretPosition( 0 );
@@ -171,8 +172,8 @@ public class ModInfoArea extends JScrollPane {
 		try {
 			doc.remove( 0, doc.getLength() );
 		}
-		catch ( BadLocationException e) {
-			log.error( "Error clearing info text area.", e );
+		catch ( BadLocationException e ) {
+			log.error( "Error clearing info text area", e );
 		}
 	}
 
@@ -206,10 +207,10 @@ public class ModInfoArea extends JScrollPane {
 	private static StyleContext getDefaultStyleContext() {
 		StyleContext result = new StyleContext();
 		Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
-		Style baseStyle = result.addStyle("base", defaultStyle);
+		Style baseStyle = result.addStyle( "base", defaultStyle );
 
 		Style regularStyle = result.addStyle( STYLE_REGULAR, baseStyle );
-		StyleConstants.setFontFamily( regularStyle, "Monospaced" );
+		StyleConstants.setFontFamily( regularStyle, Font.MONOSPACED );
 		StyleConstants.setFontSize( regularStyle, 12 );
 
 		Style hyperStyle = result.addStyle( STYLE_HYPERLINK, regularStyle );
@@ -217,7 +218,7 @@ public class ModInfoArea extends JScrollPane {
 		StyleConstants.setUnderline( hyperStyle, true );
 
 		Style titleStyle = result.addStyle( STYLE_TITLE, baseStyle );
-		StyleConstants.setFontFamily( titleStyle, "SansSerif" );
+		StyleConstants.setFontFamily( titleStyle, Font.SANS_SERIF );
 		StyleConstants.setFontSize( titleStyle, 24 );
 		StyleConstants.setBold( titleStyle, true );
 
