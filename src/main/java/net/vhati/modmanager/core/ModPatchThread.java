@@ -176,6 +176,8 @@ public class ModPatchThread extends Thread {
 				return true;
 			}
 
+			String ultimateEncoding = null;
+
 			packContainer = new PackContainer();
 			if ( ftlDatFile.exists() ) {  // FTL 1.6.1.
 				AbstractPack ftlPack = new PkgPack( ftlDatFile, "r+" );
@@ -186,6 +188,8 @@ public class ModPatchThread extends Thread {
 				packContainer.setPackFor( "img/", ftlPack );
 				packContainer.setPackFor( null, ftlPack );
 				// Supposedly "exe_icon.png" has been observed at top-level?
+
+				ultimateEncoding = "UTF-8";
 			}
 			else if ( dataDatFile.exists() && resourceDatFile.exists() ) {  // FTL 1.01-1.5.13.
 				AbstractPack dataPack = new FTLPack( dataDatFile, "r+" );
@@ -195,6 +199,8 @@ public class ModPatchThread extends Thread {
 				packContainer.setPackFor( "data/", dataPack );
 				packContainer.setPackFor( "fonts/", resourcePack );
 				packContainer.setPackFor( "img/", resourcePack );
+
+				ultimateEncoding = "windows-1252";
 			}
 			else {
 				throw new IOException( String.format( "Could not find either \"%s\" or both \"%s\" and \"%s\"", ftlDatFile.getName(), dataDatFile.getName(), resourceDatFile.getName() ) );
@@ -277,7 +283,7 @@ public class ModPatchThread extends Thread {
 								InputStream mainStream = null;
 								try {
 									mainStream = pack.getInputStream( innerPath );
-									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, ultimateEncoding, globalPanic, pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
 									pack.remove( innerPath );
 									pack.add( innerPath, mergedStream );
@@ -304,7 +310,7 @@ public class ModPatchThread extends Thread {
 								InputStream mainStream = null;
 								try {
 									mainStream = pack.getInputStream( innerPath );
-									InputStream mergedStream = ModUtilities.appendXMLFile( mainStream, zis, "windows-1252", pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
+									InputStream mergedStream = ModUtilities.appendXMLFile( mainStream, zis, ultimateEncoding, pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
 									pack.remove( innerPath );
 									pack.add( innerPath, mergedStream );
@@ -330,7 +336,7 @@ public class ModPatchThread extends Thread {
 							String fixedText = ModUtilities.decodeText( zis, modFile.getName()+":"+parentPath+fileName ).text;
 							fixedText = Pattern.compile("\n").matcher( fixedText ).replaceAll( "\r\n" );
 
-							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
+							InputStream fixedStream = ModUtilities.encodeText( fixedText, ultimateEncoding, modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
 							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
@@ -345,7 +351,7 @@ public class ModPatchThread extends Thread {
 						else if ( fileName.endsWith( ".xml" ) ) {
 							innerPath = checkCase( innerPath, knownPaths, knownPathsLower );
 
-							InputStream fixedStream = ModUtilities.rebuildXMLFile( zis, "windows-1252", modFile.getName()+":"+parentPath+fileName );
+							InputStream fixedStream = ModUtilities.rebuildXMLFile( zis, ultimateEncoding, modFile.getName()+":"+parentPath+fileName );
 
 							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );
@@ -365,7 +371,7 @@ public class ModPatchThread extends Thread {
 							String fixedText = ModUtilities.decodeText( zis, modFile.getName()+":"+parentPath+fileName ).text;
 							fixedText = Pattern.compile("\n").matcher( fixedText ).replaceAll( "\r\n" );
 
-							InputStream fixedStream = ModUtilities.encodeText( fixedText, "windows-1252", modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
+							InputStream fixedStream = ModUtilities.encodeText( fixedText, ultimateEncoding, modFile.getName()+":"+parentPath+fileName+" (with new EOL)" );
 
 							if ( !moddedItems.contains( innerPath ) ) {
 								moddedItems.add( innerPath );

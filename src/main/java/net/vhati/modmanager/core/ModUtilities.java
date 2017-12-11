@@ -179,8 +179,11 @@ public class ModUtilities {
 	 * closing.
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
-	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding, even
-	 * on Linux.
+	 *
+	 * FTL 1.01-1.5.13 assumes all XML is in windows-1252 encoding, even on
+	 * Linux.
+	 *
+	 * FTL 1.6.1 assumes all XML is in UTF-8 encoding.
 	 *
 	 * The description arguments identify the streams for log messages.
 	 *
@@ -244,8 +247,11 @@ public class ModUtilities {
 	 * which doesn't need closing.
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
-	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
-	 * even on Linux.
+	 *
+	 * FTL 1.01-1.5.13 assumes all XML is in windows-1252 encoding, even on
+	 * Linux.
+	 *
+	 * FTL 1.6.1 assumes all XML is in UTF-8 encoding.
 	 *
 	 * The description arguments identify the streams for log messages.
 	 *
@@ -334,8 +340,11 @@ public class ModUtilities {
 	 * which doesn't need closing.
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
-	 * Note: FTL stubbornly assumes all XML is in windows-1252 encoding,
-	 * even on Linux.
+	 *
+	 * FTL 1.01-1.5.13 assumes all XML is in windows-1252 encoding, even on
+	 * Linux.
+	 *
+	 * FTL 1.6.1 assumes all XML is in UTF-8 encoding.
 	 *
 	 * The description argument identifies the stream for log messages.
 	 *
