@@ -166,12 +166,12 @@ public class SlipstreamCLI {
 		}
 
 		File configFile = new File( "modman.cfg" );
-		Properties config = getConfig( configFile );
+		SlipstreamConfig appConfig = getConfig( configFile );
 
 		if ( cmdline.hasOption( "list-mods" ) ) {  // Exits.
 			log.info( "Listing mods..." );
 
-			boolean allowZip = config.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
+			boolean allowZip = appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
 			File[] modFiles = modsDir.listFiles( new ModAndDirFileFilter( allowZip, true ) );
 			List<String> dirList = new ArrayList<String>();
 			List<String> fileList = new ArrayList<String>();
@@ -193,7 +193,7 @@ public class SlipstreamCLI {
 		if ( cmdline.hasOption( "extract-dats" ) ||
 		     cmdline.hasOption( "patch" ) ||
 		     cmdline.hasOption( "runftl" ) ) {
-			datsDir = getDatsDir( config );
+			datsDir = getDatsDir( appConfig );
 		}
 
 		if ( cmdline.hasOption( "extract-dats" ) ) {  // Exits (0/1).
@@ -306,19 +306,34 @@ public class SlipstreamCLI {
 			File exeFile = null;
 			String[] exeArgs = null;
 
-			if ( config.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ).equals( "true" ) ) {
-				exeFile = FTLUtilities.findSteamExe();
-				exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+			// Try to run via Steam.
+			if ( "true".equals( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ) ) ) {
+
+				String steamPath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH );
+				if ( steamPath.length() > 0 ) {
+					exeFile = new File( steamPath );
+
+					if ( exeFile.exists() ) {
+						exeArgs = new String[] {"-applaunch", FTLUtilities.STEAM_APPID_FTL};
+					}
+					else {
+						log.warn( String.format( "%s does not exist: %s", SlipstreamConfig.STEAM_EXE_PATH, exeFile.getAbsolutePath() ) );
+						exeFile = null;
+					}
+				}
 
 				if ( exeFile == null ) {
-					log.warn( "Steam executable could not be found; FTL will be launched directly" );
+					log.warn( "Steam executable could not be found, so FTL will be launched directly" );
 				}
+
 			}
+			// Try to run directly.
 			if ( exeFile == null ) {
 				exeFile = FTLUtilities.findGameExe( datsDir );
-				exeArgs = new String[0];
 
-				if ( exeFile == null ) {
+				if ( exeFile != null ) {
+					exeArgs = new String[0];
+				} else {
 					log.warn( "FTL executable could not be found" );
 				}
 			}
@@ -326,7 +341,8 @@ public class SlipstreamCLI {
 			if ( exeFile != null ) {
 				try {
 					FTLUtilities.launchExe( exeFile, exeArgs );
-				} catch ( Exception e ) {
+				}
+				catch ( Exception e ) {
 					log.error( "Error launching FTL", e );
 					System.exit( 1 );
 				}
@@ -349,14 +365,19 @@ public class SlipstreamCLI {
 	 * If an error occurs, it'll be logged,
 	 * and default settings will be returned.
 	 */
-	private static Properties getConfig( File configFile ) {
+	private static SlipstreamConfig getConfig( File configFile ) {
 
-		Properties config = new Properties();
-		config.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
-		config.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
-		config.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
-		config.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+		Properties props = new Properties();
+		props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
+		props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
+		props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+		props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+		props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
+		props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
 		// "update_catalog" doesn't have a default.
+		// "update_app" doesn't have a default.
+		// "manager_geometry" doesn't have a default.
 
 		// Read the config file.
 		InputStream in = null;
@@ -364,7 +385,7 @@ public class SlipstreamCLI {
 			if ( configFile.exists() ) {
 				log.trace( "Loading properties from config file" );
 				in = new FileInputStream( configFile );
-				config.load( new InputStreamReader( in, "UTF-8" ) );
+				props.load( new InputStreamReader( in, "UTF-8" ) );
 			}
 		}
 		catch ( IOException e ) {
@@ -375,7 +396,8 @@ public class SlipstreamCLI {
 			catch ( IOException e ) {}
 		}
 
-		return config;
+		SlipstreamConfig appConfig = new SlipstreamConfig( props, configFile );
+		return appConfig;
 	}
 
 
@@ -383,18 +405,19 @@ public class SlipstreamCLI {
 	 * Checks the validity of the config's dats path and returns it.
 	 * Or exits if the path is invalid.
 	 */
-	private static File getDatsDir( Properties config ) {
+	private static File getDatsDir( SlipstreamConfig appConfig ) {
 		File datsDir = null;
-		String datsPath = config.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
+		String datsPath = appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
 
 		if ( datsPath.length() > 0 ) {
 			log.info( "Using FTL dats path from config: "+ datsPath );
 			datsDir = new File( datsPath );
 			if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
-				log.error( "The config's ftl_dats_path does not exist" );
+				log.error( "The config's "+ SlipstreamConfig.FTL_DATS_PATH +" does not exist, or it is invalid" );
 				datsDir = null;
 			}
-		} else {
+		}
+		else {
 			log.error( "No FTL dats path previously set" );
 		}
 		if ( datsDir == null ) {

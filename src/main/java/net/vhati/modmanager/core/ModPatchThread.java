@@ -276,7 +276,7 @@ public class ModPatchThread extends Thread {
 							else {
 								InputStream mainStream = null;
 								try {
-									mainStream = pack.getInputStream(innerPath);
+									mainStream = pack.getInputStream( innerPath );
 									InputStream mergedStream = ModUtilities.patchXMLFile( mainStream, zis, "windows-1252", globalPanic, pack.getName()+":"+innerPath, modFile.getName()+":"+parentPath+fileName );
 									mainStream.close();
 									pack.remove( innerPath );
