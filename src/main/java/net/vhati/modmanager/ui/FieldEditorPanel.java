@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -28,11 +29,12 @@ import net.vhati.modmanager.ui.RegexDocument;
 
 
 public class FieldEditorPanel extends JPanel {
-	public enum ContentType { WRAPPED_LABEL, LABEL, STRING, INTEGER, BOOLEAN, SLIDER, COMBO, CHOOSER };
+	public enum ContentType { WRAPPED_LABEL, LABEL, STRING, TEXT_AREA, INTEGER, BOOLEAN, SLIDER, COMBO, CHOOSER };
 
 	private Map<String, JTextArea> wrappedLabelMap = new HashMap<String, JTextArea>();
 	private Map<String, JLabel> labelMap = new HashMap<String, JLabel>();
 	private Map<String, JTextField> stringMap = new HashMap<String, JTextField>();
+	private Map<String, JTextArea> textAreaMap = new HashMap<String, JTextArea>();
 	private Map<String, JTextField> intMap = new HashMap<String, JTextField>();
 	private Map<String, JCheckBox> boolMap = new HashMap<String, JCheckBox>();
 	private Map<String, JSlider> sliderMap = new HashMap<String, JSlider>();
@@ -134,6 +136,19 @@ public class FieldEditorPanel extends JPanel {
 			JTextField valueField = new JTextField();
 			stringMap.put( valueName, valueField );
 			this.add( valueField, gridC );
+		}
+		else if ( contentType == ContentType.TEXT_AREA ) {
+			gridC.anchor = GridBagConstraints.WEST;
+			JTextArea valueArea = new JTextArea();
+			valueArea.setEditable( true );
+			valueArea.setBorder( BorderFactory.createEtchedBorder() );
+			valueArea.setLineWrap( true );
+			valueArea.setWrapStyleWord( true );
+			valueArea.setFocusable( true );
+			valueArea.setFont( UIManager.getFont( "TextField.font" ) );  // Override small default font on systemLaf.
+
+			textAreaMap.put( valueName, valueArea );
+			this.add( valueArea, gridC );
 		}
 		else if ( contentType == ContentType.INTEGER ) {
 			gridC.anchor = GridBagConstraints.WEST;
@@ -331,6 +346,10 @@ public class FieldEditorPanel extends JPanel {
 		return stringMap.get( valueName );
 	}
 
+	public JTextArea getTextArea( String valueName ) {
+		return textAreaMap.get( valueName );
+	}
+
 	public JTextField getInt( String valueName ) {
 		return intMap.get( valueName );
 	}
@@ -362,6 +381,9 @@ public class FieldEditorPanel extends JPanel {
 		for ( JTextField valueField : stringMap.values() )
 			valueField.setText( "" );
 
+		for ( JTextArea valueArea : textAreaMap.values() )
+			valueArea.setText( "" );
+
 		for ( JTextField valueField : intMap.values() )
 			valueField.setText( "" );
 
@@ -386,6 +408,7 @@ public class FieldEditorPanel extends JPanel {
 		wrappedLabelMap.clear();
 		labelMap.clear();
 		stringMap.clear();
+		textAreaMap.clear();
 		intMap.clear();
 		boolMap.clear();
 		sliderMap.clear();
