@@ -111,7 +111,7 @@ public class FieldEditorPanel extends JPanel {
 		if ( contentType == ContentType.WRAPPED_LABEL ) {
 			gridC.anchor = GridBagConstraints.WEST;
 			JTextArea valueArea = new JTextArea();
-			valueArea.setBackground(null);
+			valueArea.setBackground( null );
 			valueArea.setEditable( false );
 			valueArea.setBorder( null );
 			valueArea.setLineWrap( true );
@@ -383,12 +383,14 @@ public class FieldEditorPanel extends JPanel {
 
 	@Override
 	public void removeAll() {
+		wrappedLabelMap.clear();
 		labelMap.clear();
 		stringMap.clear();
 		intMap.clear();
 		boolMap.clear();
 		sliderMap.clear();
 		comboMap.clear();
+		chooserMap.clear();
 		reminderMap.clear();
 		super.removeAll();
 		gridC = new GridBagConstraints();

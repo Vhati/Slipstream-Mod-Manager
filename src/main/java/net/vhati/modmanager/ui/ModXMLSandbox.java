@@ -100,7 +100,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 		this.datsDir = datsDir;
 
-		Font sandboxFont = new Font( "Monospaced", Font.PLAIN, 13 );
+		Font sandboxFont = new Font( Font.MONOSPACED, Font.PLAIN, 13 );
 
 		mainArea = new JTextArea();
 		mainArea.setTabSize( 4 );

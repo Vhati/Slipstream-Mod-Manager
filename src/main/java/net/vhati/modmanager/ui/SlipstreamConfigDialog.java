@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -55,6 +54,7 @@ public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 		editorPanel = new FieldEditorPanel( false );
 		editorPanel.setBorder( BorderFactory.createEmptyBorder( 10, 10, 0, 10 ) );
 		editorPanel.setNameWidth( 250 );
+
 		editorPanel.addRow( ALLOW_ZIP, ContentType.BOOLEAN );
 		editorPanel.addTextRow( "Treat .zip files as .ftl files." );
 		editorPanel.addSeparatorRow();
@@ -141,7 +141,6 @@ public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 			}
 		});
 	}
-
 
 	@Override
 	public void actionPerformed( ActionEvent e ) {

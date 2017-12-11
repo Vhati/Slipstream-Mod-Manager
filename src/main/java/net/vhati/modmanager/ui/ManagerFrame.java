@@ -881,7 +881,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 						}
 					}
 					catch ( IOException f ) {
-						log.error( "Error opening mods/ folder", f );
+						log.error( String.format( "Error opening %s/ folder", backupDir.getName() ), f );
 					}
 				}
 			}
