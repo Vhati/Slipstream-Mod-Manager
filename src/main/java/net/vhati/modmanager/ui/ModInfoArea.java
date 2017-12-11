@@ -4,8 +4,13 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
@@ -37,7 +42,10 @@ public class ModInfoArea extends JScrollPane {
 	public static Color COLOR_HYPER = Color.BLUE;
 	public static final StyleContext DEFAULT_STYLES = ModInfoArea.getDefaultStyleContext();
 
+	private JPopupMenu linkPopup = new JPopupMenu();
+
 	private Statusbar statusbar = null;
+	private String lastClickedLinkTarget = null;
 
 	private JTextPane textPane;
 	private StyledDocument doc;
@@ -62,11 +70,31 @@ public class ModInfoArea extends JScrollPane {
 			browseWorks = true;
 		}
 
+		linkPopup.add( new AbstractAction( "Copy link address" ) {
+			@Override
+			public void actionPerformed( ActionEvent ae ) {
+				if ( lastClickedLinkTarget != null ) {
+					Toolkit.getDefaultToolkit().getSystemClipboard().setContents( new StringSelection( lastClickedLinkTarget ), null );
+				}
+			}
+		});
 
 		MouseInputAdapter hyperlinkListener = new MouseInputAdapter() {
 			private Cursor defaultCursor = new Cursor( Cursor.DEFAULT_CURSOR );
 			private Cursor linkCursor = new Cursor( Cursor.HAND_CURSOR );
 			private boolean wasOverLink = false;
+
+			@Override
+			public void mousePressed( MouseEvent e ) {
+				if ( e.isConsumed() ) return;
+				if ( e.isPopupTrigger() ) showMenu( e );
+			}
+
+			@Override
+			public void mouseReleased( MouseEvent e ) {
+				if ( e.isConsumed() ) return;
+				if ( e.isPopupTrigger() ) showMenu( e );
+			}
 
 			@Override
 			public void mouseClicked( MouseEvent e ) {
@@ -106,6 +134,23 @@ public class ModInfoArea extends JScrollPane {
 							statusbar.setStatusText( "" );
 					}
 					wasOverLink = false;
+				}
+			}
+
+			private void showMenu( MouseEvent e ) {
+				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel( e.getPoint() ) ).getAttributes();
+				Object targetObj = tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET );
+				if ( targetObj != null ) {  // Link menu.
+					textPane.requestFocus();
+
+					lastClickedLinkTarget = targetObj.toString();
+
+					int nx = e.getX();
+					if ( nx > 500 ) nx = nx - linkPopup.getSize().width;
+
+					linkPopup.show( e.getComponent(), nx, e.getY() - linkPopup.getSize().height );
+
+					e.consume();
 				}
 			}
 		};
