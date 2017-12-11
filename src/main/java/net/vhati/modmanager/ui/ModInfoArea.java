@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -69,6 +70,9 @@ public class ModInfoArea extends JScrollPane {
 
 			@Override
 			public void mouseClicked( MouseEvent e ) {
+				if ( e.isConsumed() ) return;
+				if ( !SwingUtilities.isLeftMouseButton( e ) ) return;
+
 				AttributeSet tmpAttr = doc.getCharacterElement( textPane.viewToModel( e.getPoint() ) ).getAttributes();
 				Object targetObj = tmpAttr.getAttribute( ATTR_HYPERLINK_TARGET );
 				if ( targetObj != null ) {
@@ -81,6 +85,7 @@ public class ModInfoArea extends JScrollPane {
 							log.error( "Error browsing clicked url: "+ targetObj.toString(), f );
 						}
 					}
+					e.consume();
 				}
 			}
 

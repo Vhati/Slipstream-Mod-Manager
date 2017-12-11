@@ -14,6 +14,9 @@ import javax.swing.text.JTextComponent;
 
 /**
  * A Cut/Copy/Paste/SelectAll context menu for JTextComponents.
+ *
+ * Add this listener after any others. Any pressed/released listeners that want
+ * to preempt this menu should call e.consume().
  */
 public class ClipboardMenuMouseListener extends MouseAdapter {
 
@@ -63,11 +66,13 @@ public class ClipboardMenuMouseListener extends MouseAdapter {
 
 	@Override
 	public void mousePressed( MouseEvent e ) {
+		if ( e.isConsumed() ) return;
 		if ( e.isPopupTrigger() ) showMenu( e );
 	}
 
 	@Override
 	public void mouseReleased( MouseEvent e ) {
+		if ( e.isConsumed() ) return;
 		if ( e.isPopupTrigger() ) showMenu( e );
 	}
 
@@ -79,10 +84,10 @@ public class ClipboardMenuMouseListener extends MouseAdapter {
 
 		boolean enabled = textComponent.isEnabled();
 		boolean editable = textComponent.isEditable();
-		boolean nonempty = !(textComponent.getText() == null || textComponent.getText().equals(""));
+		boolean nonempty = !(textComponent.getText() == null || textComponent.getText().equals( "" ));
 		boolean marked = textComponent.getSelectedText() != null;
 
-		boolean pasteAvailable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor);
+		boolean pasteAvailable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents( null ).isDataFlavorSupported( DataFlavor.stringFlavor );
 
 		cutAction.setEnabled( enabled && editable && marked );
 		copyAction.setEnabled( enabled && marked );
@@ -93,5 +98,7 @@ public class ClipboardMenuMouseListener extends MouseAdapter {
 		if ( nx > 500 ) nx = nx - popup.getSize().width;
 
 		popup.show( e.getComponent(), nx, e.getY() - popup.getSize().height );
+
+		e.consume();
 	}
 }
