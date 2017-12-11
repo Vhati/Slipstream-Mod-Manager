@@ -130,6 +130,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private JMenu fileMenu;
 	private JMenuItem rescanMenuItem;
 	private JMenuItem extractDatsMenuItem;
+	private JMenuItem createModMenuItem;
 	private JMenuItem sandboxMenuItem;
 	private JMenuItem configMenuItem;
 	private JMenuItem exitMenuItem;
@@ -318,10 +319,16 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		extractDatsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Extract FTL resources into a folder." ) );
 		extractDatsMenuItem.addActionListener( this );
 		fileMenu.add( extractDatsMenuItem );
+		fileMenu.add( new JSeparator() );
+		createModMenuItem = new JMenuItem( "New Mod..." );
+		createModMenuItem.addMouseListener( new StatusbarMouseListener( this, "Generate boilerplace for a new mod." ) );
+		createModMenuItem.addActionListener( this );
+		fileMenu.add( createModMenuItem );
 		sandboxMenuItem = new JMenuItem( "XML Sandbox..." );
 		sandboxMenuItem.addMouseListener( new StatusbarMouseListener( this, "Experiment with advanced mod syntax." ) );
 		sandboxMenuItem.addActionListener( this );
 		fileMenu.add( sandboxMenuItem );
+		fileMenu.add( new JSeparator() );
 		configMenuItem = new JMenuItem( "Preferences..." );
 		configMenuItem.addMouseListener( new StatusbarMouseListener( this, "Edit preferences." ) );
 		configMenuItem.addActionListener( this );
@@ -802,6 +809,15 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			extractDlg.getWorkerThread().setDefaultUncaughtExceptionHandler( this );
 			extractDlg.extract();
 			extractDlg.setVisible( true );
+		}
+		else if ( source == createModMenuItem ) {
+			setStatusText( "" );
+
+			CreateModDialog createModDlg = new CreateModDialog( ManagerFrame.this, modsDir );
+			createModDlg.addWindowListener( nerfListener );
+			//configDlg.setSize( 300, 400 );
+			createModDlg.setLocationRelativeTo( null );
+			createModDlg.setVisible( true );
 		}
 		else if ( source == sandboxMenuItem ) {
 			setStatusText( "" );
