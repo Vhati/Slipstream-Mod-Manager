@@ -1,5 +1,8 @@
 Changelog
 
+1.9:
+- Fixed corrupted civilian sector music in FTL 1.6.1+
+
 1.8:
 - Fixed endless prompting about Steam on startup for standalone distros
 - Fixed mods not being added to FTL's resources

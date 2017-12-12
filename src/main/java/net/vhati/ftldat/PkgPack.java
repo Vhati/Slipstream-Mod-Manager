@@ -327,7 +327,7 @@ public class PkgPack extends AbstractPack {
 	private PkgEntry getEntryWithEarliestData() {
 		PkgEntry result = null;
 		for ( PkgEntry entry : entryList ) {
-			if ( entry != null && (result == null || entry.dataOffset > result.dataOffset) ) {
+			if ( entry != null && (result == null || entry.dataOffset < result.dataOffset) ) {
 				result = entry;
 			}
 		}
