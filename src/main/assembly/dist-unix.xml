@@ -7,12 +7,25 @@
 		<fileSet>
 			<directory>skel_common</directory>
 			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.txt</exclude>
+			</excludes>
 		</fileSet>
+		<fileSet>
+			<directory>skel_common</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.txt</include>
+			</includes>
+			<lineEnding>lf</lineEnding>
+		</fileSet>
+
 		<fileSet>  <!-- Non-executables. -->
 			<directory>skel_unix</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.command</exclude>
+				<exclude>**/*.desktop</exclude>
 				<exclude>**/*.sh</exclude>
 			</excludes>
 		</fileSet>
@@ -21,10 +34,13 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.command</include>
+				<include>**/*.desktop</include>
 				<include>**/*.sh</include>
 			</includes>
 			<fileMode>755</fileMode>
+			<lineEnding>lf</lineEnding>
 		</fileSet>
+
 		<fileSet>
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/</outputDirectory>
