@@ -28,7 +28,7 @@ public class FTLModManager {
 	private static final Logger log = LogManager.getLogger( FTLModManager.class );
 
 	public static final String APP_NAME = "Slipstream Mod Manager";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.7" );
+	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.8" );
 	public static final String APP_URL = "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102";
 	public static final String APP_AUTHOR = "Vhati";
 
