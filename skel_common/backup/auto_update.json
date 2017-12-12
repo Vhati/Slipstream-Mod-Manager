@@ -2,18 +2,27 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.7",
+				"version" : "1.8",
 				"urls" : {
 					"Forum" : "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.7/SlipstreamModManager_1.7-Unix.tar.gz/download",
-					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.7/SlipstreamModManager_1.7-Win.zip/download"
+					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Unix.tar.gz/download",
+					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Win.zip/download"
 				},
-				"notice" : "SMM 1.7 has fatal bugs, sorry. =/\nImportant: Return FTL to an unmodded state before upgrading SMM. And delete SMM's backups when upgrading FTL."
+				"notice" : "SMM 1.7 had fatal bugs, sorry. =/\nReminder: Return FTL to an unmodded state before upgrading SMM. And delete SMM's backups when upgrading FTL."
 			},
 			"changelog" : [
 				{
+					"version" : "1.8",
+					"hidden" : false,
+					"changes" : [
+						"Fixed endless prompting about Steam on startup for standalone distros",
+						"Fixed mods not being added to FTL's resources",
+						"Fixed 'stream closed' error during patching"
+					]
+				},
+				{
 					"version" : "1.7",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Added support for FTL 1.6.1",
 						"Added a config option to launch FTL via Steam, if possible",
@@ -31,14 +40,14 @@
 				},
 				{
 					"version" : "1.6",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Fixed modorder not being saved properly"
 					]
 				},
 				{
 					"version" : "1.5",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Added 'no info... yet' message when mods/ scan is still in-progress",
 						"Fixed modman.command double-clicking on Linux?",
@@ -61,7 +70,7 @@
 				},
 				{
 					"version" : "1.4",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Cleaned up some dodgy code when initially prompting for FTL's location",
 						"Added another common game location: \"C:\\Program Files (x86)\\FTL\""
@@ -69,7 +78,7 @@
 				},
 				{
 					"version" : "1.3",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Added \"Return FTL to an unmodded state before switching to a new version\" reminder when checking for updates",
 						"Fixed advanced find tags' panic arg (was \"true\" all the time)",
@@ -85,7 +94,7 @@
 				},
 				{
 					"version" : "1.2",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Added a commandline interface",
 						"Incorporated strict-then-sloppy XML parsing into the patch process",
@@ -102,7 +111,7 @@
 				},
 				{
 					"version": "1.1",
-					"hidden" : "false",
+					"hidden" : false,
 					"changes" : [
 						"Added a button to open the mods/ folder",
 						"Added FTL resource extraction",
