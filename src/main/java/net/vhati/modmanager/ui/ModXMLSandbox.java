@@ -72,6 +72,8 @@ import org.jdom2.JDOMException;
  */
 public class ModXMLSandbox extends JFrame implements ActionListener {
 
+	private static final String baseTitle = "Mod XML Sandbox";
+
 	private UndoManager undoManager = new UndoManager();
 	private String mainText = null;
 
@@ -95,7 +97,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 
 	public ModXMLSandbox( File datsDir ) {
-		super( "Mod XML Sandbox" );
+		super( baseTitle );
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
 		this.datsDir = datsDir;
@@ -289,7 +291,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		this.pack();
 	}
 
-
 	@Override
 	public void setVisible( boolean b ) {
 		super.setVisible( b );
@@ -305,7 +306,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		}
 	}
 
-
 	@Override
 	public void actionPerformed( ActionEvent e ) {
 		Object source = e.getSource();
@@ -317,7 +317,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			patch();
 		}
 	}
-
 
 	private void open() {
 		messageArea.setText( "" );
@@ -352,6 +351,7 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			mainArea.setCaretPosition( 0 );
 			areasPane.setSelectedComponent( mainScroll );
 			resultArea.setText( "" );
+			this.setTitle( String.format( "%s - %s", innerPath, baseTitle ) );
 		}
 		catch ( IOException f ) {
 			messageArea.setText( f.getMessage() );
@@ -369,7 +369,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			catch ( IOException f ) {}
 		}
 	}
-
 
 	private void patch() {
 		String mainText = mainArea.getText();
@@ -395,7 +394,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 			messageArea.setCaretPosition( 0 );
 		}
 	}
-
 
 	private void findNext() {
 		JTextArea currentArea = getCurrentArea();
@@ -442,7 +440,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		}
 	}
 
-
 	private void updateCaretStatus() {
 		JTextArea currentArea = getCurrentArea();
 		if ( currentArea == null ) return;
@@ -460,7 +457,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		}
 	}
 
-
 	private JTextArea getCurrentArea() {
 		if ( areasPane.getSelectedIndex() == 0 )
 			return mainArea;
@@ -471,7 +467,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 		else
 			return null;
 	}
-
 
 	/**
 	 * Shows a modal prompt with a JTree representing a list of paths.
@@ -523,7 +518,6 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 
 		return result;
 	}
-
 
 	/**
 	 * Adds TreeNodes, if they don't already exist, based on a shash-delimited string.
