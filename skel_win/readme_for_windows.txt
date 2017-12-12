@@ -72,15 +72,19 @@ Usage
 
 Troubleshooting
 
+* General advice...
+    Double-click modman_debug.bat.
+    That will show you the logs and offer to fix interface glitches.
+
 * If you get "java.lang.UnsupportedClassVersionError" on startup...
     You need a newer version of Java.
 
 * If some other program starts when you double-click modman.jar...
     Running an exe is recommended, but if you insist, try JarFix.
-      http://johann.loefflmann.net/en/software/jarfix/index.html
+      https://johann.loefflmann.net/en/software/jarfix/index.html
 
 * If you get permission errors...
-    Option 1 (Windoes 7 or Vista):
+    Option 1 (Windows Vista and later):
       Start Menu -> Programs -> Accessories.
       Right-click "Command Prompt" to run as an admin.
       Type this, then hit enter: cd "c:\location\of\Slipstream"
@@ -98,7 +102,7 @@ Troubleshooting
       Or in SMM, under File-Preferences, check "ftl_dats_path".
       Or open modman.cfg with a text editor.
 
-    Option 2 (Windoes 7 or Vista):
+    Option 2 (Windoes Vista and later):
       Look for a resources directory like this and delete it.
       "C:\Users\[Username]\AppData\Local\VirtualStore\Program Files\FTL\resources"
 
@@ -117,7 +121,6 @@ Troubleshooting
 
 * If text in-game is shrunken and moved to the top of the screen...
     FTL was upgraded, but Slipstream modded with backups from the old FTL.
-    When upgrading FTL in the future, delete what's in SMM\backup\ first.
     See the suggestion below for replacing corrupt resources.
 
 * If FTL's resources are corrupt...

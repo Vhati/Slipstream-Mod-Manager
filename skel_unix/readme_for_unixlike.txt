@@ -80,7 +80,6 @@ Troubleshooting
 
 * If text in-game is shrunken and moved to the top of the screen...
     FTL was upgraded, but Slipstream modded with backups from the old FTL.
-    When upgrading FTL in the future, delete what's in SMM/backup/ first.
     See the suggestion below for replacing corrupt resources.
 
 * If FTL's resources are corrupt...
