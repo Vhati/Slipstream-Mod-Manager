@@ -1,15 +1,25 @@
 Changelog
 
 1.7:
+- Added support for FTL 1.6.1
 - Added a config option to launch FTL via Steam, if possible
-- Added an alternate location to automatically find SteamApps/ on linux
+- Added alternate locations to locate FTL resources on Linux
+- Added 'modman_debug.bat' for troubleshooting on Windows
+- Added help menu items for deleting backups and Steam's 'Verify Game Cache'
+- Added a menu item to generate boilerplate for new mods
+- Added a 'copy link location' popup to forum links in mod descriptions
+- Added advanced removeAttributes tag
+- Fixed 'access denied' error when dats are set to be read-only
+- Fixed Windows exe launchers not finding Java 9
+- Fixed unresolved symlinks when locating FTL resources
+- Fixed unpreserved leading/trailing space in 'misc.xml' values (JDOM 2.0.5 bug)
 
 1.6:
 - Fixed modorder not being saved properly
 
 1.5:
 - Added 'no info... yet' message when mods/ scan is still in-progress
-- Fixed modman.command double-clicking on linux?
+- Fixed modman.command double-clicking on Linux?
 - Fixed advanced find tags not honoring start= when greater than match count
 - Fixed advanced find tags not honoring limit=
 - Fixed hidden files and directories not appearing when finding resources

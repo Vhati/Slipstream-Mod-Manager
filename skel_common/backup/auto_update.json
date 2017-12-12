@@ -2,21 +2,31 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.6",
+				"version" : "1.7",
 				"urls" : {
-					"Forum" : "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.6/Slipstream%20Mod%20Manager%20v1.6-Unix.tar.gz/download",
-					"Windows" : "http://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.6/Slipstream%20Mod%20Manager%20v1.6-Win.zip/download"
+					"Forum" : "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102",
+					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.7/SlipstreamModManager_1.7-Unix.tar.gz/download",
+					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.7/SlipstreamModManager_1.7-Win.zip/download"
 				},
-				"notice" : "Important: Return FTL to an unmodded state before switching to a new version."
+				"notice" : "Important: Return FTL to an unmodded state before upgrading SMM. And delete SMM's backups when upgrading FTL."
 			},
 			"changelog" : [
 				{
 					"version" : "1.7",
-					"hidden" : "true",
+					"hidden" : "false",
 					"changes" : [
+						"Added support for FTL 1.6.1",
 						"Added a config option to launch FTL via Steam, if possible",
-						"Added an alternate location to automatically find SteamApps/ on linux"
+						"Added alternate locations to locate FTL resources on Linux",
+						"Added 'modman_debug.bat' for troubleshooting on Windows",
+						"Added help menu items for deleting backups and Steam's 'Verify Game Cache'",
+						"Added a menu item to generate boilerplate for new mods",
+						"Added a 'copy link location' popup to forum links in mod descriptions",
+						"Added advanced removeAttributes tag",
+						"Fixed 'access denied' error when dats are set to be read-only",
+						"Fixed Windows exe launchers not finding Java 9",
+						"Fixed unresolved symlinks when locating FTL resources",
+						"Fixed unpreserved leading/trailing space in 'misc.xml' values (JDOM 2.0.5 bug)"
 					]
 				},
 				{
@@ -31,7 +41,7 @@
 					"hidden" : "false",
 					"changes" : [
 						"Added 'no info... yet' message when mods/ scan is still in-progress",
-						"Fixed modman.command double-clicking on linux?",
+						"Fixed modman.command double-clicking on Linux?",
 						"Fixed advanced find tags not honoring start= when greater than match count",
 						"Fixed advanced find tags not honoring limit=",
 						"Fixed hidden files and directories not appearing when finding resources",
