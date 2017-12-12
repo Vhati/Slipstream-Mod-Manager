@@ -8,7 +8,7 @@
 					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Unix.tar.gz/download",
 					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Win.zip/download"
 				},
-				"notice" : "SMM 1.7 had fatal bugs, sorry. =/\nReminder: Return FTL to an unmodded state before upgrading SMM. And delete SMM's backups when upgrading FTL."
+				"notice" : "SMM 1.7 had fatal bugs, sorry. =/\n\nReminder: Return FTL to an unmodded state before upgrading SMM.\nAnd delete SMM's backups when upgrading FTL."
 			},
 			"changelog" : [
 				{
