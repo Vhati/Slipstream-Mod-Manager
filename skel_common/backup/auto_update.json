@@ -12,6 +12,13 @@
 			},
 			"changelog" : [
 				{
+					"version" : "1.8",
+					"hidden" : "true",
+					"changes" : [
+						"Fixed endless prompting about Steam on startup for standalone distros"
+					]
+				},
+				{
 					"version" : "1.7",
 					"hidden" : "false",
 					"changes" : [
