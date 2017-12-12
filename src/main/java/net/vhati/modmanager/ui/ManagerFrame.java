@@ -900,6 +900,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			}
 		}
 		else if ( source == steamVerifyCacheMenuItem ) {
+			String exePath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
+			File exeFile = null;
+			if ( exePath.length() == 0 || !(exeFile=new File( exePath )).exists() ) {
+				log.warn( "Steam's location was either not set or doesn't exist" );
+				JOptionPane.showMessageDialog( ManagerFrame.this, "Steam's location was either not set or doesn't exist.", "Nothing to do", JOptionPane.WARNING_MESSAGE );
+				return;
+			}
+
 			StringBuilder verifyBuf = new StringBuilder();
 			verifyBuf.append( "Slipstream is about to tell Steam to re-download FTL's resources. This will get\n" );
 			verifyBuf.append( "the game back to a working unmodded state, but it could take a while.\n" );
@@ -918,13 +926,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, verifyBuf.toString(), "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
 				try {
-					String exePath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
-					File exeFile = null;
-					if ( exePath.length() > 0 && (exeFile=new File( exePath )).exists() ) {
-						FTLUtilities.verifySteamGameCache( exeFile, FTLUtilities.STEAM_APPID_FTL );
-					} else {
-						log.warn( "Steam executable could not be found" );
-					}
+					FTLUtilities.verifySteamGameCache( exeFile, FTLUtilities.STEAM_APPID_FTL );
 				}
 				catch ( IOException f ) {
 					log.error( "Couldn't tell Steam to 'verify game cache'", f );

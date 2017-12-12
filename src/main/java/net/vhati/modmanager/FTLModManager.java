@@ -69,9 +69,10 @@ public class FTLModManager {
 			boolean writeConfig = false;
 			Properties props = new Properties();
 			props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
-			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );
-			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
-			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
+			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );  // Prompt.
+			props.setProperty( SlipstreamConfig.STEAM_DISTRO, "" );   // Prompt.
+			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ); // Prompt.
+			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "" );  // Prompt.
 			props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
 			props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
 			props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
@@ -188,10 +189,24 @@ public class FTLModManager {
 			}
 
 			// Ask about Steam.
-			if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() == 0 ) {
-
+			if ( appConfig.getProperty( SlipstreamConfig.STEAM_DISTRO, "" ).length() == 0 ) {
 				int steamBasedResponse = JOptionPane.showConfirmDialog( null, "Was FTL installed via Steam?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 				if ( steamBasedResponse == JOptionPane.YES_OPTION ) {
+					appConfig.setProperty( SlipstreamConfig.STEAM_DISTRO, "true" );
+					writeConfig = true;
+				}
+				else {
+					appConfig.setProperty( SlipstreamConfig.STEAM_DISTRO, "false" );
+					writeConfig = true;
+				}
+			}
+
+			// If this is a Steam distro.
+			if ( "true".equals( appConfig.getProperty( SlipstreamConfig.STEAM_DISTRO, "false" ) ) ) {
+
+				// Find Steam's executable.
+				if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() == 0 ) {
+
 					File steamExeFile = FTLUtilities.findSteamExe();
 
 					if ( steamExeFile == null && System.getProperty( "os.name" ).startsWith( "Windows" ) ) {
@@ -239,8 +254,11 @@ public class FTLModManager {
 						writeConfig = true;
 						log.info( "Steam located at: "+ steamExeFile.getAbsolutePath() );
 					}
+				}
 
-					if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() > 0 ) {
+				if ( appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ).length() > 0 ) {
+
+					if ( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "" ).length() == 0 ) {
 
 						String[] launchOptions = new String[] {"Directly", "Steam"};
 						int launchResponse = JOptionPane.showOptionDialog( null, "Would you prefer to launch FTL directly, or via Steam?", "How to Launch?", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, launchOptions, launchOptions[1] );
@@ -253,10 +271,6 @@ public class FTLModManager {
 							writeConfig = true;
 						}
 					}
-				}
-				else {
-					appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" );
-					writeConfig = true;
 				}
 			}
 
@@ -271,7 +285,7 @@ public class FTLModManager {
 				String message = "";
 				message += "Would you like Slipstream to periodically check for updates?\n";
 				message += "\n";
-				message += "You can change this later in modman.cfg.";
+				message += "You can change this later.";
 
 				int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 				if ( response == JOptionPane.YES_OPTION ) {
