@@ -15,12 +15,27 @@ ECHO.
 ECHO When it exits, logs will be presented in multiple notepad windows.
 ECHO.
 ECHO.
-PAUSE
 ECHO.
+
+
+ECHO Some users reported interface glitches if they had custom Windows themes.
+ECHO Setting 'use_default_ui=true' in modman.cfg is a workaround.
+ECHO.
+SET /P YN="Create a new modman.cfg to do this? (y/N): "
+ECHO.
+
+IF /I [%YN%]==[y] (
+  ECHO Creating a new config.
+  ECHO use_default_ui=true>modman.cfg
+  ECHO.
+)
+ECHO.
+
 
 ECHO Running Slipstream...
 ECHO.
 "%~dp0modman_admin.exe" --l4j-debug
+
 
 ECHO Spawning notepad...
 ECHO.
@@ -39,6 +54,7 @@ IF EXIST "%SMM_LOG_PATH%" (
 ) ELSE (
   ECHO Missing log: "%SMM_LOG_NAME%"
 )
+
 
 ECHO.
 ECHO.
