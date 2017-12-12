@@ -2,15 +2,22 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.8",
+				"version" : "1.9",
 				"urls" : {
 					"Forum" : "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Unix.tar.gz/download",
-					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.8/SlipstreamModManager_1.8-Win.zip/download"
+					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9/SlipstreamModManager_1.9-Unix.tar.gz/download",
+					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9/SlipstreamModManager_1.9-Win.zip/download"
 				},
-				"notice" : "SMM 1.7 had fatal bugs, sorry. =/\n\nReminder: Return FTL to an unmodded state before upgrading SMM.\nAnd delete SMM's backups when upgrading FTL."
+				"notice" : "Reminder: Return FTL to an unmodded state before upgrading SMM.\nAnd delete SMM's backups when upgrading FTL."
 			},
 			"changelog" : [
+				{
+					"version" : "1.9",
+					"hidden" : false,
+					"changes" : [
+						"Fixed corrupted civilian sector music in FTL 1.6.1+"
+					]
+				},
 				{
 					"version" : "1.8",
 					"hidden" : false,
