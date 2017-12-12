@@ -24,6 +24,7 @@
 			<directory>skel_win</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
+				<exclude>**/*.bat</exclude>
 				<exclude>**/*.txt</exclude>
 			</excludes>
 		</fileSet>
@@ -31,6 +32,7 @@
 			<directory>skel_win</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
+				<include>**/*.bat</include>
 				<include>**/*.txt</include>
 			</includes>
 			<lineEnding>crlf</lineEnding>
