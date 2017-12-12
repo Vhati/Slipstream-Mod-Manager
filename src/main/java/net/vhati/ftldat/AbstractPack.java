@@ -31,7 +31,7 @@ public abstract class AbstractPack {
 	}
 
 	/**
-	 * Adds bytes read from srcFile to the pack, as innerPath.
+	 * Adds bytes read from an InputStream to the pack, as innerPath.
 	 */
 	public void add( String innerPath, InputStream is ) throws IOException {
 		throw new UnsupportedOperationException();

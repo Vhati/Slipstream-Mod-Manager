@@ -1,5 +1,10 @@
 Changelog
 
+1.8:
+- Fixed endless prompting about Steam on startup for standalone distros
+- Fixed mods not being added to FTL's resources
+- Fixed 'stream closed' error during patching
+
 1.7:
 - Added support for FTL 1.6.1
 - Added a config option to launch FTL via Steam, if possible

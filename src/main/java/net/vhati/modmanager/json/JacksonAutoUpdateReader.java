@@ -54,7 +54,7 @@ public class JacksonAutoUpdateReader {
 			JsonNode changelogNode = historyNode.get( "changelog" );
 
 			for ( JsonNode releaseNode : changelogNode ) {
-				// Skip any versions with optional "hidden" field set to true.
+				// Skip any versions with optional "hidden" field set to true (true without quotes!).
 				if ( releaseNode.get( "hidden" ) != null && releaseNode.get( "hidden" ).booleanValue() ) {
 					continue;
 				}

@@ -566,6 +566,9 @@ public class PkgPack extends AbstractPack {
 		return result;
 	}
 
+	/**
+	 * Adds bytes read from an InputStream to the pack, as innerPath.
+	 */
 	@Override
 	public void add( String innerPath, InputStream is ) throws IOException {
 		if ( innerPath.indexOf( "\\" ) != -1 ) {
@@ -608,18 +611,17 @@ public class PkgPack extends AbstractPack {
 		}
 
 		// Write data.
-		try {
-			raf.seek( entry.dataOffset );
-			byte[] buf = new byte[4096];
-			int len;
-			while ( (len = dataStream.read( buf )) >= 0 ) {
-				raf.write( buf, 0, len );
-			}
+		raf.seek( entry.dataOffset );
+		byte[] buf = new byte[4096];
+		int len;
+		while ( (len = dataStream.read( buf )) >= 0 ) {
+			raf.write( buf, 0, len );
 		}
-		finally {
-			try {if ( dataStream != null ) dataStream.close();}
-			catch ( IOException e ) {}
-		}
+
+		// Attempting to close the wrapper streams would cause an exception if
+		// the original stream was a ZipInputStream, which would need closeEntry().
+
+		// TODO: Test if compression works without closing the wrapper.
 
 		// Go back and fill in the dataSize.
 		entry.dataSize = raf.getChannel().position() - entry.dataOffset;

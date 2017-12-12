@@ -260,8 +260,11 @@ public class ModPatchThread extends Thread {
 
 						AbstractPack pack = packContainer.getPackFor( innerPath );
 						if ( pack == null ) {
-							if ( !knownRoots.contains( root ) )
+							if ( !knownRoots.contains( root ) ) {
 								log.warn( String.format( "Unexpected innerPath: %s", innerPath ) );
+							} else {
+								log.debug( String.format( "Ignoring innerPath with known root: %s", innerPath ) );
+							}
 							zis.closeEntry();
 							continue;
 						}

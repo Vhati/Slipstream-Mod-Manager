@@ -88,7 +88,7 @@ public class PackContainer {
 	public AbstractPack getPackFor( String innerPath ) {
 		Matcher m = pathPtn.matcher( innerPath );
 		if ( m.matches() ) {
-			String root = m.group( 1 );
+			String root = m.group( 2 );
 			AbstractPack rootPack = rootMap.get( root );
 
 			if ( rootPack != null ) return rootPack;
