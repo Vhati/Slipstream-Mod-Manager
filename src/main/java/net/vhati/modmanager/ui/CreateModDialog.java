@@ -36,6 +36,10 @@ public class CreateModDialog extends JDialog implements ActionListener {
 	private static final Logger log = LogManager.getLogger( CreateModDialog.class );
 
 	protected static final String DIR_NAME = "Directory Name";
+	protected static final String AUDIO_ROOT = "audio/";
+	protected static final String DATA_ROOT = "data/";
+	protected static final String FONTS_ROOT = "fonts/";
+	protected static final String IMG_ROOT = "img/";
 	protected static final String TITLE = "Title";
 	protected static final String URL = "Thread URL";
 	protected static final String AUTHOR = "Author";
@@ -63,6 +67,16 @@ public class CreateModDialog extends JDialog implements ActionListener {
 		editorPanel.getString( DIR_NAME ).setDocument( new RegexDocument( "[^\\/:;*?<>|^\"]*" ) );
 		editorPanel.addTextRow( String.format( "The name of a directory to create in the %s/ folder.", modsDir.getName() ) );
 		editorPanel.addSeparatorRow();
+		editorPanel.addRow( AUDIO_ROOT, ContentType.BOOLEAN );
+		editorPanel.addRow( DATA_ROOT, ContentType.BOOLEAN );
+		editorPanel.addRow( FONTS_ROOT, ContentType.BOOLEAN );
+		editorPanel.addRow( IMG_ROOT, ContentType.BOOLEAN );
+		editorPanel.getBoolean( AUDIO_ROOT ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
+		editorPanel.getBoolean( DATA_ROOT ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
+		editorPanel.getBoolean( FONTS_ROOT ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
+		editorPanel.getBoolean( IMG_ROOT ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
+		editorPanel.addTextRow( "Create empty top-level directories?" );
+		editorPanel.addSeparatorRow();
 		editorPanel.addRow( TITLE, ContentType.STRING );
 		editorPanel.addTextRow( "The title of this mod." );
 		editorPanel.addSeparatorRow();
@@ -77,7 +91,7 @@ public class CreateModDialog extends JDialog implements ActionListener {
 		editorPanel.addSeparatorRow();
 		editorPanel.addRow( DESC, ContentType.TEXT_AREA );
 		editorPanel.getTextArea( DESC ).setRows( 15 );
-		editorPanel.addTextRow( "Summary of gameplay effects; flavor; features; concerns about compatibility, preferred order, requirements; replaced ship slot; etc." );
+		editorPanel.addTextRow( "Summary of gameplay effects; flavor; features; concerns about compatibility, recommended patch order, requirements; replaced ship slot; etc." );
 
 		JPanel ctrlPanel = new JPanel();
 		ctrlPanel.setLayout( new BoxLayout( ctrlPanel, BoxLayout.X_AXIS ) );
@@ -151,6 +165,16 @@ public class CreateModDialog extends JDialog implements ActionListener {
 					else {
 						throw new IOException( String.format( "Failed to create directory: %s", genDir.getName() ) );
 					}
+
+					// Create root dirs.
+					if ( editorPanel.getBoolean( AUDIO_ROOT ).isSelected() )
+						new File( genDir, "audio" ).mkdir();
+					if ( editorPanel.getBoolean( DATA_ROOT ).isSelected() )
+						new File( genDir, "data" ).mkdir();
+					if ( editorPanel.getBoolean( FONTS_ROOT ).isSelected() )
+						new File( genDir, "fonts" ).mkdir();
+					if ( editorPanel.getBoolean( IMG_ROOT ).isSelected() )
+						new File( genDir, "img" ).mkdir();
 
 					// Show the folder.
 					try {
