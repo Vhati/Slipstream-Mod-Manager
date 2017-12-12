@@ -16,7 +16,7 @@ Requirements
   Java (1.6 or higher).
     http://www.java.com/en/download/
 
-  FTL (1.01-1.5.13, Windows/OSX/Linux, Steam/GOG/Standalone).
+  FTL (1.01-1.6.2, Windows/OSX/Linux, Steam/GOG/Standalone).
     http://www.ftlgame.com/
 
   * WinXP SP1 can't run Java 1.7.
@@ -121,12 +121,19 @@ Troubleshooting
     See the suggestion below for replacing corrupt resources.
 
 * If FTL's resources are corrupt...
-    Delete the files in SMM\backup\
-    Steam users:
-      Delete FTL's resource directory:
-        "C:\Program Files [or (x86)]\Steam\steamapps\common\FTL Faster Than Light\resources"
-      Start Steam and "verify game cache".
-        https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
-      Run FTL, which will cause steam to copy fresh resources from its cache.
-    Standalone users:
-      Reinstall FTL.
+    Option 1:
+      In SMM, Help-DeleteBackups
+      Steam users:
+        In SMM, Help-Steam:VerifyGameCache.
+      Standalone users:
+        Reinstall FTL.
+
+    Option 2:
+      Delete the files in SMM\backup\
+      Steam users:
+        Delete FTL's resource directory:
+          "C:\Program Files [or (x86)]\Steam\steamapps\common\FTL Faster Than Light\resources"
+        Start Steam and "verify game cache".
+          https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
+      Standalone users:
+        Reinstall FTL.

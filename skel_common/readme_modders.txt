@@ -55,9 +55,7 @@ General
   accepts the unix style (LF): fine for xml, crashing for layout.txt.
   Slipstream will convert both to CR-LF as it patches.
 
-  File and directory names must be plain ASCII (no accents). That
-  restriction isn't confirmed for the game, but the mod manager enforces
-  it just to be safe.
+  File and directory names must be plain ASCII (no accents).
 
   Images should be 32bit PNGs (24bit color + 8bit alpha transparency).
   Things that *should* be opaque rectangles like backgrounds may vary,
@@ -107,6 +105,14 @@ Encoding!?
   when decoded incorrectly. Apps have to deliberately support it - usually
   by including tests to determine when they're dealing with UTF-16 or
   something else.
+
+  Note to translators: Slipstream lets modders encode how they like and
+  converts to whatever FTL wants, but characters are limited by how FTL
+  ultimately reads the text. FTL 1.01-1.5.13 assumes text to be windows-1252
+  (you can only use characters that would be valid in that encoding). Since
+  FTL 1.6.1, it assumes UTF-8 (no worries). After the game has read the text,
+  another issue is whether the fonts contain the glyphs to display the
+  characters. You may need to replace the fonts.
 
 
 Advanced XML

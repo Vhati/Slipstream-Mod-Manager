@@ -84,13 +84,20 @@ Troubleshooting
     See the suggestion below for replacing corrupt resources.
 
 * If FTL's resources are corrupt...
-    Delete the files in SMM/backup/
-    Steam users:
-      Delete FTL's resource directory:
-        Linux: "[~/.local/share or $XDG_DATA_HOME]/Steam/SteamApps/common/FTL Faster Than Light/data/resources"
-        Mac: "~/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app"
-      Start Steam and "verify game cache".
-        https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
-      Run FTL, which will cause steam to copy fresh resources from its cache.
-    Standalone users:
-      Reinstall FTL.
+    Option 1:
+      In SMM, Help-DeleteBackups
+      Steam users:
+        In SMM, Help-Steam:VerifyGameCache.
+      Standalone users:
+        Reinstall FTL.
+
+    Option 2:
+      Delete the files in SMM/backup/
+      Steam users:
+        Delete FTL's resource directory:
+          Linux: "[~/.local/share or $XDG_DATA_HOME]/Steam/SteamApps/common/FTL Faster Than Light/data/resources"
+          Mac: "~/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app"
+        Start Steam and "verify game cache".
+          https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
+      Standalone users:
+        Reinstall FTL.
