@@ -180,12 +180,12 @@ public class ModUtilities {
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
 	 *
+	 * The description arguments identify the streams for log messages.
+	 *
 	 * FTL 1.01-1.5.13 assumes all XML is in windows-1252 encoding, even on
 	 * Linux.
 	 *
 	 * FTL 1.6.1 assumes all XML is in UTF-8 encoding.
-	 *
-	 * The description arguments identify the streams for log messages.
 	 *
 	 * Note: SMM 1.5 changed the order of arguments (previous releases took
 	 * the source of new content to append as the first argument).
@@ -318,8 +318,7 @@ public class ModUtilities {
 		}
 
 		// Bake XML into text, filtering the stream to standardize newlines and encode.
-		// TODO: sloppyPrint() needs EOL normalizing!?
-		//
+
 		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
@@ -341,12 +340,12 @@ public class ModUtilities {
 	 *
 	 * The result will have CR-LF line endings and the desired encoding.
 	 *
+	 * The description argument identifies the stream for log messages.
+	 *
 	 * FTL 1.01-1.5.13 assumes all XML is in windows-1252 encoding, even on
 	 * Linux.
 	 *
 	 * FTL 1.6.1 assumes all XML is in UTF-8 encoding.
-	 *
-	 * The description argument identifies the stream for log messages.
 	 *
 	 * @see net.vhati.modmanager.core.XMLPatcher
 	 * @see net.vhati.modmanager.core.SloppyXMLOutputProcessor
@@ -361,8 +360,7 @@ public class ModUtilities {
 		srcText = null;
 
 		// Bake XML into text, filtering the stream to standardize newlines and encode.
-		// TODO: sloppyPrint() needs EOL normalizing!?
-		//
+
 		CharsetEncoder encoder = Charset.forName( encoding ).newEncoder();
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
