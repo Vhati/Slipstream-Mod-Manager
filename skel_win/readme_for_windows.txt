@@ -17,7 +17,7 @@ Requirements
     http://www.java.com/en/download/
 
   FTL (1.01-1.6.2, Windows/OSX/Linux, Steam/GOG/Standalone).
-    http://www.ftlgame.com/
+    https://subsetgames.com/
 
   * WinXP SP1 can't run Java 1.7.
     (1.7 was built with VisualStudio 2010, causing a DecodePointer error.)

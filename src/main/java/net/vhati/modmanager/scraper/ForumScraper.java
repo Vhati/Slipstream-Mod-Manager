@@ -68,27 +68,27 @@ public class ForumScraper {
 
 	private static final Logger log = LogManager.getLogger( ForumScraper.class );
 
-	private static final String MASTER_LIST_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=2645";
-	private static final String FORUM_URL_FRAGMENT = "http://www.ftlgame.com/forum/viewtopic.php";
+	private static final String MASTER_LIST_URL = "https://subsetgames.com/forum/viewtopic.php?f=11&t=2645";
+	private static final String FORUM_URL_FRAGMENT = "https://subsetgames.com/forum/viewtopic.php";
 
 
 	public static void main( String[] args ) {
 
 		List<String> ignoredURLs = new ArrayList<String>();
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=11561" );
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11083" );
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2938" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=11&t=11561" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=12&t=11083" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=4&t=2938" );
 		ignoredURLs.add( "http://www.moddb.com/mods/better-planets-and-backgrounds/downloads/better-asteroids" );
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2947" );
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11604" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=4&t=2947" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=12&t=11604" );
 		// Hissatsu's post on "Advanced Battle Systems".
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=11469&start=60#p55171" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=11&t=11469&start=60#p55171" );
 		// SpaceDock is an app.
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=11&t=16842" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=11&t=16842" );
 		// Beginning Scrap Advantage is bundled in GMM.
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=4&t=2464" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=4&t=2464" );
 		// Engi Scrap Advantage is bundled in SMM.
-		ignoredURLs.add( "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102" );
+		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102" );
 
 
 		BasicParser parser = new BasicParser();

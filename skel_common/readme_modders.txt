@@ -269,16 +269,16 @@ Pitfalls
 
   FTL Bug (fixed in 1.03.3): If a ship is modded to have level 5 shields,
   asteroid storms will be abnormally fast.
-  http://www.ftlgame.com/forum/viewtopic.php?f=9&t=11057
+  https://subsetgames.com/forum/viewtopic.php?f=9&t=11057
 
   The game will crash at the main menu or hangar if an event choice loads
   another event, which has a choice that loads the previous event. FTL
   does not like event loops.
-  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=12265
+  https://subsetgames.com/forum/viewtopic.php?f=12&t=12265
 
   When adding a music track to sounds.xml, the explore and battle theme
   files are played simultaneously as one song (mixing between them when
   entering/exiting combat). They should have similar duration because if one
   is longer than the other, there may be noticeable silence at the end of the
   shorter piece.
-  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=9111
+  https://subsetgames.com/forum/viewtopic.php?f=12&t=9111

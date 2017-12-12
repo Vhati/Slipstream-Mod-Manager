@@ -29,7 +29,7 @@ public class FTLModManager {
 
 	public static final String APP_NAME = "Slipstream Mod Manager";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.7" );
-	public static final String APP_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=17102";
+	public static final String APP_URL = "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102";
 	public static final String APP_AUTHOR = "Vhati";
 
 
