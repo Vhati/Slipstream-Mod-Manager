@@ -130,9 +130,9 @@ public class JDOMModMetadataWriter {
 		buf.append( "\t\tList any concerns about mod compatibility, preferred order, or requirements.\n" );
 		buf.append( "\n" );
 		buf.append( "\t\tMention \"Replaces the XYZ ship.\" if relevant.\n" );
-		buf.append( "\t\t\tKestrel-A, Stealth-A, Mantis-A,\n" );
-		buf.append( "\t\t\tEngi-A,    Fed-A,     Slug-A,\n" );
-		buf.append( "\t\t\tRock-A,    Zoltan-A,  Crystal-A\n" );
+		buf.append( "\t\t\tKestrel-A, Engi-A,    Fed-A,     Zoltan-A,\n" );
+		buf.append( "\t\t\tStealth-A, Rock-A,    Slug-A,    Mantis-A,\n" );
+		buf.append( "\t\t\tLanius-A,  Crystal-A\n" );
 		buf.append( "\n" );
 		buf.append( "\t\tAbove all, keep the description general, so you won't have to edit\n" );
 		buf.append( "\t\tthat again for each new version.\n" );
