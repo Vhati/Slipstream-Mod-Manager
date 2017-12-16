@@ -36,7 +36,7 @@ public class SlipstreamConfig {
 	}
 
 	/**
-	 * Returns a copy of an existing SlipstreamConfig object.
+	 * Copy constructor.
 	 */
 	public SlipstreamConfig( SlipstreamConfig srcConfig ) {
 		this.configFile = srcConfig.getConfigFile();

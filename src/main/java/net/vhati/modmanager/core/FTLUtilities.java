@@ -224,7 +224,7 @@ public class FTLUtilities {
 
 		if ( System.getProperty( "os.name" ).startsWith( "Windows" ) ) {
 
-			for ( File candidateDir : new File[] {datsDir, datsDir.getParentFile()} ) {
+			for ( File candidateDir : new File[] { datsDir, datsDir.getParentFile() } ) {
 				if ( candidateDir == null ) continue;
 
 				File exeFile = new File( candidateDir, "FTLGame.exe" );
@@ -236,7 +236,7 @@ public class FTLUtilities {
 		}
 		else if ( System.getProperty( "os.name" ).equals( "Linux" ) ) {
 
-			for ( File candidateDir : new File[] {datsDir, datsDir.getParentFile()} ) {
+			for ( File candidateDir : new File[] { datsDir, datsDir.getParentFile() } ) {
 				if ( candidateDir == null ) continue;
 
 				File exeFile = new File( candidateDir, "FTL" );

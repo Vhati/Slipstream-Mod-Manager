@@ -16,8 +16,10 @@ import net.vhati.modmanager.ui.Statusbar;
  * Then add this mouseListener to a component.
  */
 public class StatusbarMouseListener extends MouseAdapter {
-	private Statusbar bar = null;
-	private String text = null;
+
+	protected Statusbar bar = null;
+	protected String text = null;
+
 
 	public StatusbarMouseListener( Statusbar bar, String text ) {
 		this.bar = bar;
