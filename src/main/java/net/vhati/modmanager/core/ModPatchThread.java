@@ -193,10 +193,10 @@ public class ModPatchThread extends Thread {
 			}
 			else if ( dataDatFile.exists() && resourceDatFile.exists() ) {  // FTL 1.01-1.5.13.
 				AbstractPack dataPack = new FTLPack( dataDatFile, "r+" );
-				AbstractPack resourcePack = new FTLPack( resourceDatFile, "r+" );
-
-				packContainer.setPackFor( "audio/", resourcePack );
 				packContainer.setPackFor( "data/", dataPack );
+
+				AbstractPack resourcePack = new FTLPack( resourceDatFile, "r+" );
+				packContainer.setPackFor( "audio/", resourcePack );
 				packContainer.setPackFor( "fonts/", resourcePack );
 				packContainer.setPackFor( "img/", resourcePack );
 
