@@ -516,9 +516,9 @@ public class ModUtilities {
 
 							String colorTypeString = "???";
 							if ( pngr.imgInfo.channels == 4 )
-								colorTypeString = "RGB+Alpha";
+								colorTypeString = String.format( "RGB+Alpha w/%dbit channels", pngr.imgInfo.bitDepth );
 							else if ( pngr.imgInfo.channels == 3 )
-								colorTypeString = "RGB";
+								colorTypeString = String.format( "RGB w/%dbit channels", pngr.imgInfo.bitDepth );
 							else if ( pngr.imgInfo.channels == 2 )
 								colorTypeString = "Gray+Alpha";
 							else if ( pngr.imgInfo.channels == 1 && !pngr.imgInfo.greyscale )
@@ -528,7 +528,7 @@ public class ModUtilities {
 
 							pendingMsgs.add( new ReportMessage(
 								ReportMessage.WARNING,
-								String.format( "ColorType: %s (Usually 32bit Truecolor+Alpha)", colorTypeString )
+								String.format( "Type: %s (Usually RGB+Alpha w/8bit channels)", colorTypeString )
 							) );
 						}
 					}
