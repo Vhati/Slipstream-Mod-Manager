@@ -1,5 +1,10 @@
 Changelog
 
+1.9.1:
+- Edited a comment in boilerplate mod metadata to include AE ships
+- Fixed omitted Validate warnings for PNG files
+- Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
+
 1.9:
 - Fixed corrupted civilian sector music in FTL 1.6.1+
 

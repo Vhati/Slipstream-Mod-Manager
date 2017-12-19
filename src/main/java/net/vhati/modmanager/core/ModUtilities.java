@@ -494,9 +494,22 @@ public class ModUtilities {
 					) );
 					modValid = false;
 				}
-				else if ( innerPath.endsWith( "[.]png" ) ) {
+				else if ( innerPath.matches( "^.*[.]mp3$" ) ) {
+					pendingMsgs.add( new ReportMessage(
+						ReportMessage.WARNING,
+						String.format( "As of FTL 1.6.1, MP3 audio is not supported (Use OGG or WAV)" )
+					) );
+				}
+				else if ( innerPath.matches( "^.*[.]png$" ) ) {
 					try {
 						PngReader pngr = new PngReader( zis );
+
+						if ( pngr.interlaced ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.WARNING,
+								String.format( "As of FTL 1.6.1, interlaced PNG images are not supported (Re-save it as non-interlaced)" )
+							) );
+						}
 
 						// Check for Truecolor+Alpha (32bit RGBA).
 						if ( pngr.imgInfo.channels != 4 || pngr.imgInfo.bitDepth != 8 ) {
@@ -520,13 +533,19 @@ public class ModUtilities {
 						}
 					}
 					catch ( Exception e ) {
-						log.error( String.format( "Error while validating \"%s:%s\".", modFile.getName(), innerPath ), e );
+						log.error( String.format( "Error while validating \"%s:%s\"", modFile.getName(), innerPath ), e );
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.ERROR,
 							"An error occurred. See log for details."
 						) );
 						modValid = false;
 					}
+				}
+				else if ( innerPath.matches( "^.*[.]ttf$" ) ) {
+					pendingMsgs.add( new ReportMessage(
+						ReportMessage.WARNING,
+						String.format( "FTL 1.01-1.5.13 had TTF fonts, but FTL 1.6.1 switched to *.font (A special bitmap format from the SIL library)" )
+					) );
 				}
 				else if ( innerPath.matches( "^.*(?:[.]xml[.]append|[.]append[.]xml)$" ) ||
 				          innerPath.matches( "^.*(?:[.]xml[.]rawappend|[.]rawappend[.]xml)$" ) ||
@@ -560,7 +579,7 @@ public class ModUtilities {
 					if ( decodeResult.encoding.equalsIgnoreCase( "windows-1252" ) ) {
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.WARNING,
-							String.format( "Fancy %s chars. (UTF-8 is recommended for that)", decodeResult.encoding )
+							String.format( "Fancy %s chars (UTF-8 is recommended for that)", decodeResult.encoding )
 						) );
 						modValid = false;
 					}
