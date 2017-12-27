@@ -68,7 +68,7 @@ public class SlipstreamCLI {
 			commandLine.parse( args );
 		}
 		catch ( ParameterException e ) {
-			//For multiple subcommands, commandLine.getCommandLine() returns the one that failed.
+			//For multiple subcommands, e.getCommandLine() returns the one that failed.
 
 			System.err.println( "Error parsing commandline: "+ e.getMessage() );
 			System.exit( 1 );
