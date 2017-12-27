@@ -54,7 +54,7 @@ public class FTLModManager {
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		encoder.setContext( lc );
 		encoder.setCharset( Charset.forName( "UTF-8" ) );
-		encoder.setPattern( "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n" );
+		encoder.setPattern( "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" );
 		encoder.start();
 
 		FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
