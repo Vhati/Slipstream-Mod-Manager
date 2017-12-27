@@ -47,9 +47,9 @@ This project depends on the following libraries.
 - Logback
     https://logback.qos.ch/
     (For JavaDocs, look left.)
-- Apache Commons CLI 1.x
-    http://commons.apache.org/proper/commons-cli/
-    (For JavaDocs, scroll down.)
+- picocli 2.x
+    http://picocli.info/
+    (For JavaDocs, look left and scroll down to "API Javadoc".)
 
 
 

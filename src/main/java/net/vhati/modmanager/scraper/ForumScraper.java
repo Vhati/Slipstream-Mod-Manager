@@ -46,12 +46,11 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,129 +89,75 @@ public class ForumScraper {
 		// Engi Scrap Advantage is bundled in SMM.
 		ignoredURLs.add( "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102" );
 
-
-		BasicParser parser = new BasicParser();
-
-		Options options = new Options();
-		options.addOption( OptionBuilder.withLongOpt( "load-json" )
-		                                .withDescription( "load moddb from a json catalog" )
-		                                .hasArg()
-		                                .withArgName("FILE")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "load-xml" )
-		                                .withDescription( "load moddb from an xml file" )
-		                                .hasArg()
-		                                .withArgName("FILE")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "scrape" )
-		                                .withDescription( "write changed forum posts to an xml file" )
-		                                .hasArg()
-		                                .withArgName("FILE")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "dump-json" )
-		                                .withDescription( "write the moddb to a json file" )
-		                                .hasArg()
-		                                .withArgName("FILE")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "dump-xml" )
-		                                .withDescription( "write the moddb to an xml file" )
-		                                .hasArg()
-		                                .withArgName("FILE")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "hash-thread" )
-		                                .withDescription( "print the hash of a specific thread" )
-		                                .hasArg()
-		                                .withArgName("URL")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "first-post" )
-		                                .withDescription( "print the first post of a thread (debugging)" )
-		                                .hasArg()
-		                                .withArgName("URL")
-		                                .create() );
-		options.addOption( "h", "help", false, "display this help and exit" );
-
-		CommandLine cmdline = null;
+		ScraperCommand scraperCmd = new ScraperCommand();
+		CommandLine commandLine = new CommandLine( scraperCmd );
 		try {
-			cmdline = parser.parse( options, args, true );
+			commandLine.parse( args );
 		}
-		catch( ParseException e ) {
+		catch ( ParameterException e ) {
 			System.err.println( "Error parsing commandline: "+ e.getMessage() );
 			System.exit( 1 );
 		}
 
-		if ( cmdline.hasOption( "h" ) ) {
-			HelpFormatter formatter = new HelpFormatter();
-
-			String syntax = ForumScraper.class.getCanonicalName() +" [OPTIONS]";
-
-			String helpHeader = "Load an existing catalog as the moddb, and scrape."+ formatter.getNewLine();
-			helpHeader += "Edit the catalog by copy/pasting scrape snippets."+ formatter.getNewLine();
-			helpHeader += "Load the edited catalog and dump json."+ formatter.getNewLine();
-
-			PrintWriter pw = new PrintWriter( System.out );
-			formatter.printUsage( pw, formatter.getWidth(), syntax );
-			pw.write( helpHeader );
-			pw.write( formatter.getNewLine() );
-			formatter.printOptions( pw, formatter.getWidth(), options, formatter.getLeftPadding(), formatter.getDescPadding() );
-			pw.flush();
-
+		if ( commandLine.isUsageHelpRequested() ) {
+			commandLine.usage( System.out );
 			System.exit( 0 );
 		}
 
 		ModDB modDB = new ModDB();
 
 		try {
-			if ( cmdline.hasOption( "load-json" ) ) {
+			if ( scraperCmd.jsonSrcFile != null ) {
 				log.info( "Loading json catalog..." );
 
-				File srcFile = new File( cmdline.getOptionValue( "load-json" ) );
+				File srcFile = scraperCmd.jsonSrcFile;
 				ModDB newDB = JacksonCatalogReader.parse( srcFile );
 				if ( newDB != null ) modDB = newDB;
 			}
 
-			if ( cmdline.hasOption( "load-xml" ) ) {
+			if ( scraperCmd.xmlSrcFile != null ) {
 				log.info( "Loading xml catalog..." );
 
-				File srcFile = new File( cmdline.getOptionValue( "load-xml" ) );
+				File srcFile = scraperCmd.xmlSrcFile;
 				ModDB newDB = parseCatalogXML( srcFile );
 				if ( newDB != null ) modDB = newDB;
 			}
 
-			if ( cmdline.hasOption( "scrape" ) ) {
+			if ( scraperCmd.scrapeDstFile != null ) {
 				log.info( "Scraping..." );
 
-				File dstFile = new File( cmdline.getOptionValue( "scrape" ) );
+				File dstFile = scraperCmd.scrapeDstFile;
 				List<ModsInfo> data = scrape( modDB, MASTER_LIST_URL, ignoredURLs );
 				if ( data.size() > 0 ) writeXML( data, dstFile );
 			}
 
-			if ( cmdline.hasOption( "dump-json" ) ) {
+			if ( scraperCmd.jsonDstFile != null ) {
 				log.info( "Dumping json..." );
 
-				File dstFile = new File( cmdline.getOptionValue( "dump-json" ) );
+				File dstFile = scraperCmd.jsonDstFile;
 				List<ModsInfo> data = modDB.getCollatedModInfo();
 				if ( data.size() > 0 ) JacksonCatalogWriter.write( data, dstFile );
 			}
 
-			if ( cmdline.hasOption( "dump-xml" ) ) {
+			if ( scraperCmd.xmlDstFile != null ) {
 				log.info( "Dumping xml..." );
 
-				File dstFile = new File( cmdline.getOptionValue( "dump-xml" ) );
+				File dstFile = scraperCmd.xmlDstFile;
 				List<ModsInfo> data = modDB.getCollatedModInfo();
 				if ( data.size() > 0 ) writeXML( data, dstFile );
 			}
 
-			if ( cmdline.hasOption( "hash-thread" ) ) {
+			if ( scraperCmd.hashThreadURL != null ) {
 				log.info( "Hashing thread..." );
 
-				String threadURL = cmdline.getOptionValue( "hash-thread" );
+				String threadURL = scraperCmd.hashThreadURL;
 				System.out.println( hashThread( threadURL ) );
 			}
 
-			if ( cmdline.hasOption( "first-post" ) ) {
+			if ( scraperCmd.firstPostURL != null ) {
 				log.info( "Getting thread's first post..." );
 
-				String threadURL = cmdline.getOptionValue( "first-post" );
+				String threadURL = scraperCmd.firstPostURL;
 				System.out.println( getFirstPost( threadURL ) );
 			}
 		}
@@ -220,7 +165,6 @@ public class ForumScraper {
 			log.error( "An error occurred.", e );
 		}
 	}
-
 
 	/**
 	 * Scrapes the forum for changed posts and returns info from updated mods.
@@ -243,7 +187,6 @@ public class ForumScraper {
 
 		return results;
 	}
-
 
 	/**
 	 * Scrape the Master Mod List on the FTL forum.
@@ -400,14 +343,13 @@ public class ForumScraper {
 		return results;
 	}
 
-
 	/**
 	 * Extracts the html content of the first post in a forum thread.
 	 */
 	private static String getFirstPost( String url ) throws IOException {
 		String htmlSrc = fetchWebPage( url );
 
-		Pattern firstPostPtn = Pattern.compile( "(?s)<div class=\"postbody\"[^>]*>.*?<div class=\"content\"[^>]*>(.*?)</div>\\s*<dl class=\"postprofile\"[^>]*>" );
+		Pattern firstPostPtn = Pattern.compile( "(?s)<div class=\"postbody\"[^>]*>.*?<div class=\"content\"[^>]*>(.*?)</div>" );
 		Matcher m = null;
 
 		String postContent = "";
@@ -434,7 +376,6 @@ public class ForumScraper {
 		return postContent;
 	}
 
-
 	/**
 	 * Calculates an MD5 hash of the first post in a thread.
 	 */
@@ -442,7 +383,6 @@ public class ForumScraper {
 		String rawDesc = getFirstPost( url );
 		return PackUtilities.calcStreamMD5( new ByteArrayInputStream( rawDesc.getBytes( Charset.forName("UTF-8") ) ) );
 	}
-
 
 	/**
 	 * Downloads a URL and returns the string content, decoded as UTF-8.
@@ -491,7 +431,6 @@ public class ForumScraper {
 
 		return result;
 	}
-
 
 	/**
 	 * Writes collated catalog entries to a file, as human-editable xml.
@@ -563,7 +502,6 @@ public class ForumScraper {
 		return dst;
 	}
 
-
 	/**
 	 * Parses dumped xml and returns a new catalog.
 	 */
@@ -609,6 +547,42 @@ public class ForumScraper {
 
 		return modDB;
 	}
+
+
+
+	@Command(
+		name = "ForumScraper",
+		abbreviateSynopsis = true,
+		sortOptions = false,
+		description = "Harvest new forum content to edit into the moddb catalog.",
+		footer = "%nLoad an existing catalog as the moddb, and scrape.%nManually edit the catalog by copy/pasting scraped snippets.%nLoad the edited catalog and dump back to json."
+	)
+	public static class ScraperCommand {
+		@Option(names = "--load-json", paramLabel = "FILE", description = "load moddb from a json catalog")
+		File jsonSrcFile;
+
+		@Option(names = "--load-xml", paramLabel = "FILE", description = "load moddb from an xml file")
+		File xmlSrcFile;
+
+		@Option(names = "--scrape", paramLabel = "FILE", description = "write changed forum posts to an xml file")
+		File scrapeDstFile;
+
+		@Option(names = "--dump-json", paramLabel = "FILE", description = "write the moddb to a json file")
+		File jsonDstFile;
+
+		@Option(names = "--dump-xml", paramLabel = "FILE", description = "write the moddb to an xml file")
+		File xmlDstFile;
+
+		@Option(names = "--hash-thread", paramLabel = "URL", description = "print the hash of a specific thread")
+		String hashThreadURL;
+
+		@Option(names = "--first-post", paramLabel = "URL", description = "print the first post of a thread (debugging)")
+		String firstPostURL;
+
+		@Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help and exit")
+		boolean helpRequested;
+	}
+
 
 
 	/** Information gleaned from scraping the forum. */

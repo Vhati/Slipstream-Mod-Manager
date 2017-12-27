@@ -6,6 +6,7 @@ Changelog
 - Fixed omitted Validate warnings for PNG files
 - Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
 - Changed logging framework to SLF4J/Logback
+- Changed command line parser to picocli
 
 1.9:
 - Fixed corrupted civilian sector music in FTL 1.6.1+

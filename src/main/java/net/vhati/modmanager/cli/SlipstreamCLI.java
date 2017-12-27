@@ -16,12 +16,12 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Parameters;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,77 +62,38 @@ public class SlipstreamCLI {
 			}
 		};
 
-		BasicParser parser = new BasicParser();
-
-		Options options = new Options();
-		options.addOption( Option.builder()
-			.longOpt( "extract-dats" )
-			.desc( "extract FTL resources into a dir" )
-			.hasArg()
-			.argName( "DIR" )
-			.build() );
-		options.addOption( Option.builder()
-			.longOpt( "global-panic" )
-			.desc( "patch as if advanced find tags had panic='true'" )
-			.build() );
-		options.addOption( Option.builder()
-			.longOpt( "list-mods" )
-			.desc( "list available mod names" )
-			.build() );
-		options.addOption( Option.builder()
-			.longOpt( "runftl" )
-			.desc( "run the game (standalone or with 'patch')" )
-			.build() );
-		options.addOption( Option.builder()
-			.longOpt( "patch" )
-			.desc( "revert to vanilla and add named mods (if any)" )
-			.build() );
-		options.addOption( Option.builder()
-			.longOpt( "validate" )
-			.desc( "check named mods for problems" )
-			.build() );
-		options.addOption( "h", "help", false, "display this help and exit" );
-		options.addOption( Option.builder()
-			.longOpt( "version" )
-			.desc( "output version information and exit" )
-			.build() );
-		CommandLine cmdline = null;
+		SlipstreamCommand slipstreamCmd = new SlipstreamCommand();
+		CommandLine commandLine = new CommandLine( slipstreamCmd );
 		try {
-			cmdline = parser.parse( options, args, true );
+			commandLine.parse( args );
 		}
-		catch( ParseException e ) {
+		catch ( ParameterException e ) {
+			//For multiple subcommands, commandLine.getCommandLine() returns the one that failed.
+
 			System.err.println( "Error parsing commandline: "+ e.getMessage() );
 			System.exit( 1 );
 		}
 
-		if ( cmdline.hasOption( "h" ) ) {  // Exits.
-			HelpFormatter formatter = new HelpFormatter();
-
-			String helpHeader = "Perform actions against an FTL installation and/or a list of named mods."+ formatter.getNewLine();
-
-			String helpFooter = formatter.getNewLine();
-			helpFooter += "Each MODFILE is a filename in the mods/ dir."+ formatter.getNewLine();
-			helpFooter += "If a named mod is a directory, a temporary zip will be created.";
-
-			formatter.printHelp( "modman [OPTION] [MODFILE]...", helpHeader, options, helpFooter );
+		if ( commandLine.isUsageHelpRequested() ) {
+			commandLine.usage( System.out );
 			System.exit( 0 );
 		}
-		if ( cmdline.hasOption( "version" ) ) {  // Exits.
-			System.out.println( getVersionMessage() );
+		if ( commandLine.isVersionHelpRequested() ) {
+			commandLine.printVersionHelp( System.out );
 			System.exit( 0 );
 		}
 
 		DelayedDeleteHook deleteHook = new DelayedDeleteHook();
 		Runtime.getRuntime().addShutdownHook( deleteHook );
 
-		if ( cmdline.hasOption( "validate" ) ) {  // Exits (0/1).
+		if ( slipstreamCmd.validate ) {  // Exits (0/1).
 			log.info( "Validating..." );
 
 			StringBuilder resultBuf = new StringBuilder();
 			ReportFormatter formatter = new ReportFormatter();
 			boolean anyInvalid = false;
 
-			for ( String modFileName : cmdline.getArgs() ) {
+			for ( String modFileName : slipstreamCmd.modFileNames ) {
 				File modFile = new File( modsDir, modFileName );
 
 				if ( modFile.isDirectory() ) {
@@ -175,7 +136,7 @@ public class SlipstreamCLI {
 		File configFile = new File( "modman.cfg" );
 		SlipstreamConfig appConfig = getConfig( configFile );
 
-		if ( cmdline.hasOption( "list-mods" ) ) {  // Exits.
+		if ( slipstreamCmd.listMods ) {  // Exits.
 			log.info( "Listing mods..." );
 
 			boolean allowZip = appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
@@ -197,17 +158,16 @@ public class SlipstreamCLI {
 		}
 
 		File datsDir = null;
-		if ( cmdline.hasOption( "extract-dats" ) ||
-		     cmdline.hasOption( "patch" ) ||
-		     cmdline.hasOption( "runftl" ) ) {
+		if ( slipstreamCmd.extractDatsDir != null ||
+		     slipstreamCmd.patch ||
+		     slipstreamCmd.runftl ) {
 			datsDir = getDatsDir( appConfig );
 		}
 
-		if ( cmdline.hasOption( "extract-dats" ) ) {  // Exits (0/1).
+		if ( slipstreamCmd.extractDatsDir != null ) {  // Exits (0/1).
 			log.info( "Extracting dats..." );
 
-			String extractPath = cmdline.getOptionValue( "extract-dats" );
-			File extractDir = new File( extractPath );
+			File extractDir = slipstreamCmd.extractDatsDir;
 
 			FolderPack dstPack = null;
 			List<AbstractPack> srcPacks = new ArrayList<AbstractPack>( 2 );
@@ -269,11 +229,11 @@ public class SlipstreamCLI {
 			System.exit( 0 );
 		}
 
-		if ( cmdline.hasOption( "patch" ) ) {  // Exits sometimes (1 on failure).
+		if ( slipstreamCmd.patch ) {  // Exits sometimes (1 on failure).
 			log.info( "Patching..." );
 
 			List<File> modFiles = new ArrayList<File>();
-			for ( String modFileName : cmdline.getArgs() ) {
+			for ( String modFileName : slipstreamCmd.modFileNames ) {
 				File modFile = new File( modsDir, modFileName );
 
 				if ( modFile.isDirectory() ) {
@@ -291,7 +251,7 @@ public class SlipstreamCLI {
 				modFiles.add( modFile );
 			}
 
-			boolean globalPanic = cmdline.hasOption( "global-panic" );
+			boolean globalPanic = slipstreamCmd.globalPanic;
 
 			SilentPatchObserver patchObserver = new SilentPatchObserver();
 			ModPatchThread patchThread = new ModPatchThread( modFiles, datsDir, backupDir, globalPanic, patchObserver );
@@ -307,7 +267,7 @@ public class SlipstreamCLI {
 			if ( !patchObserver.hasSucceeded() ) System.exit( 1 );
 		}
 
-		if ( cmdline.hasOption( "runftl" ) ) {  // Exits (0/1).
+		if ( slipstreamCmd.runftl ) {  // Exits (0/1).
 			log.info( "Running FTL..." );
 
 			File exeFile = null;
@@ -489,24 +449,66 @@ public class SlipstreamCLI {
 		}
 	}
 
-	private static String getVersionMessage() {
-		StringBuilder buf = new StringBuilder();
-		buf.append( String.format( "%s %s\n", FTLModManager.APP_NAME, FTLModManager.APP_VERSION ) );
-		buf.append( "Copyright (C) 2014 David Millis\n" );
-		buf.append( "\n" );
-		buf.append( "This program is free software; you can redistribute it and/or modify\n" );
-		buf.append( "it under the terms of the GNU General Public License as published by\n" );
-		buf.append( "the Free Software Foundation; version 2.\n" );
-		buf.append( "\n" );
-		buf.append( "This program is distributed in the hope that it will be useful,\n" );
-		buf.append( "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" );
-		buf.append( "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" );
-		buf.append( "GNU General Public License for more details.\n" );
-		buf.append( "\n" );
-		buf.append( "You should have received a copy of the GNU General Public License\n" );
-		buf.append( "along with this program. If not, see http://www.gnu.org/licenses/.\n" );
-		buf.append( "\n" );
-		return buf.toString();
+
+
+	@Command(
+		name = "modman",
+		abbreviateSynopsis = true,
+		sortOptions = false,
+		description = "Perform actions against an FTL installation and/or a list of named mods.",
+		footer = "%nIf a named mod is a directory, a temporary zip will be created.",
+		versionProvider = SlipstreamVersionProvider.class
+	)
+	public static class SlipstreamCommand {
+		@Option(names = "--extract-dats", paramLabel = "DIR", description = "extract FTL resources into a dir")
+		File extractDatsDir;
+
+		@Option(names = "--global-panic", description = "patch as if advanced find tags had panic='true'")
+		boolean globalPanic;
+
+		@Option(names = "--list-mods", description = "list available mod names")
+		boolean listMods;
+
+		@Option(names = "--runftl", description = "run the game (standalone or with 'patch')")
+		boolean runftl;
+
+		@Option(names = "--patch", description = "revert to vanilla and add named mods (if any)")
+		boolean patch;
+
+		@Option(names = "--validate", description = "check named mods for problems")
+		boolean validate;
+
+		@Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help and exit")
+		boolean helpRequested;
+
+		@Option(names = "--version", versionHelp = true, description = "output version information and exit")
+		boolean versionRequested;
+
+		@Parameters(paramLabel = "MODFILE", description = "names of files or directories in the mods/ dir")
+		String[] modFileNames;
+	}
+
+	public static class SlipstreamVersionProvider implements IVersionProvider {
+		@Override
+		public String[] getVersion() {
+			return new String[] {
+				String.format( "%s %s", FTLModManager.APP_NAME, FTLModManager.APP_VERSION ),
+				"Copyright (C) 2013,2014,2017 David Millis",
+				"",
+				"This program is free software; you can redistribute it and/or modify",
+				"it under the terms of the GNU General Public License as published by",
+				"the Free Software Foundation; version 2.",
+				"",
+				"This program is distributed in the hope that it will be useful,",
+				"but WITHOUT ANY WARRANTY; without even the implied warranty of",
+				"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+				"GNU General Public License for more details.",
+				"",
+				"You should have received a copy of the GNU General Public License",
+				"along with this program. If not, see http://www.gnu.org/licenses/.",
+				"",
+			};
+		}
 	}
 
 
