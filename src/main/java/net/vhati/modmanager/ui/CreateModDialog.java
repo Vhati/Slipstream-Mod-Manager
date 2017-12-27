@@ -40,6 +40,7 @@ public class CreateModDialog extends JDialog implements ActionListener {
 	protected static final String DATA_ROOT = "data/";
 	protected static final String FONTS_ROOT = "fonts/";
 	protected static final String IMG_ROOT = "img/";
+	protected static final String XML_COMMENTS = "XML Comments";
 	protected static final String TITLE = "Title";
 	protected static final String URL = "Thread URL";
 	protected static final String AUTHOR = "Author";
@@ -77,6 +78,10 @@ public class CreateModDialog extends JDialog implements ActionListener {
 		editorPanel.getBoolean( IMG_ROOT ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
 		editorPanel.addTextRow( "Create empty top-level directories?" );
 		editorPanel.addSeparatorRow();
+		editorPanel.addRow( XML_COMMENTS, ContentType.BOOLEAN );
+		editorPanel.getBoolean( XML_COMMENTS ).setHorizontalAlignment( javax.swing.SwingConstants.LEFT );
+		editorPanel.addTextRow( "Include XML comments about the purpose of these fields?" );
+		editorPanel.addSeparatorRow();
 		editorPanel.addRow( TITLE, ContentType.STRING );
 		editorPanel.addTextRow( "The title of this mod." );
 		editorPanel.addSeparatorRow();
@@ -92,6 +97,8 @@ public class CreateModDialog extends JDialog implements ActionListener {
 		editorPanel.addRow( DESC, ContentType.TEXT_AREA );
 		editorPanel.getTextArea( DESC ).setRows( 15 );
 		editorPanel.addTextRow( "Summary of gameplay effects; flavor; features; concerns about compatibility, recommended patch order, requirements; replaced ship slot; etc." );
+
+		editorPanel.getBoolean( XML_COMMENTS ).setSelected( true );
 
 		JPanel ctrlPanel = new JPanel();
 		ctrlPanel.setLayout( new BoxLayout( ctrlPanel, BoxLayout.X_AXIS ) );
@@ -141,6 +148,7 @@ public class CreateModDialog extends JDialog implements ActionListener {
 			String modAuthor = editorPanel.getString( AUTHOR ).getText().trim();
 			String modVersion = editorPanel.getString( VERSION ).getText().trim();
 			String modDesc = editorPanel.getTextArea( DESC ).getText().trim();
+			boolean xmlComments = editorPanel.getBoolean( XML_COMMENTS ).isSelected();
 
 			if ( dirName.length() == 0 ) {
 				JOptionPane.showMessageDialog( CreateModDialog.this, "No directory name was given.", "Nothing to do", JOptionPane.WARNING_MESSAGE );
@@ -156,7 +164,7 @@ public class CreateModDialog extends JDialog implements ActionListener {
 						if ( appendixDir.mkdir() ) {
 							File metadataFile = new File( appendixDir, "metadata.xml" );
 
-							JDOMModMetadataWriter.writeMetadata( metadataFile, modTitle, modURL, modAuthor, modVersion, modDesc );
+							JDOMModMetadataWriter.writeMetadata( metadataFile, modTitle, modURL, modAuthor, modVersion, modDesc, xmlComments );
 						}
 						else {
 							throw new IOException( String.format( "Failed to create directory: %s", appendixDir.getName() ) );

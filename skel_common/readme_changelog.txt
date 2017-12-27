@@ -2,6 +2,7 @@ Changelog
 
 1.9.1:
 - Edited a comment in boilerplate mod metadata to include AE ships
+- Made the comments in boilerplace mod metadata optional
 - Fixed omitted Validate warnings for PNG files
 - Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
 

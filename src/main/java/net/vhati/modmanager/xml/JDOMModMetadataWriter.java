@@ -28,8 +28,9 @@ public class JDOMModMetadataWriter {
 	 * @param modAuthor
 	 * @param modVersion
 	 * @param modDesc
+	 * @param xmlComments true to include comments describing each field, false otherwise
 	 */
-	public static void writeMetadata( File outFile, String modTitle, String modURL, String modAuthor, String modVersion, String modDesc ) throws IOException {
+	public static void writeMetadata( File outFile, String modTitle, String modURL, String modAuthor, String modVersion, String modDesc, boolean xmlComments ) throws IOException {
 		StringBuilder buf = new StringBuilder();
 
 		Element rootNode = new Element( "metadata" );
@@ -37,19 +38,23 @@ public class JDOMModMetadataWriter {
 
 		rootNode.addContent( new Text( "\n" ) );
 
-		rootNode.addContent( new Text( "\t" ) );
-		buf.setLength( 0 );
-		buf.append( "\n" );
-		buf.append( "\t\tCDATA tags mean no need to escape special characters.\n" );
-		buf.append( "\t\tDon't worry about spaces at the start/end. That gets trimmed.\n" );
-		buf.append( "\t" );
-		rootNode.addContent( new Comment( buf.toString() ) );
-		rootNode.addContent( new Text( "\n\n\n" ) );
+		if ( xmlComments ) {
+			buf.setLength( 0 );
+			buf.append( "\n" );
+			buf.append( "\t\tCDATA tags mean no need to escape special characters.\n" );
+			buf.append( "\t\tDon't worry about spaces at the start/end. That gets trimmed.\n" );
+			buf.append( "\t" );
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( buf.toString() ) );
+			rootNode.addContent( new Text( "\n\n\n" ) );
+		}
 
 		// title.
-		rootNode.addContent( new Text( "\t" ) );
-		rootNode.addContent( new Comment( String.format( " %s ", "The title of this mod." ) ) );
-		rootNode.addContent( new Text( "\n" ) );
+		if ( xmlComments ) {
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( String.format( " %s ", "The title of this mod." ) ) );
+			rootNode.addContent( new Text( "\n" ) );
+		}
 
 		rootNode.addContent( new Text( "\t" ) );
 		Element titleNode = new Element( "title" );
@@ -58,15 +63,17 @@ public class JDOMModMetadataWriter {
 		rootNode.addContent( new Text( "\n\n\n" ) );
 
 		// threadUrl.
-		rootNode.addContent( new Text( "\t" ) );
-		buf.setLength( 0 );
-		buf.append( "\n" );
-		buf.append( "\t\tThis mod's thread on subsetgames.com.\n" );
-		buf.append( "\t\tIf there's no thread yet, create one to announce your upcoming mod in the\n" );
-		buf.append( "\t\tforum. Then paste the url here.\n" );
-		buf.append( "\t" );
-		rootNode.addContent( new Comment( buf.toString() ) );
-		rootNode.addContent( new Text( "\n" ) );
+		if ( xmlComments ) {
+			buf.setLength( 0 );
+			buf.append( "\n" );
+			buf.append( "\t\tThis mod's thread on subsetgames.com.\n" );
+			buf.append( "\t\tIf there's no thread yet, create one to announce your upcoming mod in the\n" );
+			buf.append( "\t\tforum. Then paste the url here.\n" );
+			buf.append( "\t" );
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( buf.toString() ) );
+			rootNode.addContent( new Text( "\n" ) );
+		}
 
 		rootNode.addContent( new Text( "\t" ) );
 		Element urlNode = new Element( "threadUrl" );
@@ -75,9 +82,11 @@ public class JDOMModMetadataWriter {
 		rootNode.addContent( new Text( "\n\n\n" ) );
 
 		// author.
-		rootNode.addContent( new Text( "\t" ) );
-		rootNode.addContent( new Comment( String.format( " %s ", "Your forum user name." ) ) );
-		rootNode.addContent( new Text( "\n" ) );
+		if ( xmlComments ) {
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( String.format( " %s ", "Your forum user name." ) ) );
+			rootNode.addContent( new Text( "\n" ) );
+		}
 
 		rootNode.addContent( new Text( "\t" ) );
 		Element authorNode = new Element( "author" );
@@ -86,18 +95,20 @@ public class JDOMModMetadataWriter {
 		rootNode.addContent( new Text( "\n\n\n" ) );
 
 		// version.
-		rootNode.addContent( new Text( "\t" ) );
-		buf.setLength( 0 );
-		buf.append( "\n" );
-		buf.append( "\t\tThe revision/variant of this release, preferably at least a number.\n" );
-		buf.append( "\t\tExamples:\n" );
-		buf.append( "\t\t\t0.3\n" );
-		buf.append( "\t\t\t2.1c Ships Only WIP\n" );
-		buf.append( "\t\t\t2.4.1 Hi-res Bkgs\n" );
-		buf.append( "\t\t\t1.0 for FTL 1.03.1\n" );
-		buf.append( "\t" );
-		rootNode.addContent( new Comment( buf.toString() ) );
-		rootNode.addContent( new Text( "\n" ) );
+		if ( xmlComments ) {
+			buf.setLength( 0 );
+			buf.append( "\n" );
+			buf.append( "\t\tThe revision/variant of this release, preferably at least a number.\n" );
+			buf.append( "\t\tExamples:\n" );
+			buf.append( "\t\t\t0.3\n" );
+			buf.append( "\t\t\t2.1c Ships Only WIP\n" );
+			buf.append( "\t\t\t2.4.1 Hi-res Bkgs\n" );
+			buf.append( "\t\t\t1.0 for FTL 1.03.1\n" );
+			buf.append( "\t" );
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( buf.toString() ) );
+			rootNode.addContent( new Text( "\n" ) );
+		}
 
 		rootNode.addContent( new Text( "\t" ) );
 		Element versionNode = new Element( "version" );
@@ -115,30 +126,32 @@ public class JDOMModMetadataWriter {
 
 		rootNode.addContent( new Text( "\n\n" ) );
 
-		rootNode.addContent( new Text( "\t" ) );
-		buf.setLength( 0 );
-		buf.append( "\n" );
-		buf.append( "\t\tSuggestions for the description...\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tWrite a short paragraph about the mod's effect first (what style ship, how\n" );
-		buf.append( "\t\tdoes it affect gameplay). No need to introduce yourself.\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tOptionally add a paragraph of background flavor.\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tOptionally list important features.\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tList any concerns about mod compatibility, preferred order, or requirements.\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tMention \"Replaces the XYZ ship.\" if relevant.\n" );
-		buf.append( "\t\t\tKestrel-A, Engi-A,    Fed-A,     Zoltan-A,\n" );
-		buf.append( "\t\t\tStealth-A, Rock-A,    Slug-A,    Mantis-A,\n" );
-		buf.append( "\t\t\tLanius-A,  Crystal-A\n" );
-		buf.append( "\n" );
-		buf.append( "\t\tAbove all, keep the description general, so you won't have to edit\n" );
-		buf.append( "\t\tthat again for each new version.\n" );
-		buf.append( "\t" );
-		rootNode.addContent( new Comment( buf.toString() ) );
-		rootNode.addContent( new Text( "\n" ) );
+		if ( xmlComments ) {
+			buf.setLength( 0 );
+			buf.append( "\n" );
+			buf.append( "\t\tSuggestions for the description...\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tWrite a short paragraph about the mod's effect first (what style ship, how\n" );
+			buf.append( "\t\tdoes it affect gameplay). No need to introduce yourself.\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tOptionally add a paragraph of background flavor.\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tOptionally list important features.\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tList any concerns about mod compatibility, preferred order, or requirements.\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tMention \"Replaces the XYZ ship.\" if relevant.\n" );
+			buf.append( "\t\t\tKestrel-A, Engi-A,    Fed-A,     Zoltan-A,\n" );
+			buf.append( "\t\t\tStealth-A, Rock-A,    Slug-A,    Mantis-A,\n" );
+			buf.append( "\t\t\tLanius-A,  Crystal-A\n" );
+			buf.append( "\n" );
+			buf.append( "\t\tAbove all, keep the description general, so you won't have to edit\n" );
+			buf.append( "\t\tthat again for each new version.\n" );
+			buf.append( "\t" );
+			rootNode.addContent( new Text( "\t" ) );
+			rootNode.addContent( new Comment( buf.toString() ) );
+			rootNode.addContent( new Text( "\n" ) );
+		}
 
 		Format format = Format.getPrettyFormat();
 		format.setTextMode( Format.TextMode.PRESERVE );
