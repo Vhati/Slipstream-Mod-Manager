@@ -17,7 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -65,30 +65,37 @@ public class SlipstreamCLI {
 		BasicParser parser = new BasicParser();
 
 		Options options = new Options();
-		options.addOption( OptionBuilder.withLongOpt( "extract-dats" )
-		                                .withDescription( "extract FTL resources into a dir" )
-		                                .hasArg()
-		                                .withArgName("DIR")
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "global-panic" )
-		                                .withDescription( "patch as if advanced find tags had panic='true'" )
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "list-mods" )
-		                                .withDescription( "list available mod names" )
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "runftl" )
-		                                .withDescription( "run the game (standalone or with 'patch')" )
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "patch" )
-		                                .withDescription( "revert to vanilla and add named mods (if any)" )
-		                                .create() );
-		options.addOption( OptionBuilder.withLongOpt( "validate" )
-		                                .withDescription( "check named mods for problems" )
-		                                .create() );
+		options.addOption( Option.builder()
+			.longOpt( "extract-dats" )
+			.desc( "extract FTL resources into a dir" )
+			.hasArg()
+			.argName( "DIR" )
+			.build() );
+		options.addOption( Option.builder()
+			.longOpt( "global-panic" )
+			.desc( "patch as if advanced find tags had panic='true'" )
+			.build() );
+		options.addOption( Option.builder()
+			.longOpt( "list-mods" )
+			.desc( "list available mod names" )
+			.build() );
+		options.addOption( Option.builder()
+			.longOpt( "runftl" )
+			.desc( "run the game (standalone or with 'patch')" )
+			.build() );
+		options.addOption( Option.builder()
+			.longOpt( "patch" )
+			.desc( "revert to vanilla and add named mods (if any)" )
+			.build() );
+		options.addOption( Option.builder()
+			.longOpt( "validate" )
+			.desc( "check named mods for problems" )
+			.build() );
 		options.addOption( "h", "help", false, "display this help and exit" );
-		options.addOption( OptionBuilder.withLongOpt( "version" )
-		                                .withDescription( "output version information and exit" )
-		                                .create() );
+		options.addOption( Option.builder()
+			.longOpt( "version" )
+			.desc( "output version information and exit" )
+			.build() );
 		CommandLine cmdline = null;
 		try {
 			cmdline = parser.parse( options, args, true );
