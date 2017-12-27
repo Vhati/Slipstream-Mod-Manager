@@ -16,8 +16,8 @@ import java.util.zip.ZipInputStream;
 
 import org.jdom2.JDOMException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.AbstractPack.RepackResult;
@@ -31,7 +31,7 @@ import net.vhati.modmanager.core.ModUtilities;
 
 public class ModPatchThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger( ModPatchThread.class );
+	private static final Logger log = LoggerFactory.getLogger( ModPatchThread.class );
 
 	// Other threads can check or set this.
 	public volatile boolean keepRunning = true;

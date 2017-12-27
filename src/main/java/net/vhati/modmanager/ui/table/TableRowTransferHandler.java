@@ -8,8 +8,8 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.ui.table.Reorderable;
 
@@ -21,7 +21,7 @@ import net.vhati.modmanager.ui.table.Reorderable;
  */
 public class TableRowTransferHandler extends TransferHandler {
 
-	private static final Logger log = LogManager.getLogger( TableRowTransferHandler.class );
+	private static final Logger log = LoggerFactory.getLogger( TableRowTransferHandler.class );
 
 	private DataFlavor localIntegerFlavor = null;
 
@@ -36,10 +36,10 @@ public class TableRowTransferHandler extends TransferHandler {
 		this.table = table;
 
 		try {
-			localIntegerFlavor = new DataFlavor( DataFlavor.javaJVMLocalObjectMimeType + ";class=\""+ Integer.class.getName() +"\"" );
+			localIntegerFlavor = new DataFlavor( String.format( "%s;class=\"%s\"", DataFlavor.javaJVMLocalObjectMimeType, Integer.class.getName() ) );
 		}
 		catch ( ClassNotFoundException e ) {
-			log.error( e );
+			log.error( "Failed to construct a table row transfer handler", e );
 		}
 	}
 
@@ -84,7 +84,7 @@ public class TableRowTransferHandler extends TransferHandler {
 			}
 		}
 		catch ( Exception e ) {
-			log.error( e );
+			log.error( "Dragging failed", e );
 		}
 		return false;
 	}

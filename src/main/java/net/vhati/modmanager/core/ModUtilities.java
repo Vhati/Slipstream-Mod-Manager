@@ -36,8 +36,8 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.core.EmptyAwareSAXHandlerFactory;
 import net.vhati.modmanager.core.EOLWriter;
@@ -48,7 +48,7 @@ import net.vhati.modmanager.core.SloppyXMLParser;
 
 public class ModUtilities {
 
-	private static final Logger log = LogManager.getLogger(ModUtilities.class);
+	private static final Logger log = LoggerFactory.getLogger( ModUtilities.class );
 
 	private static Pattern junkFilePtn = Pattern.compile( "[.]DS_Store$|(?:^|/)thumbs[.]db$|(?:^|/)[.]dropbox$|(?:^|/)~|~$|(?:^|/)#.+#$" );
 

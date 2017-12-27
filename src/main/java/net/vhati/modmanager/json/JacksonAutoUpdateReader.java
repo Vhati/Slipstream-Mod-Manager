@@ -15,8 +15,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
@@ -24,7 +24,7 @@ import net.vhati.modmanager.core.ComparableVersion;
 
 public class JacksonAutoUpdateReader {
 
-	private static final Logger log = LogManager.getLogger( JacksonAutoUpdateReader.class );
+	private static final Logger log = LoggerFactory.getLogger( JacksonAutoUpdateReader.class );
 
 
 	public static AutoUpdateInfo parse( File jsonFile ) {
@@ -75,7 +75,7 @@ public class JacksonAutoUpdateReader {
 			exception = e;
 		}
 		if ( exception != null ) {
-			log.error( exception );
+			log.error( "Failed to parse info about available updates", exception );
 			return null;
 		}
 

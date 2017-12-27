@@ -53,8 +53,8 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ComparableVersion;
@@ -85,7 +85,7 @@ import net.vhati.modmanager.ui.table.ListState;
 
 public class ManagerFrame extends JFrame implements ActionListener, ModsScanObserver, Nerfable, Statusbar, Thread.UncaughtExceptionHandler {
 
-	private static final Logger log = LogManager.getLogger( ManagerFrame.class );
+	private static final Logger log = LoggerFactory.getLogger( ManagerFrame.class );
 
 	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
 	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/auto_update.json";

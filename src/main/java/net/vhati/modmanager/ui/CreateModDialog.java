@@ -22,8 +22,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.ui.FieldEditorPanel;
 import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
@@ -33,7 +33,7 @@ import net.vhati.modmanager.xml.JDOMModMetadataWriter;
 
 public class CreateModDialog extends JDialog implements ActionListener {
 
-	private static final Logger log = LogManager.getLogger( CreateModDialog.class );
+	private static final Logger log = LoggerFactory.getLogger( CreateModDialog.class );
 
 	protected static final String DIR_NAME = "Directory Name";
 	protected static final String AUDIO_ROOT = "audio/";

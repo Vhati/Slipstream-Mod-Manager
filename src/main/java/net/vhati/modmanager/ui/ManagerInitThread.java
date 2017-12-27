@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import javax.swing.SwingUtilities;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.core.AutoUpdateInfo;
 import net.vhati.modmanager.core.ModDB;
@@ -39,7 +39,7 @@ import net.vhati.modmanager.ui.table.ListState;
  */
 public class ManagerInitThread extends Thread {
 
-	private static final Logger log = LogManager.getLogger( ManagerInitThread.class );
+	private static final Logger log = LoggerFactory.getLogger( ManagerInitThread.class );
 
 	private final ManagerFrame frame;
 	private final SlipstreamConfig appConfig;

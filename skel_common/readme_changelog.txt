@@ -5,6 +5,7 @@ Changelog
 - Made the comments in boilerplace mod metadata optional
 - Fixed omitted Validate warnings for PNG files
 - Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
+- Changed logging framework to SLF4J/Logback
 
 1.9:
 - Fixed corrupted civilian sector music in FTL 1.6.1+

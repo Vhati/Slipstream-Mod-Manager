@@ -10,8 +10,8 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.ftldat.AbstractPack;
 import net.vhati.ftldat.FolderPack;
@@ -21,7 +21,7 @@ import net.vhati.ftldat.PkgPack;
 
 public class DatExtractDialog extends ProgressDialog {
 
-	private static final Logger log = LogManager.getLogger( DatExtractDialog.class );
+	private static final Logger log = LoggerFactory.getLogger( DatExtractDialog.class );
 
 	private boolean started = false;
 

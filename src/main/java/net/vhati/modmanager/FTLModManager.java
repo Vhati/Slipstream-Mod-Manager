@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.Properties;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -13,8 +15,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.FileAppender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import net.vhati.modmanager.cli.SlipstreamCLI;
 import net.vhati.modmanager.core.ComparableVersion;
@@ -25,7 +32,7 @@ import net.vhati.modmanager.ui.ManagerFrame;
 
 public class FTLModManager {
 
-	private static final Logger log = LogManager.getLogger( FTLModManager.class );
+	private static final Logger log = LoggerFactory.getLogger( FTLModManager.class );
 
 	public static final String APP_NAME = "Slipstream Mod Manager";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion( "1.9" );
@@ -34,8 +41,42 @@ public class FTLModManager {
 
 
 	public static void main( String[] args ) {
-		if ( args.length > 0 ) SlipstreamCLI.main( args );
+		// Redirect any libraries' java.util.Logging messages.
+		SLF4JBridgeHandler.removeHandlersForRootLogger();
+		SLF4JBridgeHandler.install();
 
+		// Doing this here instead of in "logback.xml", allows for conditional log files.
+		// For example, the app could decide not to or in a different place.
+
+		// Fork log into a file.
+		LoggerContext lc = (LoggerContext)LoggerFactory.getILoggerFactory();
+
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setContext( lc );
+		encoder.setCharset( Charset.forName( "UTF-8" ) );
+		encoder.setPattern( "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n" );
+		encoder.start();
+
+		FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
+		fileAppender.setContext( lc );
+		fileAppender.setName( "LogFile" );
+		fileAppender.setFile( new File( "./modman-log.txt" ).getAbsolutePath() );
+		fileAppender.setAppend( false );
+		fileAppender.setEncoder( encoder );
+		fileAppender.start();
+
+		lc.getLogger( Logger.ROOT_LOGGER_NAME ).addAppender( fileAppender );
+
+		// Log a welcome message.
+		log.debug( "Started: {}", new Date() );
+		log.debug( "{} v{}", APP_NAME, APP_VERSION );
+		log.debug( "OS: {} {}", System.getProperty( "os.name" ), System.getProperty( "os.version" ) );
+		log.debug( "VM: {}, {}, {}", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) );
+
+		if ( args.length > 0 ) {
+			SlipstreamCLI.main( args );
+			return;
+		}
 
 		// Ensure all popups are triggered from the event dispatch thread.
 
@@ -50,15 +91,12 @@ public class FTLModManager {
 
 	private static void guiInit() {
 		try {
-			log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
-			log.debug( String.format( "%s %s", System.getProperty( "os.name" ), System.getProperty( "os.version" ) ) );
-			log.debug( String.format( "%s, %s, %s", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) ) );
-
 			// Nag if the jar was double-clicked.
 			if ( new File( "./mods/" ).exists() == false ) {
 				String currentPath = new File( "." ).getAbsoluteFile().getParentFile().getAbsolutePath();
+
+				log.error( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting...", currentPath ) );
 				showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
-				System.err.println( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting.", currentPath ) );
 
 				throw new ExitException();
 			}

@@ -41,16 +41,13 @@ This project depends on the following libraries.
 - JDOM 2.x
     http://www.jdom.org/
     (For JavaDocs, look left.)
-- log4j2
-    http://logging.apache.org/log4j/2.x/
-    (JavaDocs are not available.)
-
-    There was a bug in Java 1.7.0_25 that causes log4j2-beta8 to hang
-    the moment a Logger object is created. 1.7.0_40 fixed it, 1.6 didn't
-    have the bug, and log4j2-beta9 will compensate, when it's released.
-    https://issues.apache.org/jira/browse/LOG4J2-322
-
-- Apache Commons CLI 1.2
+- SLF4J
+    https://www.slf4j.org/
+    (For JavaDocs, look left.)
+- Logback
+    https://logback.qos.ch/
+    (For JavaDocs, look left.)
+- Apache Commons CLI 1.x
     http://commons.apache.org/proper/commons-cli/
     (For JavaDocs, scroll down.)
 

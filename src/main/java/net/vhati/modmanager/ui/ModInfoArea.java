@@ -24,15 +24,15 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.modmanager.ui.Statusbar;
 
 
 public class ModInfoArea extends JScrollPane {
 
-	private static final Logger log = LogManager.getLogger( ModInfoArea.class );
+	private static final Logger log = LoggerFactory.getLogger( ModInfoArea.class );
 
 	private static final String STYLE_REGULAR = "regular";
 	private static final String STYLE_HYPERLINK = "hyperlink";

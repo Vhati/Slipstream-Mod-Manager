@@ -53,8 +53,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.vhati.ftldat.PackUtilities;
 import net.vhati.modmanager.core.ModDB;
@@ -66,7 +66,7 @@ import net.vhati.modmanager.json.JacksonCatalogWriter;
 
 public class ForumScraper {
 
-	private static final Logger log = LogManager.getLogger( ForumScraper.class );
+	private static final Logger log = LoggerFactory.getLogger( ForumScraper.class );
 
 	private static final String MASTER_LIST_URL = "https://subsetgames.com/forum/viewtopic.php?f=11&t=2645";
 	private static final String FORUM_URL_FRAGMENT = "https://subsetgames.com/forum/viewtopic.php";

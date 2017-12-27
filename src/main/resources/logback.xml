@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+	<!-- Notify java.util.logging to adjust its levels, to stop messages that'd get ignored anyway. -->
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
+
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+		<target>System.err</target>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>info</level>
+		</filter>
+		<encoder>
+			<pattern>%-5level %logger{0} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- Appenders declared here but not attached to loggers will be ignored. -->
+
+	<!-- LogFile appender will be constructed and added programmatically as needed. -->
+
+	<!-- Additive loggers inherit appenders and omitted values, like level. -->
+	<logger name="net.vhati" level="debug" additivity="true">
+	</logger>
+
+	<!-- Limit verbosity of any other packages. -->
+	<root level="error">
+		<appender-ref ref="Console" />
+	</root>
+</configuration>
