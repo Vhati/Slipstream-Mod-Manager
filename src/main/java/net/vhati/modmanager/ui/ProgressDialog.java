@@ -44,7 +44,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		progressHolder.add( progressBar );
 		getContentPane().add( progressHolder, BorderLayout.NORTH );
 
-		statusArea = new JTextArea();
+		statusArea = new JTextArea( 5, 50 );
 		statusArea.setLineWrap( true );
 		statusArea.setWrapStyleWord( true );
 		statusArea.setFont( statusArea.getFont().deriveFont( 13f ) );
@@ -68,7 +68,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
 		continueHolder.add( Box.createHorizontalGlue() );
 		getContentPane().add( continueHolder, BorderLayout.SOUTH );
 
-		this.setSize( 400, 160 );
+		this.pack();
 		this.setMinimumSize( this.getPreferredSize() );
 		this.setLocationRelativeTo( owner );
 	}

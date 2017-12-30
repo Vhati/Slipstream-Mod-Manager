@@ -6,6 +6,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import net.vhati.modmanager.core.ModPatchObserver;
+import net.vhati.modmanager.ui.ProgressDialog;
 
 
 public class ModPatchDialog extends ProgressDialog implements ModPatchObserver {

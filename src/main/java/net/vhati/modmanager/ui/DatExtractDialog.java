@@ -18,6 +18,8 @@ import net.vhati.ftldat.FolderPack;
 import net.vhati.ftldat.FTLPack;
 import net.vhati.ftldat.PkgPack;
 
+import net.vhati.modmanager.ui.ProgressDialog;
+
 
 public class DatExtractDialog extends ProgressDialog {
 
