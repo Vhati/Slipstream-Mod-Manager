@@ -16,12 +16,16 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -441,6 +445,7 @@ public class ModUtilities {
 		List<String> seenJunkDirs = new ArrayList<String>();
 
 		CharsetEncoder asciiEncoder = Charset.forName( "US-ASCII" ).newEncoder();
+		CharsetEncoder win1252Encoder = Charset.forName( "windows-1252" ).newEncoder();
 
 		ZipInputStream zis = null;
 		try {
@@ -576,15 +581,6 @@ public class ModUtilities {
 						modValid = false;
 					}
 
-					// Found chars unique to windows-1252.
-					if ( decodeResult.encoding.equalsIgnoreCase( "windows-1252" ) ) {
-						pendingMsgs.add( new ReportMessage(
-							ReportMessage.WARNING,
-							String.format( "Fancy %s chars (UTF-8 is recommended for that)", decodeResult.encoding )
-						) );
-						modValid = false;
-					}
-
 					if ( decodeResult.eol != DecodeResult.EOL_CRLF &&
 					     decodeResult.eol != DecodeResult.EOL_NONE ) {
 						if ( isXML ) {
@@ -602,6 +598,53 @@ public class ModUtilities {
 						modValid = false;
 					}
 
+					if ( decodeResult.encoding.equalsIgnoreCase( "windows-1252" ) ) {
+						// Found non-ASCII chars unique to windows-1252.
+
+						Set<CharSequence> uniqueGraphemes = new TreeSet<CharSequence>();
+						getUniqueGraphemes( decodeResult.text, uniqueGraphemes, Locale.getDefault() );
+
+						StringBuilder charBuf = new StringBuilder();
+						for ( CharSequence grapheme : uniqueGraphemes ) {
+							if ( !asciiEncoder.reset().canEncode( grapheme ) ) {
+								if ( charBuf.length() > 0 ) charBuf.append( "," );
+
+								charBuf.append( grapheme );
+							}
+						}
+
+						pendingMsgs.add( new ReportMessage(
+							ReportMessage.WARNING,
+							String.format( "Windows-1252 encoding with fancy non-ASCII chars (UTF-8 is recommended for clarity): %s", charBuf.toString() )
+						) );
+					}
+					else {
+						// Not windows-1252.
+						// Nag if there are chars that can't be converted to
+						// windows-1252 (for FTL 1.01-1.5.13).
+
+						Set<CharSequence> uniqueGraphemes = new TreeSet<CharSequence>();
+						getUniqueGraphemes( decodeResult.text, uniqueGraphemes, Locale.getDefault() );
+
+						StringBuilder charBuf = new StringBuilder();
+						for ( CharSequence grapheme : uniqueGraphemes ) {
+							if ( !win1252Encoder.reset().canEncode( grapheme ) ) {
+								if ( charBuf.length() > 0 ) charBuf.append( "," );
+
+								charBuf.append( grapheme ).append( " (" );
+								appendGraphemeHex( grapheme, charBuf );
+								charBuf.append( ")" );
+							}
+						}
+						if ( charBuf.length() > 0 ) {
+							pendingMsgs.add( new ReportMessage(
+								ReportMessage.WARNING,
+								String.format( "Characters that can't be re-encoded as windows-1252 will not work in FTL 1.5.13 and earlier: %s", charBuf.toString() )
+							) );
+						}
+					}
+
+					// Suggest replacements for odd characters.
 					List<Pattern> oddCharPtns = new ArrayList<Pattern>();
 					Map<Pattern,String> oddCharSuggestions = new HashMap<Pattern,String>();
 					Map<Pattern,List<Character>> oddCharLists = new HashMap<Pattern,List<Character>>();
@@ -646,8 +689,6 @@ public class ModUtilities {
 							) );
 						}
 					}
-
-					// TODO: Nag if there are chars FTL can't show.
 
 					if ( isXML ) {
 						Report xmlReport = validateModXML( decodeResult.text );
@@ -734,6 +775,50 @@ public class ModUtilities {
 		) );
 
 		return new Report( messages, modValid );
+	}
+
+	/**
+	 * Populates an existing Set with unique graphemes from a string.
+	 *
+	 * What humans think of as a character, is a grapheme. Unicode allows
+	 * multiple code points (Java's char values) to cluster into a grapheme
+	 * (like a letter, plus an accent).
+	 *
+	 * This method may be called repeatedly to accumulate graphemes from
+	 * multiple strings.
+	 *
+	 * @src a String to scan
+	 * @dstSet a Set to add results into (such as a TreeSet)
+	 * @locale a locale for creating a BreakIterator
+	 * @see java.text.BreakIterator
+	 */
+	public static void getUniqueGraphemes( String src, Set<CharSequence> dstSet, Locale locale ) {
+		BreakIterator graphemeIt = BreakIterator.getCharacterInstance( locale );  // No arg means default Locale.
+		graphemeIt.setText( src );
+
+		int start = graphemeIt.first();
+		int end = graphemeIt.next();
+
+		while ( end != BreakIterator.DONE ) {
+			CharSequence grapheme = src.subSequence( start, end );
+			dstSet.add( grapheme );
+
+			start = end;
+			end = graphemeIt.next();
+		}
+	}
+
+	/**
+	 * Appends a grapheme's code points ("U+XXXX") to a buffer.
+	 *
+	 * If a grapheme involves multiple code points, they will be
+	 * space-delimited.
+	 */
+	public static void appendGraphemeHex( CharSequence src, StringBuilder dstBuf ) {
+		for ( int i=0; i < src.length(); i++ ) {
+			if ( i > 0 ) dstBuf.append( " " );
+			dstBuf.append( String.format( "U+%04X", (int)src.charAt( i ) ) );
+		}
 	}
 
 

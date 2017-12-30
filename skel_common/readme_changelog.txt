@@ -6,6 +6,7 @@ Changelog
 - Fixed omitted Validate warnings for PNG files
 - Disabled XML escaping when reencoding to ensure invalid chars cause an error
 - Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
+- Added a Validate warning about FTL 1.5.13 for chars outside windows-1252
 - Changed logging framework to SLF4J/Logback
 - Changed command line parser to picocli
 
