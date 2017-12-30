@@ -266,7 +266,7 @@ public class PkgPack extends AbstractPack {
 			char c = (char)srcBuf.get();
 
 			if ( c == '\0' ) break;
-			if ( !asciiEncoder.canEncode( c ) ) {
+			if ( !asciiEncoder.reset().canEncode( c ) ) {
 				throw new IOException( String.format( "Unexpected non-ASCII char in null-terminated string: %X", c ) );
 			}
 
@@ -276,7 +276,7 @@ public class PkgPack extends AbstractPack {
 	}
 
 	private int writeNullTerminatedString( ByteBuffer dstBuf, CharSequence s ) throws IOException {
-		if ( !asciiEncoder.canEncode( s ) ) {
+		if ( !asciiEncoder.reset().canEncode( s ) ) {
 			throw new IllegalArgumentException( "The PKG format does not support non-ascii characters: "+ s );
 		}
 
@@ -577,7 +577,7 @@ public class PkgPack extends AbstractPack {
 		if ( pathToIndexMap.containsKey( innerPath ) ) {
 			throw new IOException( "InnerPath already exists: "+ innerPath );
 		}
-		if ( !asciiEncoder.canEncode( innerPath ) ) {
+		if ( !asciiEncoder.reset().canEncode( innerPath ) ) {
 			throw new IllegalArgumentException( "InnerPath contains non-ascii characters: "+ innerPath );
 		}
 

@@ -329,7 +329,7 @@ public class FTLPack extends AbstractPack {
 		if ( pathToIndexMap.containsKey( innerPath ) ) {
 			throw new IOException( "InnerPath already exists: "+ innerPath );
 		}
-		if ( !asciiEncoder.canEncode( innerPath ) ) {
+		if ( !asciiEncoder.reset().canEncode( innerPath ) ) {
 			throw new IllegalArgumentException( "InnerPath contains non-ascii characters: "+ innerPath );
 		}
 

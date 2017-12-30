@@ -459,7 +459,7 @@ public class ModUtilities {
 					innerPath = innerPath.replace( '\\', '/' );
 				}
 
-				if ( !asciiEncoder.canEncode( innerPath ) ) {
+				if ( !asciiEncoder.reset().canEncode( innerPath ) ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.ERROR,
 						String.format( "Non-ASCII characters in path." )
@@ -576,6 +576,7 @@ public class ModUtilities {
 						modValid = false;
 					}
 
+					// Found chars unique to windows-1252.
 					if ( decodeResult.encoding.equalsIgnoreCase( "windows-1252" ) ) {
 						pendingMsgs.add( new ReportMessage(
 							ReportMessage.WARNING,
