@@ -4,6 +4,7 @@ Changelog
 - Edited a comment in boilerplate mod metadata to include AE ships
 - Made the comments in boilerplace mod metadata optional
 - Fixed omitted Validate warnings for PNG files
+- Disabled XML escaping when reencoding to ensure invalid chars cause an error
 - Added Validate warnings about FTL 1.6.1+ for TTF, MP3, and PNG files
 - Changed logging framework to SLF4J/Logback
 - Changed command line parser to picocli

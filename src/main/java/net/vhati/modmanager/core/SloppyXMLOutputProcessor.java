@@ -9,6 +9,7 @@ import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.jdom2.output.EscapeStrategy;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
@@ -153,6 +154,9 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 * is encoding bytes to match. If encoding is null, the default
 	 * is "UTF-8".
 	 *
+	 * There will be no XML character entity escaping, which would have allowed
+	 * otherwise unmappable characters to print without errors.
+	 *
 	 * LineEndings will be CR-LF. Except for comments!?
 	 */
 	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
@@ -163,7 +167,16 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 		format.setIndent( "\t" );
 		format.setLineSeparator( LineSeparator.CRNL );
 
-		if ( encoding != null ) format.setEncoding( encoding );
+		if ( encoding != null ) {
+			format.setEncoding( encoding );
+		}
+
+		format.setEscapeStrategy(new EscapeStrategy() {
+			@Override
+			public boolean shouldEscape( char ch ) {
+				return false;
+			}
+		});
 
 		XMLOutputter outputter = new XMLOutputter( format, new SloppyXMLOutputProcessor() );
 		outputter.output( doc, writer );
