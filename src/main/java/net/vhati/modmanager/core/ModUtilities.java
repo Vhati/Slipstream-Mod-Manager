@@ -327,7 +327,7 @@ public class ModUtilities {
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
-		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding );
+		SloppyXMLOutputProcessor.sloppyPrint( mergedDoc, writer, encoding, false );
 		writer.flush();
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 
@@ -369,7 +369,7 @@ public class ModUtilities {
 		ByteArrayOutputStream tmpData = new ByteArrayOutputStream();
 		Writer writer = new EOLWriter( new OutputStreamWriter( tmpData, encoder ), "\r\n" );
 
-		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding );
+		SloppyXMLOutputProcessor.sloppyPrint( doc, writer, encoding, false );
 		writer.flush();
 		InputStream result = new ByteArrayInputStream( tmpData.toByteArray() );
 

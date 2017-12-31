@@ -154,12 +154,17 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 * is encoding bytes to match. If encoding is null, the default
 	 * is "UTF-8".
 	 *
-	 * There will be no XML character entity escaping, which would have allowed
-	 * otherwise unmappable characters to print without errors.
+	 * If XML character entity escaping is allowed, otherwise unmappable
+	 * characters may be written without errors. If disabled, an
+	 * UnmappableCharacterException will make their presence obvious and fatal.
 	 *
 	 * LineEndings will be CR-LF. Except for comments!?
+	 *
+	 * @param doc
+	 * @param writer
+	 * @param disableEscaping
 	 */
-	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
+	public static void sloppyPrint( Document doc, Writer writer, String encoding, boolean allowEscaping ) throws IOException {
 		Format format = Format.getPrettyFormat();
 		format.setTextMode( Format.TextMode.PRESERVE );  // Permit leading/trailing space.
 		format.setExpandEmptyElements( false );
@@ -171,12 +176,14 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 			format.setEncoding( encoding );
 		}
 
-		format.setEscapeStrategy(new EscapeStrategy() {
-			@Override
-			public boolean shouldEscape( char ch ) {
-				return false;
-			}
-		});
+		if ( !allowEscaping ) {
+			format.setEscapeStrategy(new EscapeStrategy() {
+				@Override
+				public boolean shouldEscape( char ch ) {
+					return false;
+				}
+			});
+		}
 
 		XMLOutputter outputter = new XMLOutputter( format, new SloppyXMLOutputProcessor() );
 		outputter.output( doc, writer );
