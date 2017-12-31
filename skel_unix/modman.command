@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Get the script's name.
 me=$(basename "$0");
@@ -46,7 +46,20 @@ fi
 # Finally, the payload.
 cd "${maindir}";
 # - - -
-java -jar modman.jar;
+
+java_cmd=$(command -v java);
+
+# OSX uses a command to decide java's location.
+if [ -x "/usr/libexec/java_home" ]; then
+  export JAVA_HOME=`/usr/libexec/java_home`
+  java_cmd=${JAVA_HOME}/bin/java
+fi
+
+echo "";
+echo "Found java at: ${java_cmd}";
+echo "";
+
+${java_cmd} -jar modman.jar;
 # - - -
 
 if [ "${ingui}" = "1" ]; then

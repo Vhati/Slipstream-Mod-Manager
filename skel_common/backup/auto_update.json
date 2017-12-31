@@ -22,7 +22,8 @@
 						"Added a Validate warning about FTL 1.5.13 for chars outside windows-1252",
 						"Disabled XML escaping when reencoding to ensure invalid chars cause an error",
 						"Changed logging framework to SLF4J/Logback",
-						"Changed command line parser to picocli"
+						"Changed command line parser to picocli",
+						"Made launcher scripts on OSX find java the recommended way"
 					]
 				},
 				{
