@@ -73,6 +73,7 @@
 			<configuration>
 				<target>1.6</target>
 				<compilerArgument>-Xlint:unchecked</compilerArgument>
+				<compilerArgument>-Xlint:deprecation</compilerArgument>
 			</configuration>
 		</plugin>
 		<plugin>

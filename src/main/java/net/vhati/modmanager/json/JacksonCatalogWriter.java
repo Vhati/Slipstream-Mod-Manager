@@ -27,10 +27,10 @@ public class JacksonCatalogWriter {
 		ObjectNode rootNode = mapper.createObjectNode();
 
 		ObjectNode catalogsNode = rootNode.objectNode();
-		rootNode.put( "catalog_versions", catalogsNode );
+		rootNode.set( "catalog_versions", catalogsNode );
 
 		ArrayNode catalogNode = rootNode.arrayNode();
-		catalogsNode.put( "1", catalogNode );
+		catalogsNode.set( "1", catalogNode );
 
 		for ( ModsInfo modsInfo : modsInfoList ) {
 			ObjectNode infoNode = rootNode.objectNode();
@@ -44,7 +44,7 @@ public class JacksonCatalogWriter {
 			infoNode.put( "thread_hash", modsInfo.threadHash );
 
 			ArrayNode versionsNode = rootNode.arrayNode();
-			infoNode.put( "versions", versionsNode );
+			infoNode.set( "versions", versionsNode );
 
 			for ( Map.Entry<String,String> entry : modsInfo.getVersionsMap().entrySet() ) {
 				String versionFileHash = entry.getKey();
