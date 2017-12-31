@@ -499,6 +499,12 @@ public class ModUtilities {
 					) );
 					modValid = false;
 				}
+				else if ( innerPath.matches( "^.*[.]font$" ) ) {
+					pendingMsgs.add( new ReportMessage(
+						ReportMessage.WARNING,
+						String.format( "The *.font files introduced with FTL 1.6.1 won't work in FTL 1.01-1.5.13, which used TTF fonts." )
+					) );
+				}
 				else if ( innerPath.matches( "^.*[.]mp3$" ) ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.WARNING,
