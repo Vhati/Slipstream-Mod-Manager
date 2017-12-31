@@ -28,9 +28,8 @@ Setup
 
   Extract the files from this archive anywhere.
 
-  On the first run, you may be prompted to locate your
-  FTL resources. Specifically "data.dat" in the "resources\"
-  directory under your FTL install.
+  On the first run, you may be prompted to locate your FTL resources.
+  Specifically "data.dat" in a directory where FTL was installed.
 
   In most cases, this should be located automatically.
 
@@ -43,7 +42,7 @@ Usage
   To start the mod manager:
     On XP, double-click modman.exe.
 
-    On Windows 7 or Vista, Slipstream usually needs to be run as an administrator.
+    Since Windows Vista, Slipstream usually needs to be run as an admin.
       Right-click modman.exe and "Run as Administrator".
       Or double-click modman_admin.exe.
 
@@ -61,12 +60,13 @@ Usage
 
   If you upgrade FTL:
     Delete the outdated files in Slipstream\backup\
+	This can be done from the menu: Help-"Delete Backups".
     If you don't, the game's resources will get corrupted.
 
   Commandline:
-    Run "modman.exe -h" for commandline usage.
+    Run "modman_admin.exe -h" for commandline usage.
 
-    On Windows 7 or Vista, the Command Prompt itself must be started as an
+    Since Windows Vista, the Command Prompt itself may need to be started as an
     administrator (right-click it in the start menu).
 
 
@@ -136,7 +136,13 @@ Troubleshooting
       Steam users:
         Delete FTL's resource directory:
           "C:\Program Files [or (x86)]\Steam\steamapps\common\FTL Faster Than Light\resources"
-        Start Steam and "verify game cache".
+        Start Steam and "verify integrity of game files".
           https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
       Standalone users:
         Reinstall FTL.
+
+* UnmappableCharacterException during patching...
+    For FTL 1.01-1.5.13, Slipstream re-encodes text to windows-1252, which
+    restricts the set of characters that can be used in mods. Click the
+    Validate button to find any problematic characters. FTL 1.6.1 switched to
+    unicode and should not have this problem.

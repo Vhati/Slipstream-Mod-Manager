@@ -136,7 +136,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private JMenuItem exitMenuItem;
 	private JMenu helpMenu;
 	private JMenuItem deleteBackupsMenuItem;
-	private JMenuItem steamVerifyCacheMenuItem;
+	private JMenuItem steamVerifyIntegrityMenuItem;
 	private JMenuItem aboutMenuItem;
 
 	private JButton patchBtn;
@@ -345,10 +345,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		deleteBackupsMenuItem.addMouseListener( new StatusbarMouseListener( this, "Delete backed up resources." ) );
 		deleteBackupsMenuItem.addActionListener( this );
 		helpMenu.add( deleteBackupsMenuItem );
-		steamVerifyCacheMenuItem = new JMenuItem( "Steam: Verify Game Cache" );
-		steamVerifyCacheMenuItem.addMouseListener( new StatusbarMouseListener( this, "Tell Steam to 'Verify Game Cache'." ) );
-		steamVerifyCacheMenuItem.addActionListener( this );
-		helpMenu.add( steamVerifyCacheMenuItem );
+		steamVerifyIntegrityMenuItem = new JMenuItem( "Steam: Verify integrity of game files" );
+		steamVerifyIntegrityMenuItem.addMouseListener( new StatusbarMouseListener( this, "Tell Steam to 'Verify integrity of game files'." ) );
+		steamVerifyIntegrityMenuItem.addActionListener( this );
+		helpMenu.add( steamVerifyIntegrityMenuItem );
 		helpMenu.add( new JSeparator() );
 		aboutMenuItem = new JMenuItem( "About" );
 		aboutMenuItem.addMouseListener( new StatusbarMouseListener( this, "Show info about this application." ) );
@@ -753,15 +753,13 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			}
 			else if ( anyInvalid ) {
 				resultBuf.append( "\n" );
-				resultBuf.append( "FTL itself can tolerate lots of XML typos and still run. " );
-				resultBuf.append( "But malformed XML may break tools that do proper parsing, " );
-				resultBuf.append( "and it hinders the development of new tools.\n" );
+				resultBuf.append( "FTL itself can tolerate lots of XML typos and still run. But malformed XML may " );
+				resultBuf.append( "break tools that do proper parsing, and it hinders the development of new " );
+				resultBuf.append( "tools.\n" );
 				resultBuf.append( "\n" );
-				resultBuf.append( "Since v1.2, Slipstream will try to parse XML while patching: " );
-				resultBuf.append( "first strictly, then failing over to a sloppy parser. " );
-				resultBuf.append( "The sloppy parser will tolerate similar errors, at the risk " );
-				resultBuf.append( "of unforseen behavior, so satisfying the strict parser " );
-				resultBuf.append( "is advised.\n" );
+				resultBuf.append( "Slipstream will try to parse XML while patching: first strictly, then failing " );
+				resultBuf.append( "over to a sloppy parser. The sloppy parser will tolerate similar errors, at the " );
+				resultBuf.append( "risk of unforseen behavior, so satisfying the strict parser is advised.\n" );
 			}
 			infoArea.setDescription( "Results", resultBuf.toString() );
 		}
@@ -849,7 +847,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			deleteBuf.append( "FTL *must be* in a working unmodded state *before* you click 'patch'.\n" );
 			deleteBuf.append( "\n" );
 			deleteBuf.append( "To get FTL into a working unmodded state, you may need to reinstall FTL\n" );
-			deleteBuf.append( "or use Steam's \"Verify Game Cache\" feature.\n" );
+			deleteBuf.append( "or use Steam's \"Verify integrity of game files\" feature.\n" );
 			deleteBuf.append( "\n" );
 			deleteBuf.append( "Whenever FTL is updated, you will need to delete stale backups or the\n" );
 			deleteBuf.append( "game will break.\n" );
@@ -899,7 +897,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				}
 			}
 		}
-		else if ( source == steamVerifyCacheMenuItem ) {
+		else if ( source == steamVerifyIntegrityMenuItem ) {
 			String exePath = appConfig.getProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );
 			File exeFile = null;
 			if ( exePath.length() == 0 || !(exeFile=new File( exePath )).exists() ) {
@@ -929,7 +927,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					FTLUtilities.verifySteamGameCache( exeFile, FTLUtilities.STEAM_APPID_FTL );
 				}
 				catch ( IOException f ) {
-					log.error( "Couldn't tell Steam to 'verify game cache'", f );
+					log.error( "Couldn't tell Steam to 'verify integrity of game files'", f );
 				}
 			}
 

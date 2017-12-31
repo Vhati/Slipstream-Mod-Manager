@@ -24,9 +24,8 @@ Setup
 
   Extract the files from this archive anywhere.
 
-  On the first run, you may be prompted to locate your
-  FTL resources. Specifically "data.dat" in the "resources\"
-  directory under your FTL install.
+  On the first run, you may be prompted to locate your FTL resources.
+  Specifically "data.dat" in a directory where FTL was installed.
 
   On OSX, you can select "FTL.app", because the resources are inside it.
 
@@ -55,6 +54,7 @@ Usage
 
   If you upgrade FTL:
     Delete the outdated files in Slipstream/backup/
+	This can be done from the menu: Help-"Delete Backups".
     If you don't, the game's resources will get corrupted.
 
   Commandline:
@@ -84,19 +84,22 @@ Troubleshooting
 
 * If FTL's resources are corrupt...
     Option 1:
-      In SMM, Help-DeleteBackups
+      In SMM, Help-"Delete Backups"
       Steam users:
-        In SMM, Help-Steam:VerifyGameCache.
+        In SMM, Help-"Steam: Verify integrity of game files".
       Standalone users:
         Reinstall FTL.
 
     Option 2:
       Delete the files in SMM/backup/
       Steam users:
-        Delete FTL's resource directory:
-          Linux: "[~/.local/share or $XDG_DATA_HOME]/Steam/SteamApps/common/FTL Faster Than Light/data/resources"
-          Mac: "~/Library/Application Support/Steam/SteamApps/common/FTL Faster Than Light/FTL.app"
-        Start Steam and "verify game cache".
+        Start Steam and "verify integrity of game files".
           https://support.steampowered.com/kb_article.php?ref=2037-QEUH-3335
       Standalone users:
         Reinstall FTL.
+
+* UnmappableCharacterException during patching...
+    For FTL 1.01-1.5.13, Slipstream re-encodes text to windows-1252, which
+    restricts the set of characters that can be used in mods. Click the
+    Validate button to find any problematic characters. FTL 1.6.1 switched to
+    unicode and should not have this problem.
