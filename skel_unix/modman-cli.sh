@@ -9,12 +9,26 @@ fi
 
 cd "${maindir}";
 
+# Search in $PATH among other places.
 java_cmd=$(command -v java);
 
 # OSX uses a command to decide java's location.
 if [ -x "/usr/libexec/java_home" ]; then
-  export JAVA_HOME=`/usr/libexec/java_home`
-  java_cmd=${JAVA_HOME}/bin/java
+  export JAVA_HOME=$(/usr/libexec/java_home)
+
+  if [ -n "${JAVA_HOME}" ]; then
+    java_cmd=${JAVA_HOME}/bin/java
+  fi
 fi
 
-${java_cmd} -jar modman.jar "$@";
+if [ -n "${java_cmd}" ]; then
+
+  "${java_cmd}" -jar modman.jar "$@";
+
+else
+
+  echo "";
+  echo "This script was unable to find java."
+  echo "";
+
+fi

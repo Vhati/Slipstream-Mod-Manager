@@ -47,19 +47,34 @@ fi
 cd "${maindir}";
 # - - -
 
+# Search in $PATH among other places.
 java_cmd=$(command -v java);
 
-# OSX uses a command to decide java's location.
+# OSX uses a command to decide java's location (or prompt the user to install it).
 if [ -x "/usr/libexec/java_home" ]; then
-  export JAVA_HOME=`/usr/libexec/java_home`
-  java_cmd=${JAVA_HOME}/bin/java
+  export JAVA_HOME=$(/usr/libexec/java_home --request)
+
+  if [ -n "${JAVA_HOME}" ]; then
+    java_cmd=${JAVA_HOME}/bin/java
+  fi
 fi
 
-echo "";
-echo "Found java at: ${java_cmd}";
-echo "";
+if [ -n "${java_cmd}" ]; then
 
-${java_cmd} -jar modman.jar;
+  echo "";
+  echo "Found java at: ${java_cmd}";
+  echo "";
+
+  "${java_cmd}" -jar modman.jar;
+
+else
+
+  echo "";
+  echo "This script was unable to find java."
+  echo "";
+
+fi
+
 # - - -
 
 if [ "${ingui}" = "1" ]; then
