@@ -364,8 +364,8 @@ public class PkgPack extends AbstractPack {
 
 		raf.seek( 0 );
 		raf.setLength( 0 );
-		for ( int i=0; i < signature.length; i++ ) {
-			raf.writeByte( signature[i] );
+		for ( int x : signature ) {
+			raf.writeByte( x );
 		}
 		writeBigUShort( HEADER_SIZE );
 		writeBigUShort( ENTRY_SIZE );
@@ -379,8 +379,8 @@ public class PkgPack extends AbstractPack {
 		raf.seek( 0 );
 
 		// Check the file signature.
-		for ( int i=0; i < signature.length; i++ ) {
-			if ( raf.readUnsignedByte() != signature[i] ) {
+		for ( int x : signature ) {
+			if ( raf.readUnsignedByte() != x ) {
 				throw new IOException( "Unexpected file signature" );
 			}
 		}
@@ -438,7 +438,7 @@ public class PkgPack extends AbstractPack {
 			bigByteBuf.position( entry.innerPathOffset );
 			entry.innerPath = readNullTerminatedString( bigByteBuf );
 
-			pathToIndexMap.put( entry.innerPath, new Integer( i ) );
+			pathToIndexMap.put( entry.innerPath, i );
 		}
 	}
 
@@ -571,7 +571,7 @@ public class PkgPack extends AbstractPack {
 	 */
 	@Override
 	public void add( String innerPath, InputStream is ) throws IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( pathToIndexMap.containsKey( innerPath ) ) {
@@ -664,7 +664,7 @@ public class PkgPack extends AbstractPack {
 
 	@Override
 	public void remove( String innerPath ) throws FileNotFoundException, IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( !pathToIndexMap.containsKey( innerPath ) ) {
@@ -686,7 +686,7 @@ public class PkgPack extends AbstractPack {
 
 	@Override
 	public boolean contains( String innerPath ) {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		return pathToIndexMap.containsKey( innerPath );
@@ -694,7 +694,7 @@ public class PkgPack extends AbstractPack {
 
 	@Override
 	public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( !pathToIndexMap.containsKey( innerPath ) ) {
@@ -805,8 +805,7 @@ public class PkgPack extends AbstractPack {
 		// Move data toward the top.
 		long pendingDataOffset = neededMinDataOffset;
 
-		for ( int i=0; i < tmpEntries.size(); i++ ) {
-			PkgEntry entry = tmpEntries.get ( i );
+		for ( PkgEntry entry : tmpEntries ) {
 
 			if ( pendingDataOffset != entry.dataOffset ) {
 				long totalBytes = entry.dataSize;
@@ -838,7 +837,7 @@ public class PkgPack extends AbstractPack {
 
 		pathToIndexMap.clear();
 		for ( PkgEntry entry : entryList ) {
-			pathToIndexMap.put( entry.innerPath, new Integer( pathToIndexMap.size() ) );
+			pathToIndexMap.put( entry.innerPath, pathToIndexMap.size() );
 		}
 
 		// Update the header.

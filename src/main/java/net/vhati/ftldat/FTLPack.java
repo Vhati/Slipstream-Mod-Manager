@@ -208,7 +208,7 @@ public class FTLPack extends AbstractPack {
 			if ( pathToIndexMap.containsKey( entry.innerPath ) ) {
 				throw new IOException( "InnerPath occurs more than once: "+ entry.innerPath );
 			}
-			pathToIndexMap.put( entry.innerPath, new Integer( i ) );
+			pathToIndexMap.put( entry.innerPath, i );
 		}
 	}
 
@@ -323,7 +323,7 @@ public class FTLPack extends AbstractPack {
 
 	@Override
 	public void add( String innerPath, InputStream is ) throws IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( pathToIndexMap.containsKey( innerPath ) ) {
@@ -370,7 +370,7 @@ public class FTLPack extends AbstractPack {
 
 	@Override
 	public void extractTo( String innerPath, OutputStream os ) throws FileNotFoundException, IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( !pathToIndexMap.containsKey( innerPath ) ) {
@@ -398,7 +398,7 @@ public class FTLPack extends AbstractPack {
 
 	@Override
 	public void remove( String innerPath ) throws FileNotFoundException, IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( !pathToIndexMap.containsKey( innerPath ) ) {
@@ -420,7 +420,7 @@ public class FTLPack extends AbstractPack {
 
 	@Override
 	public boolean contains( String innerPath ) {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		return pathToIndexMap.containsKey( innerPath );
@@ -428,7 +428,7 @@ public class FTLPack extends AbstractPack {
 
 	@Override
 	public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		if ( !pathToIndexMap.containsKey( innerPath ) ) {
@@ -501,7 +501,7 @@ public class FTLPack extends AbstractPack {
 
 		for ( int i=0; i < tmpEntries.size(); i++ ) {
 			DatEntry entry = tmpEntries.get ( i );
-			pathToIndexMap.put( entry.innerPath, new Integer( i ) );
+			pathToIndexMap.put( entry.innerPath, i );
 
 			// Write the header index.
 			raf.seek( getHeaderIndexPosition( i ) );

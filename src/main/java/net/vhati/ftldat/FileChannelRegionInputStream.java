@@ -64,7 +64,7 @@ public class FileChannelRegionInputStream extends InputStream {
 
 		// Do an absolute get() from the buffer,
 		//   and interpret the byte as if it were unsigned.
-		int result = (int)(buf.get( (int)(intraPos - bufOffset) ) & 0xff);
+		int result = buf.get( (int)(intraPos - bufOffset) ) & 0xff;
 		intraPos++;
 		return result;
 	}

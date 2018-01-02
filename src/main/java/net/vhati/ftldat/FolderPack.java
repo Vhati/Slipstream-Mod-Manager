@@ -143,7 +143,7 @@ public class FolderPack extends AbstractPack {
 	 * The location it represents is not guaranteed to exist.
 	 */
 	public File getFile( String innerPath ) {
-		if ( innerPath.indexOf( "\\" ) != -1 ) {
+		if ( innerPath.contains( "\\" ) ) {
 			throw new IllegalArgumentException( "InnerPath contains backslashes: "+ innerPath );
 		}
 		File tmpFile = new File( rootDir, innerPath );

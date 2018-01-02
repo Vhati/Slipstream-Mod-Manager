@@ -29,7 +29,7 @@ import net.vhati.modmanager.ui.RegexDocument;
 
 
 public class FieldEditorPanel extends JPanel {
-	public enum ContentType { WRAPPED_LABEL, LABEL, STRING, TEXT_AREA, INTEGER, BOOLEAN, SLIDER, COMBO, CHOOSER };
+	public enum ContentType { WRAPPED_LABEL, LABEL, STRING, TEXT_AREA, INTEGER, BOOLEAN, SLIDER, COMBO, CHOOSER }
 
 	private Map<String, JTextArea> wrappedLabelMap = new HashMap<String, JTextArea>();
 	private Map<String, JLabel> labelMap = new HashMap<String, JLabel>();
