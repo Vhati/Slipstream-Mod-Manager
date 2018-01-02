@@ -11,6 +11,8 @@
 	</prerequisites>
 	<properties>
 		<jdk.version>1.6</jdk.version>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -71,7 +73,6 @@
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.1</version>
 			<configuration>
-				<target>1.6</target>
 				<compilerArgument>-Xlint:unchecked</compilerArgument>
 				<compilerArgument>-Xlint:deprecation</compilerArgument>
 			</configuration>
