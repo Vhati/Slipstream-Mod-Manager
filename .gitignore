@@ -13,5 +13,10 @@ Thumbs.db
 Desktop.ini
 
 
-# Mac crap
+# Mac junk
 .DS_Store
+
+
+# IdeaJ
+*.idea
+*.iml
