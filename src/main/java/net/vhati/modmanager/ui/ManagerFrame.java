@@ -530,13 +530,13 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 
 	public void showAboutInfo() {
-		String body = "";
-		body += "- Drag to reorder mods.\n";
-		body += "- Click the checkboxes to select.\n";
-		body += "- Click 'Patch' to apply mods ( select none for vanilla ).\n";
-		body += "\n";
-		body += "Thanks for using this mod manager.\n";
-		body += "Make sure to visit the forum for updates!";
+		String body = ""
+			+ "- Drag to reorder mods.\n"
+			+ "- Click the checkboxes to select.\n"
+			+ "- Click 'Patch' to apply mods ( select none for vanilla ).\n"
+			+ "\n"
+			+ "Thanks for using this mod manager.\n"
+			+ "Make sure to visit the forum for updates!";
 
 		infoArea.setDescription( appName, appAuthor, appVersion.toString(), appURL, body );
 	}
@@ -610,10 +610,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			boolean notYetReady = isScanning();
 
 			if ( notYetReady ) {
-				String body = "";
-				body += "No info is currently available for the selected mod.\n\n";
-				body += "But Slipstream has not yet finished scanning the mods/ folder. ";
-				body += "Try clicking this mod again after waiting a few seconds.";
+				String body = ""
+					+ "No info is currently available for the selected mod.\n\n"
+					+ "But Slipstream has not yet finished scanning the mods/ folder. "
+					+ "Try clicking this mod again after waiting a few seconds.";
 
 				infoArea.setDescription( modFileInfo.getName(), body );
 			}
@@ -633,20 +633,20 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 					}
 				}
 
-				String body = "";
-				body += "No info is available for the selected mod.\n\n";
+				StringBuilder bodyBuf = new StringBuilder();
+				bodyBuf.append( "No info is available for the selected mod.\n\n" );
 
 				if ( modDate != null ) {
 					SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
-					body += String.format( "It was released some time after %s.\n\n", dateFormat.format( modDate ) );
+					bodyBuf.append( String.format( "It was released some time after %s.\n\n", dateFormat.format( modDate ) ) );
 				}
 				else {
-					body += "The date of its release could not be determined.\n\n";
+					bodyBuf.append( "The date of its release could not be determined.\n\n" );
 				}
 
-				body += "Mods can include an embedded description, but this one did not.\n";
+				bodyBuf.append( "Mods can include an embedded description, but this one did not.\n" );
 
-				infoArea.setDescription( modFileInfo.getName(), body );
+				infoArea.setDescription( modFileInfo.getName(), bodyBuf.toString() );
 			}
 		}
 	}
@@ -838,23 +838,23 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			exitApp();
 		}
 		else if ( source == deleteBackupsMenuItem ) {
-			StringBuilder deleteBuf = new StringBuilder();
-			deleteBuf.append( "Slipstream uses backups to revert FTL to a state without mods.\n" );
-			deleteBuf.append( "You are about to delete them.\n" );
-			deleteBuf.append( "\n" );
-			deleteBuf.append( "The next time you click 'patch', Slipstream will create fresh backups.\n" );
-			deleteBuf.append( "\n" );
-			deleteBuf.append( "FTL *must be* in a working unmodded state *before* you click 'patch'.\n" );
-			deleteBuf.append( "\n" );
-			deleteBuf.append( "To get FTL into a working unmodded state, you may need to reinstall FTL\n" );
-			deleteBuf.append( "or use Steam's \"Verify integrity of game files\" feature.\n" );
-			deleteBuf.append( "\n" );
-			deleteBuf.append( "Whenever FTL is updated, you will need to delete stale backups or the\n" );
-			deleteBuf.append( "game will break.\n" );
-			deleteBuf.append( "\n" );
-			deleteBuf.append( "Are you sure you want to continue?" );
+			String deletePrompt = ""
+				+ "Slipstream uses backups to revert FTL to a state without mods.\n"
+				+ "You are about to delete them.\n"
+				+ "\n"
+				+ "The next time you click 'patch', Slipstream will create fresh backups.\n"
+				+ "\n"
+				+ "FTL *must be* in a working unmodded state *before* you click 'patch'.\n"
+				+ "\n"
+				+ "To get FTL into a working unmodded state, you may need to reinstall FTL\n"
+				+ "or use Steam's \"Verify integrity of game files\" feature.\n"
+				+ "\n"
+				+ "Whenever FTL is updated, you will need to delete stale backups or the\n"
+				+ "game will break.\n"
+				+ "\n"
+				+ "Are you sure you want to continue?";
 
-			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, deleteBuf.toString(), "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, deletePrompt, "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
 
 				List<String> failures = new ArrayList<String>( 2 );
@@ -906,22 +906,22 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				return;
 			}
 
-			StringBuilder verifyBuf = new StringBuilder();
-			verifyBuf.append( "Slipstream is about to tell Steam to re-download FTL's resources. This will get\n" );
-			verifyBuf.append( "the game back to a working unmodded state, but it could take a while.\n" );
-			verifyBuf.append( "\n" );
-			verifyBuf.append( "You can do it manually like this...\n" );
-			verifyBuf.append( "- Go to Steam's Library.\n" );
-			verifyBuf.append( "- Right-click FTL, choose \"Properties\".\n" );
-			verifyBuf.append( "- Click the \"Verify integrity of game files...\" button.\n" );
-			verifyBuf.append( "\n" );
-			verifyBuf.append( "If you do not have Steam, you will need to reinstall FTL instead.\n" );
-			verifyBuf.append( "\n" );
-			verifyBuf.append( "Either way, you should delete Slipstream's backups as well.\n" );
-			verifyBuf.append( "\n" );
-			verifyBuf.append( "Are you sure you want to continue?" );
+			String verifyPrompt = ""
+				+ "Slipstream is about to tell Steam to re-download FTL's resources. This will get\n"
+				+ "the game back to a working unmodded state, but it could take a while.\n"
+				+ "\n"
+				+ "You can do it manually like this...\n"
+				+ "- Go to Steam's Library.\n"
+				+ "- Right-click FTL, choose \"Properties\".\n"
+				+ "- Click the \"Verify integrity of game files...\" button.\n"
+				+ "\n"
+				+ "If you do not have Steam, you will need to reinstall FTL instead.\n"
+				+ "\n"
+				+ "Either way, you should delete Slipstream's backups as well.\n"
+				+ "\n"
+				+ "Are you sure you want to continue?";
 
-			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, verifyBuf.toString(), "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+			int response = JOptionPane.showConfirmDialog( ManagerFrame.this, verifyPrompt, "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 			if ( response == JOptionPane.YES_OPTION ) {
 				try {
 					FTLUtilities.verifySteamGameCache( exeFile, FTLUtilities.STEAM_APPID_FTL );
@@ -1070,15 +1070,16 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String message = "An unexpected error has occurred.\n";
-				message += "\n";
-				message += "Thread: "+ threadString +"\n";
-				message += "Error: "+ errString +"\n";
-				message += "\n";
-				message += "See the log for details.\n";
-				message += "\n";
-				message += "If this interrupted patching, FTL's resources were probably corrupted.\n";
-				message += "Restart Slipstream and patch without mods to restore vanilla backups.";
+				String message = ""
+					+ "An unexpected error has occurred.\n"
+					+ "\n"
+					+ "Thread: "+ threadString +"\n"
+					+ "Error: "+ errString +"\n"
+					+ "\n"
+					+ "See the log for details.\n"
+					+ "\n"
+					+ "If this interrupted patching, FTL's resources were probably corrupted.\n"
+					+ "Restart Slipstream and patch without mods to restore vanilla backups.";
 
 				JOptionPane.showMessageDialog( ManagerFrame.this, message, "Error", JOptionPane.ERROR_MESSAGE );
 			}

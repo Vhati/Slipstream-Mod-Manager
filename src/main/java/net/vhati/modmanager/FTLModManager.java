@@ -267,14 +267,14 @@ public class FTLModManager {
 					if ( steamExeFile == null ) {
 						log.debug( "Steam was not located automatically. Prompting user for location" );
 
-						StringBuilder steamBuf = new StringBuilder();
-						steamBuf.append( "You will be prompted to locate Steam's executable.\n" );
-						steamBuf.append( "- Windows: Steam.exe\n" );
-						steamBuf.append( "- Linux: steam\n" );
-						steamBuf.append( "- OSX: Steam.app\n" );
-						steamBuf.append( "\n" );
-						steamBuf.append( "If you can't find it, you can cancel and set it later." );
-						JOptionPane.showMessageDialog( null, steamBuf.toString(), "Find Steam", JOptionPane.INFORMATION_MESSAGE );
+						String steamPrompt = ""
+							+ "You will be prompted to locate Steam's executable.\n"
+							+ "- Windows: Steam.exe\n"
+							+ "- Linux: steam\n"
+							+ "- OSX: Steam.app\n"
+							+ "\n"
+							+ "If you can't find it, you can cancel and set it later.";
+						JOptionPane.showMessageDialog( null, steamPrompt, "Find Steam", JOptionPane.INFORMATION_MESSAGE );
 
 						JFileChooser steamExeChooser = new JFileChooser();
 						steamExeChooser.setDialogTitle( "Find Steam.exe or steam or Steam.app" );
@@ -320,12 +320,12 @@ public class FTLModManager {
 				askAboutUpdates = true;
 
 			if ( askAboutUpdates ) {
-				String message = "";
-				message += "Would you like Slipstream to periodically check for updates?\n";
-				message += "\n";
-				message += "You can change this later.";
+				String updatePrompt = ""
+					+ "Would you like Slipstream to periodically check for updates?\n"
+					+ "\n"
+					+ "You can change this later.";
 
-				int response = JOptionPane.showConfirmDialog( null, message, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
+				int response = JOptionPane.showConfirmDialog( null, updatePrompt, "Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE );
 				if ( response == JOptionPane.YES_OPTION ) {
 					appConfig.setProperty( SlipstreamConfig.UPDATE_CATALOG, "7" );
 					appConfig.setProperty( SlipstreamConfig.UPDATE_APP, "4" );
