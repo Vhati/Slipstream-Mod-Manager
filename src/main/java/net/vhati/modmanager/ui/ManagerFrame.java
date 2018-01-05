@@ -405,20 +405,20 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 
 	/**
 	 * Extra initialization that must be called after the constructor.
-	 * This must be called on the Swing event thread (use invokeLater()).
 	 */
 	public void init() {
 
-		ManagerInitThread initThread = new ManagerInitThread( this,
-		                                                      new SlipstreamConfig( appConfig ),
-		                                                      modsDir,
-		                                                      modsTableStateFile,
-		                                                      metadataFile,
-		                                                      catalogFile,
-		                                                      catalogETagFile,
-		                                                      appUpdateFile,
-		                                                      appUpdateETagFile
-		                                                    );
+		ManagerInitThread initThread = new ManagerInitThread(
+			this,
+			new SlipstreamConfig( appConfig ),
+			modsDir,
+			modsTableStateFile,
+			metadataFile,
+			catalogFile,
+			catalogETagFile,
+			appUpdateFile,
+			appUpdateETagFile
+		);
 		initThread.setDaemon( true );
 		initThread.setPriority( Thread.MIN_PRIORITY );
 		initThread.setDefaultUncaughtExceptionHandler( this );
@@ -551,7 +551,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			// Links.
 			infoArea.appendRegularText( String.format( "Version %s: ", appUpdateInfo.getLatestVersion().toString() ) );
 			boolean first = true;
-			for ( Map.Entry<String,String> entry : appUpdateInfo.getLatestURLs().entrySet() ) {
+			for ( Map.Entry<String, String> entry : appUpdateInfo.getLatestURLs().entrySet() ) {
 				if ( !first ) infoArea.appendRegularText( " " );
 				infoArea.appendRegularText( "[" );
 				infoArea.appendLinkText( entry.getValue(), entry.getKey() );
@@ -569,7 +569,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			}
 
 			// Changelog.
-			for ( Map.Entry<ComparableVersion,List<String>> entry : appUpdateInfo.getChangelog().entrySet() ) {
+			for ( Map.Entry<ComparableVersion, List<String>> entry : appUpdateInfo.getChangelog().entrySet() ) {
 				if ( appVersion.compareTo( entry.getKey() ) >= 0 ) break;
 
 				if ( buf.length() > 0 ) buf.append( "\n" );
@@ -1032,32 +1032,20 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	}
 
 	/**
-	 * Sets the ModDB for the catalog. (thread-safe)
+	 * Sets the ModDB for the catalog.
 	 */
-	public void setCatalogModDB( final ModDB newDB ) {
-		Runnable r = new Runnable() {
-			@Override
-			public void run() { catalogModDB = newDB; }
-		};
-		if ( SwingUtilities.isEventDispatchThread() ) r.run();
-		else SwingUtilities.invokeLater( r );
+	public void setCatalogModDB( ModDB newDB ) {
+		catalogModDB = newDB;
 	}
 
 	/**
-	 * Sets info about available app updates. (thread-safe)
+	 * Sets info about available app updates.
 	 */
-	public void setAppUpdateInfo( final AutoUpdateInfo aui ) {
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				appUpdateInfo = aui;
-				boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
-				updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
-				updateBtn.setEnabled( isUpdateAvailable );
-			}
-		};
-		if ( SwingUtilities.isEventDispatchThread() ) r.run();
-		else SwingUtilities.invokeLater( r );
+	public void setAppUpdateInfo( AutoUpdateInfo aui ) {
+		appUpdateInfo = aui;
+		boolean isUpdateAvailable = ( appVersion.compareTo(appUpdateInfo.getLatestVersion()) < 0 );
+		updateBtn.setForeground( isUpdateAvailable ? updateBtnEnabledColor : updateBtnDisabledColor );
+		updateBtn.setEnabled( isUpdateAvailable );
 	}
 
 

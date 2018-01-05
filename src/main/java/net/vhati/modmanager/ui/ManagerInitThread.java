@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import javax.swing.SwingUtilities;
@@ -53,6 +52,7 @@ public class ManagerInitThread extends Thread {
 
 
 	public ManagerInitThread( ManagerFrame frame, SlipstreamConfig appConfig, File modsDir, File modsTableStateFile, File metadataFile, File catalogFile, File catalogETagFile, File appUpdateFile, File appUpdateETagFile ) {
+		super( "init" );
 		this.frame = frame;
 		this.appConfig = appConfig;
 		this.modsDir = modsDir;
@@ -77,6 +77,7 @@ public class ManagerInitThread extends Thread {
 
 
 	private void init() throws InterruptedException {
+
 		if ( metadataFile.exists() ) {
 			// Load cached metadata first, before scanning for new info.
 			ModDB cachedDB = JacksonCatalogReader.parse( metadataFile );
@@ -105,27 +106,24 @@ public class ManagerInitThread extends Thread {
 		int catalogUpdateInterval = appConfig.getPropertyAsInt( "update_catalog", 0 );
 		boolean needNewCatalog = false;
 
-		if ( catalogFile.exists() ) {
-			// Load the catalog first, before updating.
-			reloadCatalog();
+		// Load the catalog first, before downloading.
+		if ( catalogFile.exists() )  reloadCatalog();
 
-			if ( catalogUpdateInterval > 0 ) {
+		if ( catalogUpdateInterval > 0 ) {
+			if ( catalogFile.exists() ) {
 				// Check if the downloaded catalog is stale.
 				if ( isFileStale( catalogFile, catalogUpdateInterval ) ) {
-					log.debug( String.format( "Catalog is older than %d days.", catalogUpdateInterval ) );
+					log.debug( String.format( "Catalog is older than %d days", catalogUpdateInterval ) );
 					needNewCatalog = true;
 				} else {
-					log.debug( "Catalog isn't stale yet." );
+					log.debug( "Catalog isn't stale yet" );
 				}
 			}
+			else {
+				// Catalog file doesn't exist.
+				needNewCatalog = true;
+			}
 		}
-		else {
-			// Catalog file doesn't exist.
-			needNewCatalog = true;
-		}
-
-		// Don't update if the user doesn't want to.
-		if ( catalogUpdateInterval <= 0 ) needNewCatalog = false;
 
 		if ( needNewCatalog ) {
 			boolean fetched = URLFetcher.refetchURL( ManagerFrame.CATALOG_URL, catalogFile, catalogETagFile );
@@ -134,30 +132,27 @@ public class ManagerInitThread extends Thread {
 			}
 		}
 
-		int appUpdateInterval = appConfig.getPropertyAsInt( "update_app", 0 );
+		// Load the cached info first, before downloading.
+		if ( appUpdateFile.exists() ) reloadAppUpdateInfo();
+
+		int appUpdateInterval = appConfig.getPropertyAsInt( SlipstreamConfig.UPDATE_APP, 0 );
 		boolean needAppUpdate = false;
 
-		if ( appUpdateFile.exists() ) {
-			// Load the info first, before downloading.
-			reloadAppUpdateInfo();
-
-			if ( appUpdateInterval > 0 ) {
+		if ( appUpdateInterval > 0 ) {
+			if ( appUpdateFile.exists() ) {
 				// Check if the app update info is stale.
 				if ( isFileStale( appUpdateFile, appUpdateInterval ) ) {
-					log.debug( String.format( "App update info is older than %d days.", appUpdateInterval ) );
+					log.debug( String.format( "App update info is older than %d days", appUpdateInterval ) );
 					needAppUpdate = true;
 				} else {
-					log.debug( "App update info isn't stale yet." );
+					log.debug( "App update info isn't stale yet" );
 				}
 			}
+			else {
+				// App update file doesn't exist.
+				needAppUpdate = true;
+			}
 		}
-		else {
-			// App update file doesn't exist.
-			needAppUpdate = true;
-		}
-
-		// Don't update if the user doesn't want to.
-		if ( appUpdateInterval <= 0 ) needAppUpdate = false;
 
 		if ( needAppUpdate ) {
 			boolean fetched = URLFetcher.refetchURL( ManagerFrame.APP_UPDATE_URL, appUpdateFile, appUpdateETagFile );
@@ -186,7 +181,7 @@ public class ManagerInitThread extends Thread {
 		catch ( FileNotFoundException e ) {
 		}
 		catch ( IOException e ) {
-			log.error( String.format( "Error reading \"%s\".", modsTableStateFile.getName() ), e );
+			log.error( String.format( "Error reading \"%s\"", modsTableStateFile.getName() ), e );
 			fileNames.clear();
 		}
 		finally {
@@ -207,13 +202,27 @@ public class ManagerInitThread extends Thread {
 
 
 	private void reloadCatalog() {
-		ModDB currentDB = JacksonCatalogReader.parse( catalogFile );
-		if ( currentDB != null ) frame.setCatalogModDB( currentDB );
+		final ModDB currentDB = JacksonCatalogReader.parse( catalogFile );
+		if ( currentDB != null ) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					frame.setCatalogModDB( currentDB );
+				}
+			});
+		}
 	}
 
 	private void reloadAppUpdateInfo() {
-		AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
-		if ( aui != null ) frame.setAppUpdateInfo( aui );
+		final AutoUpdateInfo aui = JacksonAutoUpdateReader.parse( appUpdateFile );
+		if ( aui != null ) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					frame.setAppUpdateInfo( aui );
+				}
+			});
+		}
 	}
 
 
@@ -221,9 +230,14 @@ public class ManagerInitThread extends Thread {
 	 * Returns true if a file is older than N days.
 	 */
 	private boolean isFileStale( File f, int maxDays ) {
-		Date modifiedDate = new Date( f.lastModified() );
-		Calendar cal = Calendar.getInstance();
-		cal.add( Calendar.DATE, maxDays * -1 );
-		return modifiedDate.before( cal.getTime() );
+		Calendar fileCal = Calendar.getInstance();
+		fileCal.setTimeInMillis( f.lastModified() );
+		fileCal.getTimeInMillis();  // Re-calculate calendar fields.
+
+		Calendar freshCal = Calendar.getInstance();
+		freshCal.add( Calendar.DATE, maxDays * -1 );
+		freshCal.getTimeInMillis();  // Re-calculate calendar fields.
+
+		return (fileCal.compareTo( freshCal ) < 0);
 	}
 }

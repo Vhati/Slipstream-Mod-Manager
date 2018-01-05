@@ -95,7 +95,7 @@ public class SlipstreamConfig {
 
 			List<String> allFieldsList = new ArrayList<String>( userFieldsMap.size() + appFieldsMap.size() );
 			allFieldsList.addAll( userFieldsMap.keySet() );
-			allFieldsList.addAll( userFieldsMap.keySet() );
+			allFieldsList.addAll( appFieldsMap.keySet() );
 			int fieldWidth = 0;
 			for ( String fieldName : allFieldsList ) {
 				fieldWidth = Math.max( fieldName.length(), fieldWidth );

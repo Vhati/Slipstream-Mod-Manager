@@ -107,15 +107,15 @@ public class FTLModManager {
 			boolean writeConfig = false;
 			Properties props = new Properties();
 			props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
-			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );  // Prompt.
-			props.setProperty( SlipstreamConfig.STEAM_DISTRO, "" );   // Prompt.
-			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" ); // Prompt.
-			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "" );  // Prompt.
+			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );       // Prompt.
+			props.setProperty( SlipstreamConfig.STEAM_DISTRO, "" );        // Prompt.
+			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );      // Prompt.
+			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "" );       // Prompt.
 			props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );
+			props.setProperty( SlipstreamConfig.UPDATE_CATALOG, "" );      // Prompt.
+			props.setProperty( SlipstreamConfig.UPDATE_APP, "" );          // Prompt.
 			props.setProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" );
 			props.setProperty( SlipstreamConfig.REMEMBER_GEOMETRY, "true" );
-			// "update_catalog" doesn't have a default.
-			// "update_app" doesn't have a default.
 			// "manager_geometry" doesn't have a default.
 
 			// Read the config file.
