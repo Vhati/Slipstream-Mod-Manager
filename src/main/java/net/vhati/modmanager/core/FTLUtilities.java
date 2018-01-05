@@ -147,12 +147,13 @@ public class FTLUtilities {
 	public static File promptForDatsDir( Component parentComponent ) {
 		File result = null;
 
-		String message = "";
-		message += "You will now be prompted to locate FTL manually.\n";
-		message += "Look in {FTL dir} to select 'ftl.dat' or 'data.dat'.\n";
-		message += "\n";
-		message += "It may be buried under a subdirectory called 'resources/'.\n";
-		message += "Or select 'FTL.app', if you're on OSX.";
+		String message = ""
+			+ "You will now be prompted to locate FTL manually.\n"
+			+ "Look in {FTL dir} to select 'ftl.dat' or 'data.dat'.\n"
+			+ "\n"
+			+ "It may be buried under a subdirectory called 'resources/'.\n"
+			+ "Or select 'FTL.app', if you're on OSX.";
+
 		JOptionPane.showMessageDialog( parentComponent, message, "Find FTL", JOptionPane.INFORMATION_MESSAGE );
 
 		JFileChooser fc = new JFileChooser();

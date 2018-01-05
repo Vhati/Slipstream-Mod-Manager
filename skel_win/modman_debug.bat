@@ -1,9 +1,13 @@
 @ECHO OFF
 SETLOCAL
 SET L4J_LOG_NAME=launch4j.log
-SET SMM_LOG_NAME=modman-log.txt
 SET L4J_LOG_PATH=%~dp0launch4j.log
+
+SET SMM_LOG_NAME=modman-log.txt
 SET SMM_LOG_PATH=%~dp0modman-log.txt
+
+SET SMM_CFG_NAME=modman.cfg
+SET SMM_CFG_PATH=%~dp0modman.cfg
 
 IF EXIST "%L4J_LOG_PATH%" DEL /Q "%L4J_LOG_PATH%"
 IF EXIST "%SMM_LOG_PATH%" DEL /Q "%SMM_LOG_PATH%"
@@ -19,14 +23,14 @@ ECHO.
 
 
 ECHO Some users reported interface glitches if they had custom Windows themes.
-ECHO Setting 'use_default_ui=true' in modman.cfg is a workaround.
+ECHO Setting 'use_default_ui=true' in %SMM_CFG_NAME% is a workaround.
 ECHO.
-SET /P YN="Create a new modman.cfg to do this? (y/N): "
+SET /P YN="Create a new %SMM_CFG_NAME% to do this? (y/N): "
 ECHO.
 
 IF /I [%YN%]==[y] (
   ECHO Creating a new config.
-  ECHO use_default_ui=true>modman.cfg
+  ECHO use_default_ui=true>"%SMM_CFG_PATH%"
   ECHO.
 )
 ECHO.

@@ -96,11 +96,10 @@ public class FTLModManager {
 				String currentPath = new File( "." ).getAbsoluteFile().getParentFile().getAbsolutePath();
 
 				log.error( String.format( "Slipstream could not find its own folder (Currently in \"%s\"), exiting...", currentPath ) );
-				showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nThe Mod Manager will now exit.", currentPath ) );
+				showErrorDialog( String.format( "Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nSlipstream will now exit.", currentPath ) );
 
 				throw new ExitException();
 			}
-
 
 			File configFile = new File( "modman.cfg" );
 
@@ -220,7 +219,7 @@ public class FTLModManager {
 			}
 
 			if ( datsDir == null ) {
-				showErrorDialog( "FTL resources were not found.\nThe Mod Manager will now exit." );
+				showErrorDialog( "FTL resources were not found.\nSlipstream will now exit." );
 				log.debug( "No FTL dats path found, exiting" );
 
 				throw new ExitException();
