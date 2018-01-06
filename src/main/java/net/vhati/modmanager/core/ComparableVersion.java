@@ -12,11 +12,9 @@ import java.util.regex.Pattern;
  * It is composed of three parts:
  * - A series of period-separated positive ints.
  *
- * - The numbers may be immediately followed by a short
- * suffix string.
+ * - The numbers may be immediately followed by a short suffix string.
  *
- * - Finally, a string comment, separated from the rest
- * by a space.
+ * - Finally, a string comment, separated from the rest by a space.
  *
  * The (numbers + suffix) or comment may appear alone.
  *
@@ -38,7 +36,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 
 	public ComparableVersion( int[] numbers, String suffix, String comment ) {
 		this.numbers = numbers;
-    setSuffix( suffix );
+		setSuffix( suffix );
 		setComment( comment );
 	}
 
@@ -148,16 +146,14 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 
 		Matcher m = suffixPtn.matcher( s );
 		if ( m.matches() ) {
-			suffix = s;
-
 			// Matched groups 1 and 2... or 3.
 
-			if ( m.group(1) != null ) {
+			if ( m.group( 1 ) != null ) {
 				suffixDivider = m.group( 1 );
 			}
 
-			if ( m.group(2) != null ) {
-				suffixNum = Integer.parseInt( m.group(2) );
+			if ( m.group( 2 ) != null ) {
+				suffixNum = Integer.parseInt( m.group( 2 ) );
 			} else {
 				suffixNum = -1;
 			}

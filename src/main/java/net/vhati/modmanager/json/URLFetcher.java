@@ -10,16 +10,20 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 
 public class URLFetcher {
@@ -28,104 +32,129 @@ public class URLFetcher {
 
 
 	/**
-	 * Downloads content from a url into a file, if the remote content has changed.
+	 * Downloads content from a url to one file, and its ETag to another.
+	 *
+	 * If the ETag files exists, it will be read to inform the GET request.
+	 *
+	 * If the content has not changed, the destination file's modified date
+	 * will be reset to the present time.
+	 *
+	 * If the content has changed, it will be written to the file, as will the
+	 * new ETag.
 	 *
 	 * @return true if successfully downloaded, false otherwise
 	 */
 	public static boolean refetchURL( String url, File localFile, File eTagFile ) {
 		String localETag = null;
 
-		log.debug( String.format( "Attempting to download the latest \"%s\".", localFile.getName() ) );
+		log.debug( String.format( "Attempting to download the latest \"%s\"", localFile.getName() ) );
 		if ( eTagFile.exists() ) {
 			// Load the old eTag.
 			InputStream etagIn = null;
+			BufferedReader etagReader = null;
 			try {
 				etagIn = new FileInputStream( eTagFile );
-				BufferedReader br = new BufferedReader( new InputStreamReader( etagIn, "UTF-8" ) );
-				String line = br.readLine();
-				if ( line.length() > 0 )
+				etagReader = new BufferedReader( new InputStreamReader( etagIn, "UTF-8" ) );
+				String line = etagReader.readLine();
+				if ( line.length() > 0 ) {
 					localETag = line;
+				}
 			}
 			catch ( IOException e ) {
 				// Not serious enough to be a real error.
-				log.debug( String.format( "Error reading eTag from \"%s\".", eTagFile.getName() ), e );
+				log.debug( String.format( "Error reading eTag from \"%s\"", eTagFile.getName() ), e );
 			}
 			finally {
+				try {if ( etagReader != null ) etagReader.close();}
+				catch ( IOException e ) {}
+
 				try {if ( etagIn != null ) etagIn.close();}
 				catch ( IOException e ) {}
 			}
 		}
 
-		String remoteETag = null;
-		InputStream urlIn = null;
+		HttpGet request = null;
 		OutputStream localOut = null;
+		String remoteETag = null;
+
+		RequestConfig requestConfig = RequestConfig.custom()
+			.setConnectionRequestTimeout( 5000 )
+			.setConnectTimeout( 5000 )
+			.setSocketTimeout( 10000 )
+			.setRedirectsEnabled( true )
+			.build();
+
+		CloseableHttpClient httpClient = HttpClientBuilder.create()
+			.setDefaultRequestConfig( requestConfig )
+			.disableAuthCaching()
+			.disableAutomaticRetries()
+			.disableConnectionState()
+			.disableCookieManagement()
+			//.setUserAgent( "" )
+			.build();
+
 		try {
-			URLConnection conn = new URL( url ).openConnection();
+			request = new HttpGet( url );
 
-			if ( conn instanceof HttpURLConnection == false ) {
-				log.error( String.format( "Non-Http(s) URL given for fetching: %s", url ) );
-				return false;
+			HttpResponse response = httpClient.execute( request );
+
+			int status = response.getStatusLine().getStatusCode();
+			if ( status >= 200 && status < 300 ) {
+
+				HttpEntity entity = response.getEntity();
+				if ( entity != null ) {
+					localOut = new FileOutputStream( localFile );
+					entity.writeTo( localOut );
+				}
+
+				if ( response.containsHeader( "ETag" ) ) {
+					remoteETag = response.getLastHeader( "ETag" ).getValue();
+				}
 			}
-			HttpURLConnection httpConn = (HttpURLConnection)conn;
-
-			httpConn.setReadTimeout( 10000 );
-			if ( localETag != null )
-				httpConn.setRequestProperty( "If-None-Match", localETag );
-			httpConn.connect();
-
-			int responseCode = httpConn.getResponseCode();
-
-			if ( responseCode == HttpURLConnection.HTTP_NOT_MODIFIED ) {
-				log.debug( String.format( "No need to update \"%s\", the server's copy has not been modified since the previous check", localFile.getName() ) );
+			else if ( status == 304 ) {  // Not modified.
+				log.debug( String.format( "No need to download \"%s\", the server's copy has not been modified", localFile.getName() ) );
 
 				// Update the local file's timestamp as if it had downloaded.
 				localFile.setLastModified( new Date().getTime() );
-
 				return false;
-			}
-			else if ( responseCode == HttpURLConnection.HTTP_OK ) {
-				Map<String, List<String>> headerMap = httpConn.getHeaderFields();
-				List<String> eTagValues = headerMap.get( "ETag" );
-				if ( eTagValues != null && eTagValues.size() > 0 )
-					remoteETag = eTagValues.get( 0 );
-
-				urlIn = httpConn.getInputStream();
-				localOut = new FileOutputStream( localFile );
-				byte[] buf = new byte[4096];
-				int len;
-				while ( (len = urlIn.read(buf)) >= 0 ) {
-					localOut.write( buf, 0, len );
-				}
 			}
 			else {
-				log.error( String.format( "Download request failed for \"%s\": HTTP Code %d (%s)", httpConn.getURL(), responseCode, httpConn.getResponseMessage() ) );
-				return false;
+				throw new ClientProtocolException( "Unexpected response status: "+ status );
 			}
 		}
+		catch ( ClientProtocolException e ) {
+			log.error( "GET request failed for url: "+ request.getURI().toString(), e );
+			return false;
+		}
 		catch ( IOException e ) {
-			log.error( String.format( "Error downloading the latest \"%s\"", localFile.getName() ), e );
+			log.error( "Download failed for url: "+ request.getURI().toString(), e );
+			return false;
 		}
 		finally {
-			try {if ( urlIn != null ) urlIn.close();}
+			try {if ( localOut != null ) localOut.close();}
 			catch ( IOException e ) {}
 
-			try {if ( localOut != null ) localOut.close();}
+			try {httpClient.close();}
 			catch ( IOException e ) {}
 		}
 
 		if ( remoteETag != null ) {
 			// Save the new eTag.
 			OutputStream etagOut = null;
+			BufferedWriter etagWriter = null;
 			try {
 				etagOut = new FileOutputStream( eTagFile );
-				BufferedWriter bw = new BufferedWriter( new OutputStreamWriter( etagOut, "UTF-8" ) );
-				bw.append( remoteETag );
-				bw.flush();
+				etagWriter = new BufferedWriter( new OutputStreamWriter( etagOut, "UTF-8" ) );
+				etagWriter.append( remoteETag );
+				etagWriter.flush();
 			}
 			catch ( IOException e ) {
 				log.error( String.format( "Error writing eTag to \"%s\"", eTagFile.getName() ), e );
 			}
 			finally {
+				try {if ( etagWriter != null ) etagWriter.close();}
+				catch ( IOException e ) {}
+
 				try {if ( etagOut != null ) etagOut.close();}
 				catch ( IOException e ) {}
 			}

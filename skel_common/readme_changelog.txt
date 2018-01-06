@@ -9,6 +9,7 @@ Changelog
 - Added a Validate warning about FTL 1.5.13 for chars outside windows-1252
 - Changed logging framework to SLF4J/Logback
 - Changed command line parser to picocli
+- Migrated to the Apache HttpComponents library
 - Made launcher scripts on OSX find java the recommended way
 
 1.9:

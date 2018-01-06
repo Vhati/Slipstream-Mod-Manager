@@ -23,6 +23,7 @@
 						"Disabled XML escaping when reencoding to ensure invalid chars cause an error",
 						"Changed logging framework to SLF4J/Logback",
 						"Changed command line parser to picocli",
+						"Migrated to the Apache HttpComponents library",
 						"Made launcher scripts on OSX find java the recommended way"
 					]
 				},

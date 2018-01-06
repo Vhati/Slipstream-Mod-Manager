@@ -23,10 +23,11 @@ public class JacksonCatalogReader {
 
 
 	public static ModDB parse( File jsonFile ) {
-		ModDB modDB = new ModDB();
 
 		Exception exception = null;
 		try {
+			ModDB modDB = new ModDB();
+
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure( JsonParser.Feature.ALLOW_SINGLE_QUOTES, true );
 			mapper.setVisibility( PropertyAccessor.FIELD, Visibility.ANY );
@@ -53,6 +54,8 @@ public class JacksonCatalogReader {
 					modDB.addMod( modInfo );
 				}
 			}
+
+			return modDB;
 		}
 		catch ( JsonProcessingException e ) {
 			exception = e;
@@ -65,6 +68,6 @@ public class JacksonCatalogReader {
 			return null;
 		}
 
-		return modDB;
+		return null;
 	}
 }

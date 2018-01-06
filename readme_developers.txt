@@ -32,6 +32,9 @@ To build, run "mvn clean package" in this folder.
 
 
 This project depends on the following libraries.
+- Apache HttpComponents
+    https://hc.apache.org/
+    (For JavaDocs, click HttpCore or HttpClient, then again under "Project reports".)
 - Jackson JSON Processor 2.x
     http://jackson.codehaus.org/Home
     (For JavaDocs, look right.)

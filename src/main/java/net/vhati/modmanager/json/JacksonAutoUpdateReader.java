@@ -3,7 +3,6 @@ package net.vhati.modmanager.json;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +27,11 @@ public class JacksonAutoUpdateReader {
 
 
 	public static AutoUpdateInfo parse( File jsonFile ) {
-		AutoUpdateInfo aui = new AutoUpdateInfo();
 
 		Exception exception = null;
 		try {
+			AutoUpdateInfo aui = new AutoUpdateInfo();
+
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure( JsonParser.Feature.ALLOW_SINGLE_QUOTES, true );
 			mapper.setVisibility( PropertyAccessor.FIELD, Visibility.ANY );
@@ -43,9 +43,9 @@ public class JacksonAutoUpdateReader {
 			JsonNode latestNode = historyNode.get( "latest" );
 			aui.setLatestVersion( new ComparableVersion( latestNode.get( "version" ).textValue() ) );
 
-			Iterator<Map.Entry<String,JsonNode>> fieldIt = latestNode.get( "urls" ).fields();
+			Iterator<Map.Entry<String, JsonNode>> fieldIt = latestNode.get( "urls" ).fields();
 			while ( fieldIt.hasNext() ) {
-				Map.Entry<String,JsonNode> entry = fieldIt.next();
+				Map.Entry<String, JsonNode> entry = fieldIt.next();
 				aui.putLatestURL( entry.getKey(), entry.getValue().textValue() );
 			}
 
@@ -67,6 +67,8 @@ public class JacksonAutoUpdateReader {
 				}
 				aui.putChanges( new ComparableVersion( releaseVersion ), changeList );
 			}
+
+			return aui;
 		}
 		catch ( JsonProcessingException e ) {
 			exception = e;
@@ -76,9 +78,8 @@ public class JacksonAutoUpdateReader {
 		}
 		if ( exception != null ) {
 			log.error( "Failed to parse info about available updates", exception );
-			return null;
 		}
 
-		return aui;
+		return null;
 	}
 }
