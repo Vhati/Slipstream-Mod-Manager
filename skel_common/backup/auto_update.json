@@ -2,18 +2,18 @@
 	"history_versions" : {
 		"1" : {
 			"latest" : {
-				"version" : "1.9",
+				"version" : "1.9.1",
 				"urls" : {
 					"Forum" : "https://subsetgames.com/forum/viewtopic.php?f=12&t=17102",
-					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9/SlipstreamModManager_1.9-Unix.tar.gz/download",
-					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9/SlipstreamModManager_1.9-Win.zip/download"
+					"Mac/Linux" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9.1/SlipstreamModManager_1.9.1-Unix.tar.gz/download",
+					"Windows" : "https://sourceforge.net/projects/slipstreammodmanager/files/Slipstream/1.9.1/SlipstreamModManager_1.9.1-Win.zip/download"
 				},
 				"notice" : "Reminder: Return FTL to an unmodded state before upgrading SMM.\nAnd delete SMM's backups when upgrading FTL."
 			},
 			"changelog" : [
 				{
 					"version" : "1.9.1",
-					"hidden" : true,
+					"hidden" : false,
 					"changes" : [
 						"Edited a comment in boilerplate mod metadata to include AE ships",
 						"Made the comments in boilerplace mod metadata optional",
