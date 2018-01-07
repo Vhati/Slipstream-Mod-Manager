@@ -493,7 +493,7 @@ public class SlipstreamCLI {
 		public String[] getVersion() {
 			return new String[] {
 				String.format( "%s %s", FTLModManager.APP_NAME, FTLModManager.APP_VERSION ),
-				"Copyright (C) 2013,2014,2017 David Millis",
+				"Copyright (C) 2013,2014,2017,2018 David Millis",
 				"",
 				"This program is free software; you can redistribute it and/or modify",
 				"it under the terms of the GNU General Public License as published by",
