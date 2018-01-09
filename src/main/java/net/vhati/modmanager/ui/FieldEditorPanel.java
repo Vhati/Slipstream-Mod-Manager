@@ -141,7 +141,7 @@ public class FieldEditorPanel extends JPanel {
 			gridC.anchor = GridBagConstraints.WEST;
 			JTextArea valueArea = new JTextArea();
 			valueArea.setEditable( true );
-			valueArea.setBorder( BorderFactory.createEtchedBorder() );
+			valueArea.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder( 2, 2, 2, 2 ) ) );
 			valueArea.setLineWrap( true );
 			valueArea.setWrapStyleWord( true );
 			valueArea.setFocusable( true );
