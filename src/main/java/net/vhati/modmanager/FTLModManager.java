@@ -73,6 +73,13 @@ public class FTLModManager {
 		log.debug( "OS: {} {}", System.getProperty( "os.name" ), System.getProperty( "os.version" ) );
 		log.debug( "VM: {}, {}, {}", System.getProperty( "java.vm.name" ), System.getProperty( "java.version" ), System.getProperty( "os.arch" ) );
 
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException( Thread t, Throwable e ) {
+				log.error( "Uncaught exception in thread: "+ t.toString(), e );
+			}
+		});
+
 		if ( args.length > 0 ) {
 			SlipstreamCLI.main( args );
 			return;
@@ -348,13 +355,25 @@ public class FTLModManager {
 			}
 
 			// Create the main window.
+			ManagerFrame frame = null;
 			try {
-				ManagerFrame frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
+				frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
 				frame.init();
 				frame.setVisible( true );
 			}
 			catch ( Exception e ) {
 				log.error( "Exception while creating ManagerFrame", e );
+
+				// If the frame is constructed, but an exception prevents it
+				// becoming visible, that *must* be caught. The frame registers
+				// itself as a global uncaught exception handler. It doesn't
+				// dispose() itself in the handler, so EDT will wait forever
+				// for an invisible window to close.
+
+				if ( frame != null && frame.isDisplayable() ) {
+					frame.setDisposeNormally( false );
+					frame.dispose();
+				}
 
 				throw new ExitException();
 			}

@@ -103,6 +103,10 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private File appUpdateFile = new File( backupDir, "auto_update.json" );
 	private File appUpdateETagFile = new File( backupDir, "auto_update_etag.txt" );
 
+	private boolean disposeNormally = true;
+	private boolean ranInit = false;
+	private Thread.UncaughtExceptionHandler previousUncaughtExceptionHandler = null;
+
 	private final Lock managerLock = new ReentrantLock();
 	private final Condition scanEndedCond = managerLock.newCondition();
 	private boolean scanning = false;
@@ -113,8 +117,8 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	private String appURL;
 	private String appAuthor;
 
-	private HashMap<File,String> modFileHashes = new HashMap<File,String>();
-	private HashMap<String,Date> modFileDates = new HashMap<String,Date>();
+	private Map<File,String> modFileHashes = new HashMap<File,String>();
+	private Map<String,Date> modFileDates = new HashMap<String,Date>();
 	private ModDB catalogModDB = new ModDB();
 	private ModDB localModDB = new ModDB();
 
@@ -261,6 +265,12 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			@Override
 			public void windowClosed( WindowEvent e ) {
 				// dispose() was called.
+
+				// Restore the previous exception handler.
+				if ( ranInit ) Thread.setDefaultUncaughtExceptionHandler( previousUncaughtExceptionHandler );
+
+				if ( !disposeNormally ) return;  // Something bad happened. Exit quickly.
+
 				ListState<ModFileInfo> tableState = getCurrentModsTableState();
 				saveModsTableState( tableState );
 
@@ -404,9 +414,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	}
 
 	/**
-	 * Extra initialization that must be called after the constructor.
+	 * Extra one-time initialization that must be called after the constructor.
 	 */
 	public void init() {
+		if ( ranInit ) return;
+		ranInit = true;
+
+		previousUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+		Thread.setDefaultUncaughtExceptionHandler( this );
 
 		ManagerInitThread initThread = new ManagerInitThread(
 			this,
@@ -421,7 +436,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		);
 		initThread.setDaemon( true );
 		initThread.setPriority( Thread.MIN_PRIORITY );
-		initThread.setDefaultUncaughtExceptionHandler( this );
 		initThread.start();
 	}
 
@@ -524,7 +538,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		ModsScanThread scanThread = new ModsScanThread( modFiles, localModDB, this );
 		scanThread.setDaemon( true );
 		scanThread.setPriority( Thread.MIN_PRIORITY );
-		scanThread.setDefaultUncaughtExceptionHandler( this );
 		scanThread.start();
 	}
 
@@ -726,7 +739,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			log.info( "Patching..." );
 			log.info( "" );
 			ModPatchThread patchThread = new ModPatchThread( modFiles, datsDir, backupDir, false, patchDlg );
-			patchThread.setDefaultUncaughtExceptionHandler( this );
 			patchThread.start();
 
 			patchDlg.setVisible( true );
@@ -801,7 +813,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			File datsDir = new File( appConfig.getProperty( SlipstreamConfig.FTL_DATS_PATH ) );
 
 			DatExtractDialog extractDlg = new DatExtractDialog( this, extractDir, datsDir );
-			extractDlg.getWorkerThread().setDefaultUncaughtExceptionHandler( this );
 			extractDlg.extract();
 			extractDlg.setVisible( true );
 		}
@@ -1048,6 +1059,14 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 		updateBtn.setEnabled( isUpdateAvailable );
 	}
 
+	/**
+	 * Toggles whether to perform the usual actions after disposal.
+	 *
+	 * Set this to false before an abnormal exit.
+	 */
+	public void setDisposeNormally( boolean b ) {
+		disposeNormally = false;
+	}
 
 	@Override
 	public void uncaughtException( Thread t, Throwable e ) {
