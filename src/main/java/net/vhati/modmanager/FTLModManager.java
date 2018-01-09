@@ -354,7 +354,6 @@ public class FTLModManager {
 				}
 			}
 
-			// Create the main window.
 			ManagerFrame frame = null;
 			try {
 				frame = new ManagerFrame( appConfig, APP_NAME, APP_VERSION, APP_URL, APP_AUTHOR );
@@ -362,7 +361,7 @@ public class FTLModManager {
 				frame.setVisible( true );
 			}
 			catch ( Exception e ) {
-				log.error( "Exception while creating ManagerFrame", e );
+				log.error( "Failed to create and init the main window", e );
 
 				// If the frame is constructed, but an exception prevents it
 				// becoming visible, that *must* be caught. The frame registers

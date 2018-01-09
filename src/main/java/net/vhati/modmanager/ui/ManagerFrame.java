@@ -1080,7 +1080,6 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 				String message = ""
 					+ "An unexpected error has occurred.\n"
 					+ "\n"
-					+ "Thread: "+ threadString +"\n"
 					+ "Error: "+ errString +"\n"
 					+ "\n"
 					+ "See the log for details.\n"
