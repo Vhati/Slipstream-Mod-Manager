@@ -162,7 +162,7 @@ public class FTLUtilities {
 		fc.addChoosableFileFilter(new FileFilter() {
 			@Override
 			public String getDescription() {
-				return "FTL Data File - ftl.dat|data.dat";
+				return "FTL Resources (ftl.dat; data.dat; FTL.app)";
 			}
 			@Override
 			public boolean accept( File f ) {
