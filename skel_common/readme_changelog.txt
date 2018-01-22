@@ -1,5 +1,8 @@
 Changelog
 
+1.9.2:
+- Fixed ftl.dat parsing when 0-byte resources are present
+
 1.9.1:
 - Edited a comment in boilerplate mod metadata to include AE ships
 - Made the comments in boilerplace mod metadata optional

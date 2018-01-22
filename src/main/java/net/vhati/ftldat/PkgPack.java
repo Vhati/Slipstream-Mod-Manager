@@ -419,7 +419,7 @@ public class PkgPack extends AbstractPack {
 			entry.dataSize = readBigUInt();
 			entry.unpackedSize = readBigUInt();
 
-			if ( entry.dataSize == 0 ) {  // Null entry, dat wasn't repacked.
+			if ( entry.dataOffset == 0 ) {  // Null entry, dat wasn't repacked.
 				entryList.add( null );
 			} else {
 				entryList.add( entry );
@@ -434,6 +434,7 @@ public class PkgPack extends AbstractPack {
 
 		for ( int i=0; i < entryCount; i++ ) {
 			PkgEntry entry = entryList.get( i );
+			if ( entry == null ) continue;
 
 			bigByteBuf.position( entry.innerPathOffset );
 			entry.innerPath = readNullTerminatedString( bigByteBuf );

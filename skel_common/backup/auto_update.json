@@ -12,6 +12,13 @@
 			},
 			"changelog" : [
 				{
+					"version" : "1.9.2",
+					"hidden" : true,
+					"changes" : [
+						"Fixed ftl.dat parsing when 0-byte resources are present"
+					]
+				},
+				{
 					"version" : "1.9.1",
 					"hidden" : false,
 					"changes" : [
