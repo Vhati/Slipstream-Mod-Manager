@@ -233,22 +233,24 @@ public class SlipstreamCLI {
 			log.info( "Patching..." );
 
 			List<File> modFiles = new ArrayList<File>();
-			for ( String modFileName : slipstreamCmd.modFileNames ) {
-				File modFile = new File( modsDir, modFileName );
+			if ( slipstreamCmd.modFileNames != null ) {
+				for ( String modFileName : slipstreamCmd.modFileNames ) {
+					File modFile = new File( modsDir, modFileName );
 
-				if ( modFile.isDirectory() ) {
-					log.info( String.format( "Zipping dir: %s/", modFile.getName() ) );
-					try {
-						modFile = createTempMod( modFile );
-						deleteHook.addDoomedFile( modFile );
+					if ( modFile.isDirectory() ) {
+						log.info( String.format( "Zipping dir: %s/", modFile.getName() ) );
+						try {
+							modFile = createTempMod( modFile );
+							deleteHook.addDoomedFile( modFile );
+						}
+						catch ( IOException e ) {
+							log.error( String.format( "Error zipping dir: %s/", modFile.getName() ), e );
+							System.exit( 1 );
+						}
 					}
-					catch ( IOException e ) {
-						log.error( String.format( "Error zipping dir: %s/", modFile.getName() ), e );
-						System.exit( 1 );
-					}
+
+					modFiles.add( modFile );
 				}
-
-				modFiles.add( modFile );
 			}
 
 			boolean globalPanic = slipstreamCmd.globalPanic;
