@@ -1065,7 +1065,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 	 * Set this to false before an abnormal exit.
 	 */
 	public void setDisposeNormally( boolean b ) {
-		disposeNormally = false;
+		disposeNormally = b;
 	}
 
 	@Override
