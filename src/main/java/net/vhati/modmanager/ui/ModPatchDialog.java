@@ -13,7 +13,7 @@ public class ModPatchDialog extends ProgressDialog implements ModPatchObserver {
 
 
 	public ModPatchDialog( Frame owner, boolean continueOnSuccess ) {
-		super( owner, true );
+		super( owner, continueOnSuccess );
 		this.setTitle( "Patching..." );
 
 		this.setSize( 400, 160 );
