@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.166.1/containers/java
 {
-	"name": "Slipstream-Mod-Manager",
+	"name": "DuckDNSUpdater",
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
@@ -15,5 +15,6 @@
 		"davidanson.vscode-markdownlint",
 		"redhat.vscode-yaml"
 	],
+	"postCreateCommand": "pre-commit install",
 	"remoteUser": "vscode"
 }

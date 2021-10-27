@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-
 public abstract class AbstractPack {
 
 	/**
@@ -33,39 +32,38 @@ public abstract class AbstractPack {
 	/**
 	 * Adds bytes read from an InputStream to the pack, as innerPath.
 	 */
-	public void add( String innerPath, InputStream is ) throws IOException {
+	public void add(String innerPath, InputStream is) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * Writes the contents of the file with innerPath to dstFile.
 	 */
-	public void extractTo( String innerPath, OutputStream os ) throws FileNotFoundException, IOException {
+	public void extractTo(String innerPath, OutputStream os) throws FileNotFoundException, IOException {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * Removes the file with innerPath from the pack.
 	 */
-	public void remove( String innerPath ) throws FileNotFoundException, IOException {
+	public void remove(String innerPath) throws FileNotFoundException, IOException {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * Returns whether innerPath is in the pack.
 	 */
-	public boolean contains( String innerPath ) {
+	public boolean contains(String innerPath) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * Returns an InputStream get bytes from an innerFile.
 	 *
-	 * Close all input streams before calling methods to
-	 * modify this dat. Do not pass an input stream from
-	 * this dat instance into another of its own methods.
+	 * Close all input streams before calling methods to modify this dat. Do not
+	 * pass an input stream from this dat instance into another of its own methods.
 	 */
-	public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException {
+	public InputStream getInputStream(String innerPath) throws FileNotFoundException, IOException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -84,8 +82,6 @@ public abstract class AbstractPack {
 		return null;
 	}
 
-
-
 	/**
 	 * A holder for (innerPath + size) results from listSizes().
 	 */
@@ -93,13 +89,11 @@ public abstract class AbstractPack {
 		public String path = null;
 		public long size = 0;
 
-		public PathAndSize( String path, long size ) {
+		public PathAndSize(String path, long size) {
 			this.path = path;
 			this.size = size;
 		}
 	}
-
-
 
 	/**
 	 * A holder for results after repacking a dat.
@@ -109,7 +103,7 @@ public abstract class AbstractPack {
 		public long newDatLength = 0;
 		public long bytesChanged = 0;
 
-		public RepackResult( long oldDatLength, long newDatLength, long bytesChanged ) {
+		public RepackResult(long oldDatLength, long newDatLength, long bytesChanged) {
 			this.oldDatLength = oldDatLength;
 			this.newDatLength = newDatLength;
 			this.bytesChanged = bytesChanged;
