@@ -1,0 +1,19 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.166.1/containers/java
+{
+	"name": "Slipstream-Mod-Manager",
+	"build": {
+		"dockerfile": "Dockerfile",
+	},
+	"settings": {
+		"java.home": "/docker-java-home"
+	},
+	"extensions": [
+		"vscjava.vscode-java-pack",
+		"vscjava.vscode-java-dependency",
+		"redhat.vscode-xml",
+		"davidanson.vscode-markdownlint",
+		"redhat.vscode-yaml"
+	],
+	"remoteUser": "vscode"
+}
