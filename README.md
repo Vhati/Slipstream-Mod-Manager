@@ -19,16 +19,7 @@ It is the successor to Grognak's Mod Manager
     -   (1.7 was built with VisualStudio 2010, causing a DecodePointer error.)
     -   To get 1.6, you may have to google "jdk-6u45-windows-i586.exe".
 
-## Building
-
-1.  Open the repository in the provided Visual Studio Code devcontainer.
-2.  Run `mvn package` from the repository root to compile the source and
-    generate a JAR file.
-
-The build process for this project is automated by
-[Maven](http://maven.apache.org/) ([guide](http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven)).
-
-To build, run `mvn clean package` in the root directory.
+## Directory structure
 
 -   `assets/`
     -   Screenshots.
@@ -38,7 +29,7 @@ To build, run `mvn clean package` in the root directory.
     -   System-specific files to include in distribution archives.
 -   `skel_exe/`
     -   Materials to create modman.exe (not part of Maven).
-        -   Get Launch4j: <http://launch4j.sourceforge.net/index.html>
+        -   [Get Launch4j](http://launch4j.sourceforge.net/index.html)
         -   Drag "launch4j_*.xml" onto "launch4jc.exe".
         -   "modman.exe" will appear alongside the xml.
         -   Drag modman.exe into "skel_win/".
@@ -47,6 +38,18 @@ To build, run `mvn clean package` in the root directory.
         [prevent VirtualStore redirection](http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware).
 -   `auto_update.json`
     -   Info about the latest release, downloaded periodically by clients.
+
+## Building
+
+The build process for this project is automated by
+[Maven](http://maven.apache.org/) ([guide](http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven)).
+
+1.  Open the repository in the provided Visual Studio Code devcontainer.
+2.  Run `mvn package` from the repository root to compile the source and
+    generate a zip file containing the compiled assets for each platform in the
+    `target` directory.
+
+## Dependencies
 
 This project depends on the following libraries.
 
@@ -60,25 +63,6 @@ This project depends on the following libraries.
 -   [Logback](https://logback.qos.ch/) (For JavaDocs, look left.)
 -   [picocli 2.x](http://picocli.info/) (For JavaDocs, look left and scroll
     down to "API Javadoc".)
-
-Here's a batch file that builds when double-clicked (edit the vars):
-
-```bat
-@ECHO OFF
-SETLOCAL
-
-SET JAVA_HOME=D:\Apps\j2sdk1.6.0_45
-SET M2_HOME=D:\Apps\Maven
-
-SET M2=%M2_HOME%\bin
-SET PATH=%M2%;%PATH%
-
-CD /D "%~dp0"
-CALL mvn clean package
-
-PAUSE
-ENDLOCAL & EXIT /B
-```
 
 ## Downloads, comments and donations
 

@@ -10,9 +10,9 @@
 		<maven>2.2.1</maven>
 	</prerequisites>
 	<properties>
-		<jdk.version>1.6</jdk.version>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<jdk.version>1.8</jdk.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -44,10 +44,11 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.3</version>
 		</dependency>
-		<dependency>  <!-- Since 2.7, uses Java 7 features via reflection, but runs on Java 6. -->
+		<dependency>
+			<!-- Since 2.7, uses Java 7 features via reflection, but runs on Java 6. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.9.2</version>  <!-- Since 2.8, will not run on Java 6. -->
+			<version>2.13.0</version> <!-- Since 2.8, will not run on Java 6. -->
 		</dependency>
 		<dependency>
 			<groupId>ar.com.hjg</groupId>
@@ -62,7 +63,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.4</version>
+			<version>4.5.13</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
@@ -70,82 +71,85 @@
 			<version>2.2.0</version>
 		</dependency>
 	</dependencies>
-  
+
 	<build>
-	<plugins>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.1</version>
-			<configuration>
-				<compilerArgument>-Xlint:unchecked</compilerArgument>
-				<compilerArgument>-Xlint:deprecation</compilerArgument>
-			</configuration>
-		</plugin>
-		<plugin>
-			<!--
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
+					<compilerArgument>-Xlint:deprecation</compilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!--
 				Assembly 2.4.0 needed its own dependencies pinned to get
 				around a Plexus Archiver tar bug. And Assembly 2.4.1 fixed
 				fileSet lineEnding bug that ate the final newlines.
 			-->
 
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-assembly-plugin</artifactId>
-			<version>2.4.1</version>
-			<executions>
-				<execution>  <!-- Build jar. -->
-					<id>jar-with-dependencies</id>
-					<phase>package</phase>
-					<goals>
-						<goal>single</goal>
-					</goals>
-					<configuration>
-						<descriptorRefs>
-							<descriptorRef>jar-with-dependencies</descriptorRef>
-						</descriptorRefs>
-						<archive>
-							<manifest>
-								<mainClass>net.vhati.modmanager.FTLModManager</mainClass>
-							</manifest>
-							<manifestEntries>
-								<Built-By>Vhati</Built-By>
-							</manifestEntries>
-						</archive>
-						<finalName>modman</finalName>
-						<appendAssemblyId>false</appendAssemblyId>
-						<attach>false</attach>
-					</configuration>
-				</execution>
-				<execution>  <!-- Build zip archive. -->
-					<id>dist-win</id>
-					<phase>package</phase>
-					<goals>
-						<goal>single</goal>
-					</goals>
-					<configuration>
-						<descriptors>
-							<descriptor>src/main/assembly/dist-win.xml</descriptor>
-						</descriptors>
-						<finalName>SlipstreamModManager_${project.version}-Win</finalName>
-						<appendAssemblyId>false</appendAssemblyId>
-					</configuration>
-				</execution>
-				<execution>  <!-- Build tar.gz archive. -->
-					<id>dist-unix</id>
-					<phase>package</phase>
-					<goals>
-						<goal>single</goal>
-					</goals>
-					<configuration>
-						<descriptors>
-							<descriptor>src/main/assembly/dist-unix.xml</descriptor>
-						</descriptors>
-						<finalName>SlipstreamModManager_${project.version}-Unix</finalName>
-						<appendAssemblyId>false</appendAssemblyId>
-					</configuration>
-				</execution>
-			</executions>
-		</plugin>
-	</plugins>
-  </build>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4.1</version>
+				<executions>
+					<execution>
+						<!-- Build jar. -->
+						<id>jar-with-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>net.vhati.modmanager.FTLModManager</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Built-By>Vhati</Built-By>
+								</manifestEntries>
+							</archive>
+							<finalName>modman</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<attach>false</attach>
+						</configuration>
+					</execution>
+					<execution>
+						<!-- Build zip archive. -->
+						<id>dist-win</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/dist-win.xml</descriptor>
+							</descriptors>
+							<finalName>SlipstreamModManager_${project.version}-Win</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					<execution>
+						<!-- Build tar.gz archive. -->
+						<id>dist-unix</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/dist-unix.xml</descriptor>
+							</descriptors>
+							<finalName>SlipstreamModManager_${project.version}-Unix</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
