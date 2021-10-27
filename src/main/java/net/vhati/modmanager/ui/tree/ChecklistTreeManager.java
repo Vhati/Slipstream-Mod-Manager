@@ -30,10 +30,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import net.vhati.modmanager.ui.tree.ChecklistTreePathFilter;
-import net.vhati.modmanager.ui.tree.ChecklistTreeSelectionModel;
-
-
 public class ChecklistTreeManager extends MouseAdapter implements TreeSelectionListener {
 
 	private ChecklistTreeSelectionModel selectionModel;
@@ -41,89 +37,89 @@ public class ChecklistTreeManager extends MouseAdapter implements TreeSelectionL
 	protected JTree tree = new JTree();
 	protected int checkMaxX = 0;
 
-
 	/**
 	 * Constructor.
 	 *
-	 * Modifies a given tree to add checkboxes.
-	 * - The tree's existing cell renderer will be wrapped with a ChecklistTreeCellRenderer.
-	 * - A MouseListener will be added to the tree to detect clicks, which will toggle checkboxes.
+	 * Modifies a given tree to add checkboxes. - The tree's existing cell renderer
+	 * will be wrapped with a ChecklistTreeCellRenderer. - A MouseListener will be
+	 * added to the tree to detect clicks, which will toggle checkboxes.
 	 *
-	 * A secondary ChecklistTreeSelectionModel will track checkboxes' states (independent of row
-	 * highlighting).
+	 * A secondary ChecklistTreeSelectionModel will track checkboxes' states
+	 * (independent of row highlighting).
 	 *
-	 * @param tree  a tree to modify
-	 * @param dig  true show that a node is partially selected by scanning its descendents, false otherwise
-	 * @checklistFilter  a filter to decide which TreePaths need checkboxes, or null
+	 * @param tree a tree to modify
+	 * @param dig  true show that a node is partially selected by scanning its
+	 *             descendents, false otherwise
+	 * @checklistFilter a filter to decide which TreePaths need checkboxes, or null
 	 */
-	public ChecklistTreeManager( JTree tree, boolean dig, ChecklistTreePathFilter checklistFilter ) {
+	public ChecklistTreeManager(JTree tree, boolean dig, ChecklistTreePathFilter checklistFilter) {
 		this.tree = tree;
 		this.checklistFilter = checklistFilter;
 
 		// Note: If largemodel is not set then treenodes are getting truncated.
 		// Need to debug further to find the problem.
-		if ( checklistFilter != null ) tree.setLargeModel( true );
+		if (checklistFilter != null)
+			tree.setLargeModel(true);
 
-		selectionModel = new ChecklistTreeSelectionModel( tree.getModel(), dig );
+		selectionModel = new ChecklistTreeSelectionModel(tree.getModel(), dig);
 
-		ChecklistTreeCellRenderer checklistRenderer = new ChecklistTreeCellRenderer( tree.getCellRenderer(), selectionModel, checklistFilter );
-		setCheckboxMaxX( checklistRenderer.getCheckboxMaxX() );
-		tree.setCellRenderer( checklistRenderer );
+		ChecklistTreeCellRenderer checklistRenderer = new ChecklistTreeCellRenderer(tree.getCellRenderer(), selectionModel,
+				checklistFilter);
+		setCheckboxMaxX(checklistRenderer.getCheckboxMaxX());
+		tree.setCellRenderer(checklistRenderer);
 
-		selectionModel.addTreeSelectionListener( this );
-		tree.addMouseListener( this );
+		selectionModel.addTreeSelectionListener(this);
+		tree.addMouseListener(this);
 	}
 
-
 	/**
-	 * Sets the checkbox's right edge (in the TreeCellRenderer component's coordinate space).
+	 * Sets the checkbox's right edge (in the TreeCellRenderer component's
+	 * coordinate space).
 	 *
 	 * Values less than that will be interpreted as within the checkbox's bounds.
 	 * X=0 is the renderer component's left edge.
 	 */
-	public void setCheckboxMaxX( int x ) {
+	public void setCheckboxMaxX(int x) {
 		checkMaxX = x;
 	}
-
 
 	public ChecklistTreePathFilter getChecklistFilter() {
 		return checklistFilter;
 	}
 
-
 	public ChecklistTreeSelectionModel getSelectionModel() {
 		return selectionModel;
 	}
 
-
 	@Override
-	public void mouseClicked( MouseEvent e ) {
-		TreePath path = tree.getPathForLocation( e.getX(), e.getY() );
-		if ( path == null ) return;
+	public void mouseClicked(MouseEvent e) {
+		TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+		if (path == null)
+			return;
 
-		if ( e.getX() > tree.getPathBounds(path).x + checkMaxX ) return;
+		if (e.getX() > tree.getPathBounds(path).x + checkMaxX)
+			return;
 
-		if ( checklistFilter != null && !checklistFilter.isSelectable(path) ) return;
+		if (checklistFilter != null && !checklistFilter.isSelectable(path))
+			return;
 
-		boolean selected = selectionModel.isPathSelected( path, selectionModel.isDigged() );
-		selectionModel.removeTreeSelectionListener( this );
+		boolean selected = selectionModel.isPathSelected(path, selectionModel.isDigged());
+		selectionModel.removeTreeSelectionListener(this);
 
 		try {
-			if ( selected ) {
-				selectionModel.removeSelectionPath( path );
+			if (selected) {
+				selectionModel.removeSelectionPath(path);
 			} else {
-				selectionModel.addSelectionPath( path );
+				selectionModel.addSelectionPath(path);
 			}
-		}
-		finally {
-			selectionModel.addTreeSelectionListener( this );
+		} finally {
+			selectionModel.addTreeSelectionListener(this);
 			tree.treeDidChange();
 		}
 	}
 
-
 	@Override
-	public void valueChanged( TreeSelectionEvent e ) {
+	public void valueChanged(TreeSelectionEvent e) {
 		tree.treeDidChange();
 	}
 }

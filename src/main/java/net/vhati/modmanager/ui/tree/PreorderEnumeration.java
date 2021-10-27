@@ -25,42 +25,39 @@ package net.vhati.modmanager.ui.tree;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Stack;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-
 
 public class PreorderEnumeration implements Enumeration<TreePath> {
 
 	private TreeModel model;
 	protected Stack<Enumeration<TreePath>> stack = new Stack<Enumeration<TreePath>>();
 
-
-	public PreorderEnumeration( TreePath path, TreeModel model ) {
-		this( Collections.enumeration( Collections.singletonList( path ) ), model );
+	public PreorderEnumeration(TreePath path, TreeModel model) {
+		this(Collections.enumeration(Collections.singletonList(path)), model);
 	}
 
-	public PreorderEnumeration( Enumeration<TreePath> enumer, TreeModel model ){
+	public PreorderEnumeration(Enumeration<TreePath> enumer, TreeModel model) {
 		this.model = model;
-		stack.push( enumer );
+		stack.push(enumer);
 	}
-
 
 	@Override
 	public boolean hasMoreElements() {
-		return ( !stack.empty() && stack.peek().hasMoreElements() );
+		return (!stack.empty() && stack.peek().hasMoreElements());
 	}
 
 	@Override
 	public TreePath nextElement() {
-		Enumeration<TreePath>	enumer = stack.peek();
+		Enumeration<TreePath> enumer = stack.peek();
 		TreePath path = enumer.nextElement();
 
-		if ( !enumer.hasMoreElements() ) stack.pop();
+		if (!enumer.hasMoreElements())
+			stack.pop();
 
-		if ( model.getChildCount( path.getLastPathComponent() ) > 0 ) {
-			stack.push( new ChildrenEnumeration( path, model ) );
+		if (model.getChildCount(path.getLastPathComponent()) > 0) {
+			stack.push(new ChildrenEnumeration(path, model));
 		}
 
 		return path;
