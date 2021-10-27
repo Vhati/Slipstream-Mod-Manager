@@ -75,7 +75,6 @@ public class ChecklistTreePanel extends JPanel {
 		}
 
 		for (Enumeration enumer = currentNode.children(); enumer.hasMoreElements();) {
-			DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) enumer.nextElement();
 			getAllUserObjects(currentNode, results);
 		}
 	}
