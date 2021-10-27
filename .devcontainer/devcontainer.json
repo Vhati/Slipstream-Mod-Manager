@@ -17,9 +17,7 @@
 	"extensions": [
 		"vscjava.vscode-java-pack",
 		"vscjava.vscode-java-dependency",
-		"idleberg.innosetup",
 		"redhat.vscode-xml",
-		"redhat.fabric8-analytics",
 		"davidanson.vscode-markdownlint",
 		"redhat.vscode-yaml"
 	],
