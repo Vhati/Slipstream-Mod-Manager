@@ -5,14 +5,14 @@
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>dist/common</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.txt</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>dist/common</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.txt</include>
@@ -21,7 +21,7 @@
 		</fileSet>
 
 		<fileSet>
-			<directory>skel_win</directory>
+			<directory>dist/win</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.bat</exclude>
@@ -29,7 +29,7 @@
 			</excludes>
 		</fileSet>
 		<fileSet>
-			<directory>skel_win</directory>
+			<directory>dist/win</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.bat</include>

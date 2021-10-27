@@ -101,10 +101,9 @@ public class FTLModManager {
 				String currentPath = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
 
 				log.error(
-						String.format("Slipstream could not find its own folder (Currently in \"%s\"), exiting...", currentPath));
-				showErrorDialog(String.format(
-						"Slipstream could not find its own folder.\nCurrently in: %s\n\nRun one of the following instead of the jar...\nWindows: modman.exe or modman_admin.exe\nLinux/OSX: modman.command or modman-cli.sh\n\nSlipstream will now exit.",
-						currentPath));
+						String.format("Slipstream could not find its mods folder (Currently in \"%s\"), exiting...", currentPath));
+				showErrorDialog(
+						String.format("Slipstream could not find its mods folder.\n\nSlipstream will now exit.", currentPath));
 
 				throw new ExitException();
 			}

@@ -7,7 +7,7 @@ mods at the same time and, later, revert to vanilla gameplay.
 It is the successor to Grognak's Mod Manager
 ([GMM](https://subsetgames.com/forum/viewtopic.php?p=9994)).
 
-![Screenshot of the mod manager in use](img/screenshot01.png)
+![Screenshot of the mod manager in use](assets/screenshot01.png)
 
 ## Requirements
 
@@ -23,21 +23,19 @@ It is the successor to Grognak's Mod Manager
 
 -   `assets/`
     -   Screenshots.
--   `skel_common/`
+-   `dist/common/`
     -   Files to include in distribution archives.
--   `skel_win/` and `skel_unix/`
+    -   `backup/auto_update.json`
+        -   Info about the latest release, downloaded periodically by clients.
+-   `dist/win/` and `dist/unix/`
     -   System-specific files to include in distribution archives.
--   `skel_exe/`
+-   `installer/`
     -   Materials to create modman.exe (not part of Maven).
-        -   [Get Launch4j](http://launch4j.sourceforge.net/index.html)
-        -   Drag "launch4j_*.xml" onto "launch4jc.exe".
-        -   "modman.exe" will appear alongside the xml.
-        -   Drag modman.exe into "skel_win/".
-        -   Run "mvn clean package".
-    -   The manifest files will be embedded to
-        [prevent VirtualStore redirection](http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware).
--   `auto_update.json`
-    -   Info about the latest release, downloaded periodically by clients.
+        -   Run `/usr/bin/launch4j/launch4j installer/launch4j_normal.xml` and
+            `/usr/bin/launch4j/launch4j installer/launch4j_admin.xml` to
+            generate Windows executables.
+        -   The manifest files will be embedded to
+            [prevent VirtualStore redirection](http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware).
 
 ## Building
 

@@ -1,0 +1,11 @@
+<!-- Paths are relative to this xml file -->
+<launch4jConfig>
+	<headerType>gui</headerType>
+	<jar>../target/modman.jar</jar>
+	<outfile>../target/modman-admin.exe</outfile>
+	<manifest>admin.manifest</manifest>
+	<icon>slipstream.ico</icon>
+	<jre>
+		<minVersion>1.6.0</minVersion>
+	</jre>
+</launch4jConfig>

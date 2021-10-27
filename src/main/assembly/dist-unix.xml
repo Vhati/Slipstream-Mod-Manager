@@ -5,14 +5,14 @@
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>dist/common</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.txt</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>dist/common</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.txt</include>
@@ -20,8 +20,9 @@
 			<lineEnding>lf</lineEnding>
 		</fileSet>
 
-		<fileSet>  <!-- Non-executables. -->
-			<directory>skel_unix</directory>
+		<fileSet>
+			<!-- Non-executables. -->
+			<directory>dist/unix</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.command</exclude>
@@ -29,8 +30,9 @@
 				<exclude>**/*.sh</exclude>
 			</excludes>
 		</fileSet>
-		<fileSet>  <!-- Executables. -->
-			<directory>skel_unix</directory>
+		<fileSet>
+			<!-- Executables. -->
+			<directory>dist/unix</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.command</include>

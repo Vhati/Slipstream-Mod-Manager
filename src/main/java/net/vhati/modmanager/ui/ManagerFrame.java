@@ -74,8 +74,8 @@ public class ManagerFrame extends JFrame
 
 	private static final Logger log = LoggerFactory.getLogger(ManagerFrame.class);
 
-	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/current_catalog.json";
-	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/skel_common/backup/auto_update.json";
+	public static final String CATALOG_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/dist/common/backup/current_catalog.json";
+	public static final String APP_UPDATE_URL = "https://raw.github.com/Vhati/Slipstream-Mod-Manager/master/dist/common/backup/auto_update.json";
 
 	private File backupDir = new File("./backup/");
 	private File modsDir = new File("./mods/");

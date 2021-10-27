@@ -118,36 +118,36 @@
 							<attach>false</attach>
 						</configuration>
 					</execution>
+					<!--
 					<execution>
-						<!-- Build zip archive. -->
-						<id>dist-win</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/assembly/dist-win.xml</descriptor>
-							</descriptors>
-							<finalName>SlipstreamModManager_${project.version}-Win</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
+					<id>dist-win</id>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/dist-win.xml</descriptor>
+						</descriptors>
+						<finalName>SlipstreamModManager_${project.version}-Win</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
 					</execution>
-					<execution>
-						<!-- Build tar.gz archive. -->
-						<id>dist-unix</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/assembly/dist-unix.xml</descriptor>
-							</descriptors>
-							<finalName>SlipstreamModManager_${project.version}-Unix</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
+			    <execution>
+					<id>dist-unix</id>
+					<phase>package</phase>
+					<goals>
+						<goal>single</goal>
+					</goals>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/dist-unix.xml</descriptor>
+						</descriptors>
+						<finalName>SlipstreamModManager_${project.version}-Unix</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+					</configuration>
 					</execution>
+					-->
 				</executions>
 			</plugin>
 		</plugins>
