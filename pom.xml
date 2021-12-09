@@ -47,7 +47,7 @@
 		<dependency>  <!-- Since 2.7, uses Java 7 features via reflection, but runs on Java 6. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.9.2</version>  <!-- Since 2.8, will not run on Java 6. -->
+			<version>2.9.10.8</version>  <!-- Since 2.8, will not run on Java 6. -->
 		</dependency>
 		<dependency>
 			<groupId>ar.com.hjg</groupId>
