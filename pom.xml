@@ -10,7 +10,7 @@
 		<maven>2.2.1</maven>
 	</prerequisites>
 	<properties>
-		<jdk.version>1.6</jdk.version>
+		<jdk.version>11</jdk.version>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -76,10 +76,11 @@
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.1</version>
+			<version>3.8.0</version>
 			<configuration>
 				<compilerArgument>-Xlint:unchecked</compilerArgument>
 				<compilerArgument>-Xlint:deprecation</compilerArgument>
+				<release>6</release>
 			</configuration>
 		</plugin>
 		<plugin>
