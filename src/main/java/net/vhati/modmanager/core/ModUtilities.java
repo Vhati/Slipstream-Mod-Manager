@@ -878,7 +878,7 @@ public class ModUtilities {
 		tmpBuf = srcBuf; srcBuf = dstBuf; dstBuf = tmpBuf; dstBuf.setLength( 0 );
 
 		// Comments with long tails or double-dashes.
-		m = Pattern.compile( "(?s)<!--(-*)(.*?)(-*)-->" ).matcher( srcBuf );
+		m = Pattern.compile( "(?s)<!--(-*)(.*?)(-*)(-->){1}+" ).matcher( srcBuf );
 		while ( m.find() ) {
 			if ( m.group( 1 ).length() > 0 || m.group( 3 ).length() > 0 || m.group( 2 ).indexOf( "--" ) != -1 ) {
 				messages.add( new ReportMessage(
