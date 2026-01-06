@@ -32,6 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import ar.com.hjg.pngj.PngReader;
+import java.nio.Buffer;
 
 import org.jdom2.Content;
 import org.jdom2.Document;
@@ -128,7 +129,7 @@ public class ModUtilities {
 			Map<String,Exception> errorMap = new LinkedHashMap<String,Exception>();
 			for ( String guess : new String[] {"UTF-8", "windows-1252"} ) {
 				try {
-					byteBuffer.rewind();
+					((Buffer)byteBuffer).rewind();
 					byteBuffer.limit( allBytes.length );
 					CharsetDecoder decoder = Charset.forName( guess ).newDecoder();
 					result = decoder.decode( byteBuffer ).toString();
