@@ -17,6 +17,7 @@ public class SlipstreamConfig {
 	public static final String ALLOW_ZIP = "allow_zip";
 	public static final String FTL_DATS_PATH = "ftl_dats_path";
 	public static final String STEAM_DISTRO = "steam_distro";
+	public static final String ASSUME_FTL_1_6_9 = "assume_ftl_1_6_9";
 	public static final String STEAM_EXE_PATH = "steam_exe_path";
 	public static final String RUN_STEAM_FTL = "run_steam_ftl";
 	public static final String NEVER_RUN_FTL = "never_run_ftl";
@@ -62,6 +63,10 @@ public class SlipstreamConfig {
 			return defaultValue;
 	}
 
+	public boolean getProperyAsBoolean( String key ) {
+		return config.getProperty( key, "false" ).equals( "true" );
+	}
+
 	public String getProperty( String key, String defaultValue ) {
 		return config.getProperty( key, defaultValue );
 	}
@@ -83,6 +88,7 @@ public class SlipstreamConfig {
 			userFieldsMap.put( ALLOW_ZIP,         "Sets whether to treat .zip files as .ftl files. Default: false." );
 			userFieldsMap.put( FTL_DATS_PATH,     "The path to FTL's resources folder. If invalid, you'll be prompted." );
 			userFieldsMap.put( STEAM_DISTRO,      "If true, FTL was installed via Steam. Stops the GUI asking for a path." );
+			userFieldsMap.put( ASSUME_FTL_1_6_9,  "Only perform checks that are relevant to FTL 1.6.9+" );
 			userFieldsMap.put( STEAM_EXE_PATH,    "The path to Steam's executable, if FTL was installed via Steam." );
 			userFieldsMap.put( RUN_STEAM_FTL,     "If true, SMM will use Steam to launch FTL, if possible." );
 			userFieldsMap.put( NEVER_RUN_FTL,     "If true, there will be no offer to run FTL after patching. Default: false." );

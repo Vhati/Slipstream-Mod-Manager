@@ -30,6 +30,7 @@ import net.vhati.modmanager.ui.FieldEditorPanel.ContentType;
 public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 
 	protected static final String ALLOW_ZIP = SlipstreamConfig.ALLOW_ZIP;
+	protected static final String ASSUME_FTL_1_6_9 = SlipstreamConfig.ASSUME_FTL_1_6_9;
 	protected static final String RUN_STEAM_FTL = SlipstreamConfig.RUN_STEAM_FTL;
 	protected static final String NEVER_RUN_FTL = SlipstreamConfig.NEVER_RUN_FTL;
 	protected static final String USE_DEFAULT_UI = SlipstreamConfig.USE_DEFAULT_UI;
@@ -57,6 +58,9 @@ public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 
 		editorPanel.addRow( ALLOW_ZIP, ContentType.BOOLEAN );
 		editorPanel.addTextRow( "Treat .zip files as .ftl files." );
+		editorPanel.addSeparatorRow();
+		editorPanel.addRow( ASSUME_FTL_1_6_9, ContentType.BOOLEAN );
+		editorPanel.addTextRow( "Only perform checks that are relevant to FTL 1.6.9+." );
 		editorPanel.addSeparatorRow();
 		editorPanel.addRow( RUN_STEAM_FTL, ContentType.BOOLEAN );
 		editorPanel.addTextRow( "Use Steam to run FTL, if possible." );
@@ -88,6 +92,7 @@ public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 		editorPanel.addFillRow();
 
 		editorPanel.getBoolean( ALLOW_ZIP ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ) ) );
+		editorPanel.getBoolean( ASSUME_FTL_1_6_9 ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.ASSUME_FTL_1_6_9, "true" ) ) );
 		editorPanel.getBoolean( RUN_STEAM_FTL ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.RUN_STEAM_FTL, "false" ) ) );
 		editorPanel.getBoolean( NEVER_RUN_FTL ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" ) ) );
 		editorPanel.getBoolean( USE_DEFAULT_UI ).setSelected( "true".equals( appConfig.getProperty( SlipstreamConfig.USE_DEFAULT_UI, "false" ) ) );
@@ -149,6 +154,7 @@ public class SlipstreamConfigDialog extends JDialog implements ActionListener {
 		if ( source == applyBtn ) {
 			String tmp;
 			appConfig.setProperty( SlipstreamConfig.ALLOW_ZIP, editorPanel.getBoolean( ALLOW_ZIP ).isSelected() ? "true" : "false" );
+			appConfig.setProperty( SlipstreamConfig.ASSUME_FTL_1_6_9, editorPanel.getBoolean( ASSUME_FTL_1_6_9 ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( SlipstreamConfig.RUN_STEAM_FTL, editorPanel.getBoolean( RUN_STEAM_FTL ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( SlipstreamConfig.NEVER_RUN_FTL, editorPanel.getBoolean( NEVER_RUN_FTL ).isSelected() ? "true" : "false" );
 			appConfig.setProperty( SlipstreamConfig.USE_DEFAULT_UI, editorPanel.getBoolean( USE_DEFAULT_UI ).isSelected() ? "true" : "false" );

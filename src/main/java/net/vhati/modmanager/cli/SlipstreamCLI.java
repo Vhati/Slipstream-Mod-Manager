@@ -86,6 +86,9 @@ public class SlipstreamCLI {
 		DelayedDeleteHook deleteHook = new DelayedDeleteHook();
 		Runtime.getRuntime().addShutdownHook( deleteHook );
 
+		File configFile = new File( "modman.cfg" );
+		SlipstreamConfig appConfig = getConfig( configFile );
+                
 		if ( slipstreamCmd.validate ) {  // Exits (0/1).
 			log.info( "Validating..." );
 
@@ -117,7 +120,7 @@ public class SlipstreamCLI {
 					}
 				}
 
-				Report validateReport = ModUtilities.validateModFile( modFile );
+				Report validateReport = ModUtilities.validateModFile( modFile, appConfig );
 
 				formatter.format( validateReport.messages, resultBuf, 0 );
 				resultBuf.append( "\n" );
@@ -133,13 +136,10 @@ public class SlipstreamCLI {
 			System.exit( anyInvalid ? 1 : 0 );
 		}
 
-		File configFile = new File( "modman.cfg" );
-		SlipstreamConfig appConfig = getConfig( configFile );
-
 		if ( slipstreamCmd.listMods ) {  // Exits.
 			log.info( "Listing mods..." );
 
-			boolean allowZip = appConfig.getProperty( SlipstreamConfig.ALLOW_ZIP, "false" ).equals( "true" );
+			boolean allowZip = appConfig.getProperyAsBoolean( SlipstreamConfig.ALLOW_ZIP );
 			File[] modFiles = modsDir.listFiles( new ModAndDirFileFilter( allowZip, true ) );
 			List<String> dirList = new ArrayList<String>();
 			List<String> fileList = new ArrayList<String>();
