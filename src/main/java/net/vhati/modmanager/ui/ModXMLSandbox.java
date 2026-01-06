@@ -52,6 +52,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.UndoManager;
@@ -535,9 +536,9 @@ public class ModXMLSandbox extends JFrame implements ActionListener {
 				chunk += "/";
 
 			boolean found = false;
-			Enumeration<DefaultMutableTreeNode> enumIt = currentNode.children();
+			Enumeration<TreeNode> enumIt = currentNode.children();
 			while ( enumIt.hasMoreElements()  ) {
-				DefaultMutableTreeNode tmpNode = enumIt.nextElement();
+				DefaultMutableTreeNode tmpNode = (DefaultMutableTreeNode)enumIt.nextElement();
 				if ( chunk.equals( tmpNode.getUserObject() ) ) {
 					found = true;
 					currentNode = tmpNode;
