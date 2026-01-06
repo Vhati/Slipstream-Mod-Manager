@@ -433,8 +433,9 @@ public class ModUtilities {
 	 * Checks a mod file for common problems.
 	 *
 	 * @param modFile an *.ftl file to check
+	 * @param config app configuration
 	 */
-	public static Report validateModFile( File modFile ) {
+	public static Report validateModFile( File modFile, SlipstreamConfig config ) {
 
 		List<ReportMessage> messages = new ArrayList<ReportMessage>();
 		List<ReportMessage> pendingMsgs = new ArrayList<ReportMessage>();
@@ -499,7 +500,8 @@ public class ModUtilities {
 					) );
 					modValid = false;
 				}
-				else if ( innerPath.matches( "^.*[.]font$" ) ) {
+				else if ( ! config.getProperyAsBoolean(SlipstreamConfig.ASSUME_FTL_1_6_9)
+						&& innerPath.matches( "^.*[.]font$" ) ) {
 					pendingMsgs.add( new ReportMessage(
 						ReportMessage.WARNING,
 						String.format( "The *.font files introduced with FTL 1.6.1 won't work in FTL 1.01-1.5.13, which used TTF fonts." )
@@ -624,7 +626,7 @@ public class ModUtilities {
 							String.format( "Windows-1252 encoding with fancy non-ASCII chars (UTF-8 is recommended for clarity): %s", charBuf.toString() )
 						) );
 					}
-					else {
+					else if (! config.getProperyAsBoolean(SlipstreamConfig.ASSUME_FTL_1_6_9)) {
 						// Not windows-1252.
 						// Nag if there are chars that can't be converted to
 						// windows-1252 (for FTL 1.01-1.5.13).

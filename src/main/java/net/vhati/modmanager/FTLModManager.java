@@ -115,6 +115,7 @@ public class FTLModManager {
 			props.setProperty( SlipstreamConfig.ALLOW_ZIP, "false" );
 			props.setProperty( SlipstreamConfig.FTL_DATS_PATH, "" );       // Prompt.
 			props.setProperty( SlipstreamConfig.STEAM_DISTRO, "" );        // Prompt.
+			props.setProperty( SlipstreamConfig.ASSUME_FTL_1_6_9, "true" );
 			props.setProperty( SlipstreamConfig.STEAM_EXE_PATH, "" );      // Prompt.
 			props.setProperty( SlipstreamConfig.RUN_STEAM_FTL, "" );       // Prompt.
 			props.setProperty( SlipstreamConfig.NEVER_RUN_FTL, "false" );

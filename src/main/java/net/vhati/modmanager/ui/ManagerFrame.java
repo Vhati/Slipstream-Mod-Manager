@@ -751,7 +751,7 @@ public class ManagerFrame extends JFrame implements ActionListener, ModsScanObse
 			boolean anyInvalid = false;
 
 			for ( ModFileInfo modFileInfo : modsTablePanel.getSelectedItems() ) {
-				Report validateReport = ModUtilities.validateModFile( modFileInfo.getFile() );
+				Report validateReport = ModUtilities.validateModFile( modFileInfo.getFile(), appConfig );
 
 				ReportFormatter formatter = new ReportFormatter();
 				formatter.format( validateReport.messages, resultBuf, 0 );
